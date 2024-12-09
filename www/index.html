@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>ft_transcendence</title>
-	</head>
-	<body>
-		<h2>Hello world</h2>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <title>ft_transcendence</title>
+</head>
+<body>
+    <h2>Hello world</h2>
+    <script>
+        // Push an initial state to prevent back navigation
+        history.pushState(null, document.title, location.href);
+
+        // Listen for the popstate event
+        window.addEventListener("popstate", (event) => {
+            // Push the state again to effectively "cancel" the back navigation
+            history.pushState(null, document.title, location.href);
+
+            // Log that the event has been intercepted
+            console.log("Popstate event was canceled.");
+        });
+    </script>
+</body>
 </html>
