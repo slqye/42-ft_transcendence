@@ -9,7 +9,7 @@ all : $(NAME)
 $(NAME) : build up
 
 build :
-	@mkdir -p /home/${USER}/data/database_data
+	@mkdir -p ${PWD}/data/database_data
 	@docker compose -f ./srcs/docker-compose.yml build
 		
 up :
@@ -32,8 +32,18 @@ fclean: clean
 	@docker image prune --all --force
 
 re:
-	@make clean
+	@make fclean
 	@make build
 	@make up
 
-.PHONY:	all re down clean fclean up build
+clean_data:
+	@rm -rf ${PWD}/data
+
+cre:
+	@make fclean
+	@make clean_data
+	@make build
+	@make up
+
+.PHONY:	all re down clean fclean up build clean_data create_db
+
