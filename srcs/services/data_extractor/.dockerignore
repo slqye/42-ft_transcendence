@@ -1,3 +1,0 @@
-# Exclude unnecessary files
-__pycache__/
-*.pyc 

@@ -45,5 +45,5 @@ cre:
 	@make build
 	@make up
 
-.PHONY:	all re down clean fclean up build clean_data create_db
+.PHONY:	all re down clean fclean up build clean_data cre
 
