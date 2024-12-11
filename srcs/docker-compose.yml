@@ -1,0 +1,33 @@
+services:
+  postgres:
+    container_name: transcendence_postgres
+    image: postgres
+    build:
+      context: services/postgres
+    env_file: .env
+    volumes:
+      - transcendence_database_data:/var/lib/postgresql/data
+    networks:
+      - transcendence_network_backend
+    restart: always
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  transcendence_database_data:
+    name: transcendence_database_data
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/database_data
+      o: bind
+
+networks:
+  transcendence_network_backend:
+    name: transcendence_network_backend
+    driver: bridge
