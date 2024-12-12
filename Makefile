@@ -10,6 +10,7 @@ $(NAME) : build up
 
 build :
 	@mkdir -p ${PWD}/data/database_data
+	@mkdir -p ${PWD}/data/database_migrations
 	@docker compose -f ./srcs/docker-compose.yml build
 		
 up :
