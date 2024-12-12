@@ -1,2 +1,4 @@
 postgresql
-psycopg2-binary
+psycopg3-binary
+
+Need to setup the connection-service file and the password file
