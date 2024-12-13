@@ -10,25 +10,26 @@ $(NAME) : build up
 
 build :
 	@mkdir -p ${PWD}/data/database_data
-	@docker compose -f ./srcs/docker-compose.yml build
+	@mkdir -p ${PWD}/data/database_migrations
+	@docker compose -f ./sources/docker-compose.yml build
 		
 up :
-	@docker compose -f ./srcs/docker-compose.yml up -d
+	@docker compose -f ./sources/docker-compose.yml up -d
 
 stop :
-	@docker compose -f ./srcs/docker-compose.yml stop
+	@docker compose -f ./sources/docker-compose.yml stop
 
 start :
-	@docker compose -f ./srcs/docker-compose.yml start
+	@docker compose -f ./sources/docker-compose.yml start
 
 down :
-	@docker compose -f ./srcs/docker-compose.yml down
+	@docker compose -f ./sources/docker-compose.yml down
 
 clean: down
 	@ { docker volume ls -q; echo null; } | xargs -r docker volume rm --force
 
 fclean: clean
-	@docker compose -f ./srcs/docker-compose.yml down --rmi all
+	@docker compose -f ./sources/docker-compose.yml down --rmi all
 	@docker image prune --all --force
 
 re:
