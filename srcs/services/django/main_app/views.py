@@ -10,7 +10,7 @@ from .own_models import *
 
 def index(request):
 	#return HttpResponse(template.render(context, request))
-	return HttpResponse("Hello, world. You're at the main_app index.")
+	return HttpResponse("Hello, world. You're index.")
 
 def create_user(request):
 	username = "testuser"

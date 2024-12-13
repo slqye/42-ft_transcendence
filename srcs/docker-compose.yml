@@ -6,11 +6,14 @@ services:
       context: services/django
     env_file: .env
     volumes:
+      - ./services/django/.:/app
       - transcendence_database_migrations:/migrations
     networks:
       - transcendence_network_backend
     ports:
       - 8080:8080
+    environment:
+      - DEBUG=1
     restart: on-failure
     depends_on:
       postgres:
