@@ -1,0 +1,37 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow p-3 p-lg-4">
+	<div class="container-fluid">
+		<button class="navbar-brand btn btn-link mb-0">ft_transcendence</button>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNav">
+			<!-- right -->
+			<ul class="navbar-nav">
+				<!-- games -->
+				<li class="nav-item dropdown">
+					<button class="nav-link dropdown-toggle" id="dropdown_title" role="button" data-bs-toggle="dropdown" aria-expanded="false">Games</button>
+					<ul class="dropdown-menu">
+						<li><button class="dropdown-item">Pong</button></li>
+						<li><button class="dropdown-item">Tictactoe</button></li>
+					</ul>
+				</li>
+				<!-- about -->
+				<li class="nav-item">
+					<button class="nav-link btn btn-link" id="about">about</button>
+				</li>
+			</ul>
+			<!-- left -->
+			<ul class="navbar-nav ms-auto d-lg-flex align-items-lg-center">
+				<!-- theme -->
+				<li class="nav-item">
+					<button class="nav-link btn btn-link d-flex align-items-center justify-content-center" onclick="switch_theme();"><p class="mb-0 d-inline-block d-lg-none" id="theme">theme</p><img src="frontend/assets/sun-fill.svg" alt="icon_theme" id="theme_icon" class="px-2 d-none d-lg-inline-block" style="filter: invert(100%)"></button>
+				</li>
+				<!-- signin -->
+				<li class="nav-item">
+					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in">sign in</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in">sign in</button>
+				</li>
+			</ul>
+		</div>
+	</div>
+</nav>

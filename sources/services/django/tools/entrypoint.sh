@@ -2,7 +2,7 @@
 
 if [ ! -f "./migrations/done" ]; then
 	python manage.py flush --no-input
-	python manage.py makemigrations main_app
+	python manage.py makemigrations api
 	python manage.py migrate
 	touch ./migrations/done
 fi
