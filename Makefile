@@ -11,6 +11,7 @@ $(NAME) : build up
 build :
 	@mkdir -p ${PWD}/data/database_data
 	@mkdir -p ${PWD}/data/database_migrations
+	@mkdir -p ${PWD}/data/frontend_data
 	@docker compose -f ./sources/docker-compose.yml build
 		
 up :
