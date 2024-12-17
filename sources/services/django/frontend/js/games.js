@@ -7,6 +7,7 @@ function	launch(value)
 	}
 	else if (value == "tictactoe")
 	{
-		console.warn("Tictactoe is not implemented yet.");
+		var game = new TicTacToe(new Player("loupy"), new Player("slqye"));
+		game.init();
 	}
 }
