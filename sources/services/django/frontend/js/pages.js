@@ -17,9 +17,8 @@ async function load_home() {
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
 	body.innerHTML = content.string;
-	if (window.location.pathname !== "/home") {
+	if (window.location.pathname !== "/home")
 		history.pushState({ page: "home" }, "Home", "/home");
-	}
 }
 
 async function load_pong() {
@@ -30,9 +29,9 @@ async function load_pong() {
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
 	body.innerHTML = content.string;
-	if (window.location.pathname !== "/pong") {
+	if (window.location.pathname !== "/pong")
 		history.pushState({ page: "pong" }, "Pong", "/pong");
-	}
+	launch("pong");
 }
 
 async function load_tictactoe() {
@@ -43,9 +42,8 @@ async function load_tictactoe() {
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
 	body.innerHTML = content.string;
-	if (window.location.pathname !== "/tictactoe") {
+	if (window.location.pathname !== "/tictactoe")
 		history.pushState({ page: "tictactoe" }, "TicTacToe", "/tictactoe");
-	}
 }
 
 async function load_about() {
@@ -56,9 +54,8 @@ async function load_about() {
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
 	body.innerHTML = content.string;
-	if (window.location.pathname !== "/about") {
+	if (window.location.pathname !== "/about")
 		history.pushState({ page: "about" }, "About", "/about");
-	}
 }
 
 async function load_signin() {
@@ -69,9 +66,8 @@ async function load_signin() {
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
 	body.innerHTML = content.string;
-	if (window.location.pathname !== "/signin") {
+	if (window.location.pathname !== "/signin")
 		history.pushState({ page: "signin" }, "Signin", "/signin");
-	}
 }
 
 async function load_signup() {
@@ -82,9 +78,8 @@ async function load_signup() {
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
 	body.innerHTML = content.string;
-	if (window.location.pathname !== "/signup") {
+	if (window.location.pathname !== "/signup")
 		history.pushState({ page: "signup" }, "Signup", "/signup");
-	}
 }
 
 window.onpopstate = async function (event) {

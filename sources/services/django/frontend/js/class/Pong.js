@@ -4,7 +4,7 @@ class Pong
 	static DOWN			= "down";
 	static P1_KEYS		= {[Pong.UP]: "w", [Pong.DOWN]: "s"};
 	static P2_KEYS		= {[Pong.UP]: "ArrowUp", [Pong.DOWN]: "ArrowDown"};
-	static PADDLE_SPEED	= 1;
+	static PADDLE_SPEED	= 10;
 
 	constructor(player1, player2)
 	{
@@ -29,14 +29,46 @@ class Pong
 
 	paddle_keyhook()
 	{
+		const game_container = document.getElementById("game-container");
+		const paddle_left = document.getElementById("paddle-left");
+		const paddle_right = document.getElementById("paddle-right");
+
 		if (this.keys.has(Pong.P1_KEYS[Pong.UP]))
-			this.paddles[this.player1.name]["y"] += Pong.PADDLE_SPEED;
+		{
+			var top = parseInt(paddle_left.style.top || "50%");
+			var paddle_size = parseInt(window.getComputedStyle(paddle_left).height);
+			var game_container_size = parseInt(window.getComputedStyle(game_container).height);
+			var min_top = Pong.PADDLE_SPEED;
+			top = Math.max(top - Pong.PADDLE_SPEED, min_top);
+			paddle_left.style.top = `${top}px`;
+		}
 		if (this.keys.has(Pong.P1_KEYS[Pong.DOWN]))
-			this.paddles[this.player1.name]["y"] -= Pong.PADDLE_SPEED;
+		{
+			var top = parseInt(paddle_left.style.top || "50%");
+			var paddle_size = parseInt(window.getComputedStyle(paddle_left).height);
+			var game_container_size = parseInt(window.getComputedStyle(game_container).height);
+			var max_top = Math.round(game_container_size - paddle_size - Pong.PADDLE_SPEED);
+			top = Math.min(top + Pong.PADDLE_SPEED, max_top);
+			paddle_left.style.top = `${top}px`;
+		}
 		if (this.keys.has(Pong.P2_KEYS[Pong.UP]))
-			this.paddles[this.player2.name]["y"] += Pong.PADDLE_SPEED;
+		{
+			var top = parseInt(paddle_right.style.top || "50%");
+			var paddle_size = parseInt(window.getComputedStyle(paddle_right).height);
+			var game_container_size = parseInt(window.getComputedStyle(game_container).height);
+			var min_top = Pong.PADDLE_SPEED;
+			top = Math.max(top - Pong.PADDLE_SPEED, min_top);
+			paddle_right.style.top = `${top}px`;
+		}
 		if (this.keys.has(Pong.P2_KEYS[Pong.DOWN]))
-			this.paddles[this.player2.name]["y"] -= Pong.PADDLE_SPEED;
+		{
+			var top = parseInt(paddle_right.style.top || "50%");
+			var paddle_size = parseInt(window.getComputedStyle(paddle_right).height);
+			var game_container_size = parseInt(window.getComputedStyle(game_container).height);
+			var max_top = Math.round(game_container_size - paddle_size - Pong.PADDLE_SPEED);
+			top = Math.min(top + Pong.PADDLE_SPEED, max_top);
+			paddle_right.style.top = `${top}px`;
+		}
 	}
 
 	debug()
