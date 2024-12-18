@@ -1,21 +1,38 @@
 function	switch_theme()
 {
 	const body = document.querySelector("body");
-	const icon = document.getElementById("theme_icon");
+
 	if (body.getAttribute("data-bs-theme") == "dark")
-	{
-		body.setAttribute("data-bs-theme", "light");
-		body.classList.remove("bg-dark");
-		body.classList.add("bg-light");
-		icon.src = "frontend/assets/moon-fill.svg";
-		icon.style.filter = "invert(0%)";
-	}
+		switch_theme_light(body);
 	else
-	{
-		body.setAttribute("data-bs-theme", "dark");
-		body.classList.remove("bg-light");
-		body.classList.add("bg-dark");
-		icon.src = "frontend/assets/sun-fill.svg";
-		icon.style.filter = "invert(100%)";
-	}
+		switch_theme_dark(body);
+}
+
+function	switch_theme_light(body)
+{
+	const icon_sun = document.getElementById("theme_icon_sun");
+	const icon_moon = document.getElementById("theme_icon_moon");
+
+	body.setAttribute("data-bs-theme", "light");
+	body.classList.remove("bg-dark");
+	body.classList.add("bg-light");
+	icon_sun.classList.remove("d-lg-inline-block");
+	icon_sun.classList.add("d-lg-none");
+	icon_moon.classList.remove("d-lg-none");
+	icon_moon.classList.add("d-lg-inline-block");
+	console.log(icon_moon.classList);
+}
+function	switch_theme_dark(body)
+{
+	const icon_sun = document.getElementById("theme_icon_sun");
+	const icon_moon = document.getElementById("theme_icon_moon");
+
+	body.setAttribute("data-bs-theme", "dark");
+	body.classList.remove("bg-light");
+	body.classList.add("bg-dark");
+	icon_moon.classList.remove("d-lg-inline-block");
+	icon_moon.classList.add("d-lg-none");
+	icon_sun.classList.remove("d-lg-none");
+	icon_sun.classList.add("d-lg-inline-block");
+	console.log(icon_moon.classList);
 }

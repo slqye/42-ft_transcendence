@@ -1,11 +1,17 @@
 const ERROR_TEMPLATE = "Template error.";
 
 async function load_navbar() {
+	const body = document.querySelector("body");
 	const header = document.getElementById("header");
 	var navbar = await new Template("frontend/html/navbar.html").load();
 
 	if (navbar == null)
 		return console.error(ERROR_TEMPLATE);
+	if (body.getAttribute("data-bs-theme") != "dark")
+	{
+		navbar.edit.id.set.attribute("theme_icon_sun", "class", "px-2 d-none d-lg-none");
+		navbar.edit.id.set.attribute("theme_icon_moon", "class", "px-2 d-none d-lg-inline-block");
+	}
 	header.innerHTML = navbar.string;
 }
 
