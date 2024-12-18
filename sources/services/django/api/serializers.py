@@ -13,7 +13,6 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
     def create(self, validated_data):
-        # Why: Using set_password ensures the password is hashed.
         user = User(
             username=validated_data['username'],
             avatar_url=validated_data.get('avatar_url', ''),

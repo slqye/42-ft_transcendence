@@ -19,27 +19,30 @@ from rest_framework.response import Response
 User = get_user_model()
 
 class RegisterUser(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny]
+	queryset = User.objects.all()
+	serializer_class = UserSerializer
+	permission_classes = [permissions.AllowAny]
 
 # We override the post method to return the token more explicitly if needed
 class CustomAuthToken(ObtainAuthToken):
-    permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.AllowAny]
 
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        # response.data contains 'token' if success
-        return response
+	def post(self, request, *args, **kwargs):
+		response = super().post(request, *args, **kwargs)
+		# response.data contains 'token' if success
+		return response
 
 
 class UserList(generics.ListCreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
+	permission_classes = [permissions.IsAuthenticated]
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
+	permission_classes = [permissions.IsAdminUser]
+
 
 def index(request):
 	content = ""
