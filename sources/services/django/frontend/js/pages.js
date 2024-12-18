@@ -1,4 +1,8 @@
-const ERROR_TEMPLATE = "Template error.";
+function	init_tooltips()
+{
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+}
 
 async function load_navbar() {
 	const body = document.querySelector("body");
@@ -16,76 +20,82 @@ async function load_navbar() {
 }
 
 async function load_home() {
-	const body = document.getElementById("body");
-	var content = await new Template("frontend/html/pages/home.html").load();
+	const content = document.getElementById("content");
+	var template = await new Template("frontend/html/pages/home.html").load();
 
-	if (content == null)
+	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
-	body.innerHTML = content.string;
+	content.innerHTML = template.string;
 	if (window.location.pathname !== "/home")
 		history.pushState({ page: "home" }, "Home", "/home");
+	init_tooltips();
 }
 
 async function load_pong() {
-	const body = document.getElementById("body");
-	var content = await new Template("frontend/html/pages/pong.html").load();
+	const content = document.getElementById("content");
+	var template = await new Template("frontend/html/pages/pong.html").load();
 
-	if (content == null)
+	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
-	body.innerHTML = content.string;
+	content.innerHTML = template.string;
 	if (window.location.pathname !== "/pong")
 		history.pushState({ page: "pong" }, "Pong", "/pong");
+	init_tooltips();
 	launch("pong");
 }
 
 async function load_tictactoe() {
-	const body = document.getElementById("body");
-	var content = await new Template("frontend/html/pages/tictactoe.html").load();
+	const content = document.getElementById("content");
+	var template = await new Template("frontend/html/pages/tictactoe.html").load();
 
-	if (content == null)
+	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
-	body.innerHTML = content.string;
+	content.innerHTML = template.string;
 	if (window.location.pathname !== "/tictactoe")
 		history.pushState({ page: "tictactoe" }, "TicTacToe", "/tictactoe");
+	init_tooltips();
 }
 
 async function load_about() {
-	const body = document.getElementById("body");
-	var content = await new Template("frontend/html/pages/about.html").load();
+	const content = document.getElementById("content");
+	var template = await new Template("frontend/html/pages/about.html").load();
 
-	if (content == null)
+	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
-	body.innerHTML = content.string;
+	content.innerHTML = template.string;
 	if (window.location.pathname !== "/about")
 		history.pushState({ page: "about" }, "About", "/about");
+	init_tooltips();
 }
 
 async function load_signin() {
-	const body = document.getElementById("body");
-	var content = await new Template("frontend/html/pages/signin.html").load();
+	const content = document.getElementById("content");
+	var template = await new Template("frontend/html/pages/signin.html").load();
 
-	if (content == null)
+	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
-	body.innerHTML = content.string;
+	content.innerHTML = template.string;
 	if (window.location.pathname !== "/signin")
 		history.pushState({ page: "signin" }, "Signin", "/signin");
+	init_tooltips();
 }
 
 async function load_signup() {
-	const body = document.getElementById("body");
-	var content = await new Template("frontend/html/pages/signup.html").load();
+	const content = document.getElementById("content");
+	var template = await new Template("frontend/html/pages/signup.html").load();
 
-	if (content == null)
+	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
-	body.innerHTML = content.string;
+	content.innerHTML = template.string;
 	if (window.location.pathname !== "/signup")
 		history.pushState({ page: "signup" }, "Signup", "/signup");
+	init_tooltips();
 }
 
 window.onpopstate = async function (event) {

@@ -2,22 +2,24 @@
 	<div class="container d-flex justify-content-center anim-slide-down" style="margin-top: 10vh;">
 		<div class="row text-center border rounded m-2 m-sm-3 m-md-5 p-2 p-sm-3 p-md-5">
 			<h1 class="p-2">Sign up</h1>
-			<form>
+			<form onsubmit="event.preventDefault(); signup();">
 				<div class="input-group my-2">
 					<span class="input-group-text">~</span>
-					<input type="text" class="form-control" placeholder="Username" aria-label="username" required>
+					<input type="text" class="form-control" placeholder="Username" aria-label="username" id="signup_username" required>
 				</div>
 				<div class="input-group my-2">
 					<span class="input-group-text">@</span>
-					<input type="email" class="form-control" placeholder="Email" aria-label="email" required>
+					<input type="email" class="form-control" placeholder="Email" aria-label="email" id="signup_email" required>
 				</div>
 				<div class="input-group my-2">
 					<span class="input-group-text">$</span>
-					<input type="password" class="form-control" placeholder="Password" aria-label="password1" required>
+					<input type="password" class="form-control" placeholder="Password" aria-label="password1" id="signup_password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" required>
+					<span class="input-group-text" data-bs-toggle="tooltip" data-bs-title="Require at least one digit, one lowercase letter, one uppercase letter, and one special character.">?</span>
 				</div>
 				<div class="input-group my-2">
 					<span class="input-group-text">$</span>
-					<input type="password" class="form-control" placeholder="Confirm password" aria-label="password2" required>
+					<input type="password" class="form-control" placeholder="Confirm password" aria-label="password2" id="signup_password_confirm" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" required>
+					<span class="input-group-text" data-bs-toggle="tooltip" data-bs-title="Require at least one digit, one lowercase letter, one uppercase letter, and one special character.">?</span>
 				</div>
 				<button type="submit" class="btn btn-outline-primary mt-3">Submit</button>
 			</form>
