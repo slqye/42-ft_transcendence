@@ -1,13 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class User(models.Model):
-	username = models.CharField(max_length=50)
-	password_hash = models.CharField(max_length=255)
-	password_salt = models.CharField(max_length=255)
-	avatar_url = models.CharField(max_length=255)
-	created_at = models.DateTimeField(auto_now_add=True)
-	language_code = models.CharField(max_length=2)
-	auth_token = models.CharField(max_length=255, null=True, blank=True)
+class User(AbstractUser):
+    avatar_url = models.CharField(max_length=255, blank=True, null=True)
+    language_code = models.CharField(max_length=2, default='en')
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Friendship(models.Model):
 	user_id_1 = models.ForeignKey(User, related_name='friendship_user_1', on_delete=models.CASCADE)
