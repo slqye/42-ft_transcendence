@@ -20,7 +20,6 @@ function	switch_theme_light(body)
 	icon_sun.classList.add("d-lg-none");
 	icon_moon.classList.remove("d-lg-none");
 	icon_moon.classList.add("d-lg-inline-block");
-	console.log(icon_moon.classList);
 }
 function	switch_theme_dark(body)
 {
@@ -34,5 +33,4 @@ function	switch_theme_dark(body)
 	icon_moon.classList.add("d-lg-none");
 	icon_sun.classList.remove("d-lg-none");
 	icon_sun.classList.add("d-lg-inline-block");
-	console.log(icon_moon.classList);
 }
