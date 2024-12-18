@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary shadow p-3 p-lg-4">
 	<div class="container-fluid">
-		<button class="navbar-brand btn btn-link mb-0">ft_transcendence</button>
+		<button class="navbar-brand btn btn-link mb-0" onclick="load_home();">ft_transcendence</button>
 		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
@@ -11,13 +11,13 @@
 				<li class="nav-item dropdown">
 					<button class="nav-link dropdown-toggle" id="dropdown_title" role="button" data-bs-toggle="dropdown" aria-expanded="false">Games</button>
 					<ul class="dropdown-menu">
-						<li><button class="dropdown-item">Pong</button></li>
-						<li><button class="dropdown-item">Tictactoe</button></li>
+						<li><button class="dropdown-item" onclick="load_pong();">Pong</button></li>
+						<li><button class="dropdown-item" onclick="load_tictactoe();">Tictactoe</button></li>
 					</ul>
 				</li>
 				<!-- about -->
 				<li class="nav-item">
-					<button class="nav-link btn btn-link" id="about">about</button>
+					<button class="nav-link btn btn-link" id="about" onclick="load_about();">about</button>
 				</li>
 			</ul>
 			<!-- left -->
@@ -28,8 +28,8 @@
 				</li>
 				<!-- signin -->
 				<li class="nav-item">
-					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in">sign in</button>
-					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in">sign in</button>
+					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in" onclick="load_signin();">sign in</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in" onclick="load_signin();">sign in</button>
 				</li>
 			</ul>
 		</div>

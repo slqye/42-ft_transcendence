@@ -31,9 +31,9 @@ services:
       - transcendence_network_backend
     restart: always
     expose:
-      - 5432
+      - 5050
     ports:
-      - 5432:5432
+      - 5050:5050
     healthcheck:
       test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
       interval: 10s
