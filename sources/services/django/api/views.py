@@ -4,8 +4,8 @@ from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
 
-from .models import User
-from .serializers import UserSerializer
+from .models import User, Match
+from .serializers import UserSerializer, MatchSerializer
 
 from django.contrib.auth import get_user_model
 
@@ -41,7 +41,17 @@ class UserList(generics.ListCreateAPIView):
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAdminUser]
+	permission_classes = [permissions.IsAuthenticated]
+
+class MatchList(generics.ListCreateAPIView):
+	queryset = Match.objects.all()
+	serializer_class = MatchSerializer
+	permission_classes = [permissions.AllowAny]
+
+class MatchDetail(generics.RetrieveDestroyAPIView):
+	queryset = Match.objects.all()
+	serializer_class = MatchSerializer
+	permission_classes = [permissions.AllowAny]
 
 
 def index(request):

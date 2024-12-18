@@ -6,4 +6,6 @@ urlpatterns = [
     path('token-auth/', views.CustomAuthToken.as_view(), name='api_token_auth'),
 	path("users/", views.UserList.as_view(), name="user-list"),
 	path("users/<int:pk>", views.UserDetail.as_view(), name="user-detail"),
+	path("match/", views.MatchList.as_view(), name="match-list"),
+	path("match/<int:pk>", views.MatchDetail.as_view(), name="match-detail"),
 ]
