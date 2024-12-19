@@ -38,11 +38,11 @@ function	switch_theme_dark(body)
 async function	show_toast(path)
 {
 	const toast = document.getElementById("toast");
-	var template = await new Template(path).load();
+	let template = await new Template(path).load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	toast.innerHTML = template.string;
-	var toast_bootstrap = bootstrap.Toast.getOrCreateInstance(document.getElementById("liveToast"));
+	let toast_bootstrap = bootstrap.Toast.getOrCreateInstance(document.getElementById("liveToast"));
 	toast_bootstrap.show();
 }

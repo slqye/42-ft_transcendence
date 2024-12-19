@@ -51,7 +51,7 @@ class Editor
 				},
 				contents: (_class) => {
 					const elements = this.template.html.getElementsByClassName(_class);
-					var result = [];
+					let result = [];
 					if (elements.length > 0)
 					{
 						Array.from(elements).forEach(element =>
@@ -65,7 +65,7 @@ class Editor
 				attributes: (_class, key) =>
 				{
 					const elements = this.template.html.getElementsByClassName(_class);
-					var result = [];
+					let result = [];
 					if (elements.length > 0)
 					{
 						Array.from(elements).forEach(element =>

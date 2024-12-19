@@ -7,7 +7,7 @@ function	init_tooltips()
 async function load_navbar() {
 	const body = document.querySelector("body");
 	const header = document.getElementById("header");
-	var navbar = await new Template("frontend/html/navbar.html").load();
+	let navbar = await new Template("frontend/html/navbar.html").load();
 
 	if (navbar == null)
 		return console.error(ERROR_TEMPLATE);
@@ -21,7 +21,7 @@ async function load_navbar() {
 
 async function load_home() {
 	const content = document.getElementById("content");
-	var template = await new Template("frontend/html/pages/home.html").load();
+	let template = await new Template("frontend/html/pages/home.html").load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
@@ -34,7 +34,7 @@ async function load_home() {
 
 async function load_pong() {
 	const content = document.getElementById("content");
-	var template = await new Template("frontend/html/pages/pong.html").load();
+	let template = await new Template("frontend/html/pages/pong.html").load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
@@ -48,7 +48,7 @@ async function load_pong() {
 
 async function load_tictactoe() {
 	const content = document.getElementById("content");
-	var template = await new Template("frontend/html/pages/tictactoe.html").load();
+	let template = await new Template("frontend/html/pages/tictactoe.html").load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
@@ -61,7 +61,7 @@ async function load_tictactoe() {
 
 async function load_about() {
 	const content = document.getElementById("content");
-	var template = await new Template("frontend/html/pages/about.html").load();
+	let template = await new Template("frontend/html/pages/about.html").load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
@@ -74,7 +74,7 @@ async function load_about() {
 
 async function load_signin() {
 	const content = document.getElementById("content");
-	var template = await new Template("frontend/html/pages/signin.html").load();
+	let template = await new Template("frontend/html/pages/signin.html").load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
@@ -87,7 +87,7 @@ async function load_signin() {
 
 async function load_signup() {
 	const content = document.getElementById("content");
-	var template = await new Template("frontend/html/pages/signup.html").load();
+	let template = await new Template("frontend/html/pages/signup.html").load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);

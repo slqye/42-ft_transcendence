@@ -39,8 +39,8 @@ class Pong {
 
 	paddle()
 	{
-		var p1_paddle = this.paddles[this.player1.name];
-		var p2_paddle = this.paddles[this.player2.name];
+		let p1_paddle = this.paddles[this.player1.name];
+		let p2_paddle = this.paddles[this.player2.name];
 
 		if (this.keys.has(Pong.P1_KEYS[Pong.UP]) && p1_paddle.y > 0)
 			p1_paddle.y -= Pong.PADDLE_SPEED;
