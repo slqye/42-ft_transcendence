@@ -7,6 +7,5 @@ async function	signup()
 
 	if (password != password_confirm)
 		return (show_toast("frontend/html/toasts/errors/password_match.html"));
-	// TODO: faire la requette register
 	show_toast("frontend/html/toasts/success/account_created.html")
 }

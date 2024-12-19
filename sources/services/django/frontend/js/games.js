@@ -2,7 +2,7 @@ function	launch(value)
 {
 	if (value == "pong")
 	{
-		var pong = new Pong(new Player("p1_test"), new Player("p2_test"));
+		var pong = new Pong(document.getElementById("game"), new Player("p1_test"), new Player("p2_test"));
 		pong.start();
 	}
 	else if (value == "tictactoe")
