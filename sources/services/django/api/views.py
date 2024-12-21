@@ -54,7 +54,7 @@ class MatchDetail(generics.RetrieveDestroyAPIView):
 	permission_classes = [permissions.AllowAny]
 
 
-def index(request):
+def index(request, path=None):
 	content = ""
 	with open("frontend/index.html", "r") as file:
 		content = file.read()
