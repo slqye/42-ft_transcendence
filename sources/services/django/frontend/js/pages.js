@@ -39,6 +39,8 @@ async function load_pong() {
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
+	if (isMobile())
+		template.edit.class.set.attributes("player-slider", "class", "player-slider col-12 d-flex m-1");
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/pong")
 		history.pushState({ page: "pong" }, "Pong", "/pong");

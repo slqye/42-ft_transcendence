@@ -14,6 +14,7 @@ class Pong
 	constructor(canvas, score, player1, player2) {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext("2d");
+		this.sliders = document.getElementsByClassName("form-range");
 		this.score = score;
 		this.player1 = player1;
 		this.player2 = player2;
@@ -73,14 +74,24 @@ class Pong
 
 	paddle_movements()
 	{
-		if (this.keys.has(Pong.P1_KEYS[Pong.UP]) && this.p1_paddle.y > 0)
-			this.p1_paddle.y -= this.paddle_speed;
-		if (this.keys.has(Pong.P1_KEYS[Pong.DOWN]) && this.p1_paddle.y < this.canvas.height -this.p1_paddle.height)
-			this.p1_paddle.y += this.paddle_speed;
-		if (this.keys.has(Pong.P2_KEYS[Pong.UP]) && this.p2_paddle.y > 0)
-			this.p2_paddle.y -= this.paddle_speed;
-		if (this.keys.has(Pong.P2_KEYS[Pong.DOWN]) && this.p2_paddle.y < this.canvas.height - this.p2_paddle.height)
-			this.p2_paddle.y += this.paddle_speed;
+		if (isMobile())
+		{
+			const top_range = document.getElementById("top-range");
+			const bottom_range = document.getElementById("bottom-range");
+			this.p1_paddle.y = top_range.value * this.canvas.height;
+			this.p2_paddle.y = -bottom_range.value * this.canvas.height;
+		}
+		else
+		{
+			if (this.keys.has(Pong.P1_KEYS[Pong.UP]) && this.p1_paddle.y > 0)
+				this.p1_paddle.y -= this.paddle_speed;
+			if (this.keys.has(Pong.P1_KEYS[Pong.DOWN]) && this.p1_paddle.y < this.canvas.height -this.p1_paddle.height)
+				this.p1_paddle.y += this.paddle_speed;
+			if (this.keys.has(Pong.P2_KEYS[Pong.UP]) && this.p2_paddle.y > 0)
+				this.p2_paddle.y -= this.paddle_speed;
+			if (this.keys.has(Pong.P2_KEYS[Pong.DOWN]) && this.p2_paddle.y < this.canvas.height - this.p2_paddle.height)
+				this.p2_paddle.y += this.paddle_speed;
+		}
 	}
 
 	ball_movements()
@@ -131,6 +142,8 @@ class Pong
 		document.addEventListener("keydown", this.key_listener);
 		document.addEventListener("keyup", this.keyup_listener);
 		this.resize_handler();
+		this.sliders[0].setAttribute("value", this.sliders[0].getAttribute("max") / 2);
+		this.sliders[1].setAttribute("value", this.sliders[1].getAttribute("min") / 2);
 		this.update();
 	}
 
@@ -151,11 +164,13 @@ class Pong
 	}
 
 	resize_handler()
-	{
+	{		
 		this.canvas.width = document.querySelector("#game-container").offsetWidth;
 		this.canvas.height = this.canvas.width * Pong.ASPECT_RATIO;
 		this.resize_paddle();
 		this.resize_ball();
+		this.sliders[0].setAttribute("max", 1 - this.p1_paddle.height / this.canvas.height);
+		this.sliders[1].setAttribute("min", -1 + this.p2_paddle.height / this.canvas.height);
 	}
 	
 	key_listener(event) { this.keys.add(event.key); }

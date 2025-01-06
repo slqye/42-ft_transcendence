@@ -2,14 +2,14 @@
 	<div class="container d-flex justify-content-center anim-slide-down" style="margin-top: 10vh;">
 		<div class="row text-center border rounded m-2 m-sm-3 m-md-5 p-2 p-sm-3 p-md-5">
 			<h1 class="p-2">Sign in</h1>
-			<form>
+			<form onsubmit="event.preventDefault(); signin();">
 				<div class="input-group my-2">
-					<span class="input-group-text">@</span>
-					<input type="email" class="form-control" placeholder="Email" aria-label="email" required>
+					<span class="input-group-text">~</span>
+					<input type="text" class="form-control" placeholder="Username" aria-label="username" id="signin_username" required>
 				</div>
 				<div class="input-group my-2">
 					<span class="input-group-text">$</span>
-					<input type="password" class="form-control" placeholder="Password" aria-label="password" required>
+					<input type="password" class="form-control" placeholder="Password" aria-label="password" id="signin_password" required>
 				</div>
 				<button type="submit" class="btn btn-outline-primary mt-3">Submit</button>
 			</form>

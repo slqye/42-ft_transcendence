@@ -23,11 +23,19 @@ async function	signup()
 			"language_code": "en"
 		})
 	})
-	.then(response => response.json())
+	.then(response =>
+	{
+		if (!response.ok)
+		{
+			new Toast(Toast.ERROR, "A network error occurred.");
+			throw new Error("A network error occurred.");
+		}
+		response.json();
+	})
 	.then(data =>
 	{
-		load_home();
 		new Toast(Toast.SUCCESS, "Account has been created!");
+		load_home();
 	})
 	.catch(error =>
 	{
