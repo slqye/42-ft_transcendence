@@ -80,7 +80,7 @@ class Editor
 			set: {
 				contents: (_class, content) => {
 					const elements = this.template.html.getElementsByClassName(_class);
-					elements.forEach(element =>
+					Array.from(elements).forEach(element =>
 					{
 						element.innerHTML = content;
 					});
@@ -89,7 +89,7 @@ class Editor
 				attributes: (_class, key, value) =>
 				{
 					const elements = this.template.html.getElementsByClassName(_class);
-					elements.forEach(element =>
+					Array.from(elements).forEach(element =>
 					{
 						element.setAttribute(key, value);
 					});

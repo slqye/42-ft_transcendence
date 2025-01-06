@@ -1,4 +1,5 @@
-class Pong {
+class Pong
+{
 	static UP = "up";
 	static DOWN = "down";
 	static P1_KEYS = { [Pong.UP]: "w", [Pong.DOWN]: "s" };

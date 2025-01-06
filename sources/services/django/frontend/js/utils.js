@@ -34,15 +34,3 @@ function	switch_theme_dark(body)
 	icon_sun.classList.remove("d-lg-none");
 	icon_sun.classList.add("d-lg-inline-block");
 }
-
-async function	show_toast(path)
-{
-	const toast = document.getElementById("toast");
-	let template = await new Template(path).load();
-
-	if (template == null)
-		return console.error(ERROR_TEMPLATE);
-	toast.innerHTML = template.string;
-	let toast_bootstrap = bootstrap.Toast.getOrCreateInstance(document.getElementById("liveToast"));
-	toast_bootstrap.show();
-}
