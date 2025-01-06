@@ -7,7 +7,7 @@ class Pong
 	static ASPECT_RATIO = 0.5;
 	static PADDLE_SIZE_RATIO = { width: 1/100, height: 1/4 };
 	static PADDLE_SPEED_RATIO = 1/100;
-	static PADDLE_OFFSET = 10;
+	static PADDLE_OFFSET_RATIO = 1/25;
 	static BALL_RADIUS_RATIO = 1/100;
 	static BALL_SPEED_RATIO = 1/75;
 
@@ -60,8 +60,8 @@ class Pong
 		this.p2_paddle.height = this.canvas.height * Pong.PADDLE_SIZE_RATIO.height;
 		this.p1_paddle.y = this.canvas.height / 2 - this.p1_paddle.height / 2;
 		this.p2_paddle.y = this.canvas.height / 2 - this.p2_paddle.height / 2;
-		this.p1_paddle.x = Pong.PADDLE_OFFSET;
-		this.p2_paddle.x = this.canvas.width - this.p2_paddle.width - Pong.PADDLE_OFFSET;
+		this.p1_paddle.x = this.canvas.width * Pong.PADDLE_OFFSET_RATIO;
+		this.p2_paddle.x = this.canvas.width - this.p2_paddle.width - this.canvas.width * Pong.PADDLE_OFFSET_RATIO;
 	}
 
 	resize_ball()
@@ -101,12 +101,12 @@ class Pong
 		let ball_x_radius = this.ball.dx == 1 ? this.ball.x + this.ball.radius : this.ball.x - this.ball.radius;
 		let ball_y_radius = this.ball.dy == 1 ? this.ball.y + this.ball.radius : this.ball.y - this.ball.radius;
 
-		if (ball_x_radius <= Pong.PADDLE_OFFSET + this.p1_paddle.width)
+		if (ball_x_radius <= Pong.PADDLE_OFFSET_RATIO * this.canvas.width + this.p1_paddle.width && ball_x_radius >= Pong.PADDLE_OFFSET_RATIO * this.canvas.width)
 		{
 			if (ball_y_radius >= this.p1_paddle.y && ball_y_radius <= this.p1_paddle.y + this.p1_paddle.height)
 				this.ball.dx = -this.ball.dx;
 		}
-		if (ball_x_radius >= this.canvas.width - Pong.PADDLE_OFFSET - this.p2_paddle.width)
+		if (ball_x_radius >= this.canvas.width - Pong.PADDLE_OFFSET_RATIO * this.canvas.width - this.p2_paddle.width && ball_x_radius <= this.canvas.width - Pong.PADDLE_OFFSET_RATIO * this.canvas.width)
 		{
 			if (ball_y_radius >= this.p2_paddle.y && ball_y_radius <= this.p2_paddle.y + this.p2_paddle.height)
 				this.ball.dx = -this.ball.dx;
