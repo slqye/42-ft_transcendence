@@ -23,11 +23,11 @@ async function	signin()
 			new Toast(Toast.ERROR, "Invalid credentials.");
 			throw new Error("Invalid credentials.");
 		}
-		response.json();
+		return response.json();
 	})
 	.then(data =>
 	{
-		console.log("data: " + data);
+		console.log("data: " + data); // use data.token to access the token
 		new Toast(Toast.SUCCESS, "Logged-in!");
 		load_home();
 	})
