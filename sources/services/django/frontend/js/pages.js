@@ -58,7 +58,8 @@ async function load_tictactoe() {
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/tictactoe")
 		history.pushState({ page: "tictactoe" }, "TicTacToe", "/tictactoe");
-	init_tooltips();
+  init_tooltips();
+	launch("tictactoe");
 }
 
 async function load_about() {
