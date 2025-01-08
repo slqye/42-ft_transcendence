@@ -35,7 +35,12 @@ function	switch_theme_dark(body)
 	icon_sun.classList.add("d-lg-inline-block");
 }
 
-function isMobile()
+function	isLogin()
+{
+	return (localStorage.getItem("auth-token") == null ? false : true);
+}
+
+function	isMobile()
 {
 	const userAgent = navigator.userAgent.toLowerCase();
 	return (/iphone|ipod|android|webos|blackberry|iemobile|opera mini/.test(userAgent));
