@@ -17,7 +17,7 @@
 				</li>
 				<!-- about -->
 				<li class="nav-item">
-					<button class="nav-link btn btn-link" id="about" onclick="load_about();">about</button>
+					<button class="nav-link btn btn-link" id="about" onclick="load_about();">About</button>
 				</li>
 			</ul>
 			<!-- left -->
@@ -25,14 +25,28 @@
 				<!-- theme -->
 				<li class="nav-item">
 					<button class="nav-link btn btn-link d-flex align-items-center justify-content-center" onclick="switch_theme();">
-						<p class="mb-0 d-inline-block d-lg-none" id="theme">theme</p>
+						<p class="mb-0 d-inline-block d-lg-none" id="theme">Theme</p>
 						<img src="/frontend/assets/sun-fill.svg" alt="icon_theme" id="theme_icon_sun" class="px-2 d-none d-lg-inline-block" style="filter: invert(100%);">
 						<img src="/frontend/assets/moon-fill.svg" alt="icon_theme" id="theme_icon_moon" class="px-2 d-none d-lg-none"></button>
 				</li>
 				<!-- signin -->
-				<li class="nav-item">
-					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in" onclick="load_signin();">sign in</button>
-					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in" onclick="load_signin();">sign in</button>
+				<li class="nav-item" id="signin">
+					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in" onclick="load_signin();">Sign in</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in" onclick="load_signin();">Sign in</button>
+				</li>
+				<li class="nav-item d-none" id="profile">
+					<div class="dropdown dropstart">
+						<button class="btn-transparent d-none d-lg-block" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: transparent; border-color: transparent;">
+							<img class="img-fluid profile-img" src="https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360" alt="test">
+						</button>
+						<button class="nav-link btn btn-link d-inline-block d-lg-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: transparent; border-color: transparent;">
+							<p class="mb-0" id="theme">Profile</p>
+						</button>
+						<ul class="dropdown-menu">
+							<button class="dropdown-item" id="about" onclick="">Settings</button>
+							<button class="dropdown-item" id="about" onclick="signout(); load_home();">Sign out</button>
+						</ul>
+					</div>
 				</li>
 			</ul>
 		</div>
