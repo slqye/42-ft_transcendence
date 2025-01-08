@@ -1,33 +1,6 @@
-.paddle {
-	position: absolute;
-	width: 10px;
-	height: 100px;
-	background-color: white;
-}
-
-.middle {
-	position: absolute;
-	left: 50%;
-	height: 100%;
-	border: 2px dashed white;
-}
-
-#game-container {
-	position: relative;
-	width: 1000px;
-	height: 500px;
+#game {
+	width: 100%;
+	max-width: 1000px;
 	background-color: black;
 	border: solid 2px white;
-}
-
-#paddle-left {
-	left: 5%;
-	top: 50%;
-	transform: translateY(-50%);
-}
-
-#paddle-right {
-	right: 5%;
-	top: 50%;
-	transform: translateY(-50%);
 }
