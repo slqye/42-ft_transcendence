@@ -1,21 +1,26 @@
 from rest_framework import serializers
 from .models import User, Friendship, Match, Tournament, TournamentParticipant, PongGameStats, TicTacToeGameStats
+from django.contrib.auth import get_user_model
 
-# User Serializer
+User = get_user_model()
+
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+
     class Meta:
         model = User
-        fields = [
-            'id',  # Default primary key from Django
-            'username',
-            'password_hash',
-            'password_salt',
-            'avatar_url',
-            'created_at',
-            'language_code',
-            'auth_token',
-        ]
+        fields = ['id', 'username', 'password', 'avatar_url', 'language_code', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+    def create(self, validated_data):
+        user = User(
+            username=validated_data['username'],
+            avatar_url=validated_data.get('avatar_url', ''),
+            language_code=validated_data.get('language_code', 'en')
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 # Friendship Serializer

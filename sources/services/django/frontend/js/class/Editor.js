@@ -4,38 +4,97 @@ class Editor
 	{
 		this.template = template;
 		this.id = {
-			content: (_id, content) => {
-				const element = this.template.html.getElementById(_id);
-				if (element)
-					element.innerHTML = content;
-				this.template.update();
+			get: {
+				element: (_id) => {
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						return (element);
+					return (null);
+				},
+				content: (_id) => {
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						return (element.innerHTML);
+					return (null);
+				},
+				attribute: (_id, key) =>
+				{
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						return (element.getAttribute(key));
+					return (null);
+				}
 			},
-			attribute: (_id, key, value) =>
-			{
-				const element = this.template.html.getElementById(_id);
-				if (element)
-					element.setAttribute(key, value);
-				this.template.update();
+			set: {
+				content: (_id, content) => {
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						element.innerHTML = content;
+					this.template.update();
+				},
+				attribute: (_id, key, value) =>
+				{
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						element.setAttribute(key, value);
+					this.template.update();
+				}
 			}
-		}
+		};
 		this.class = {
-			content: (_class, content) =>
-			{
-				const elements = this.template.html.getElementsByClassName(_class);
-				elements.forEach(element =>
+			get: {
+				elements: (_class) => {
+					const elements = this.template.html.getElementsByClassName(_class);
+					if (elements)
+						return (elements);
+					return (null);
+				},
+				contents: (_class) => {
+					const elements = this.template.html.getElementsByClassName(_class);
+					let result = [];
+					if (elements.length > 0)
+					{
+						Array.from(elements).forEach(element =>
+						{
+							result.push(element.innerHTML);
+						});
+						return (result);
+					}
+					return (null);
+				},
+				attributes: (_class, key) =>
 				{
-					element.innerHTML = content;
-				});
-				this.template.update();
+					const elements = this.template.html.getElementsByClassName(_class);
+					let result = [];
+					if (elements.length > 0)
+					{
+						Array.from(elements).forEach(element =>
+						{
+							result.push(element.getAttribute(key));
+						});
+						return (result);
+					}
+					return (null);
+				}
 			},
-			attribute: (_class, key, value) =>
-			{
-				const elements = this.template.html.getElementsByClassName(_class);
-				elements.forEach(element =>
+			set: {
+				contents: (_class, content) => {
+					const elements = this.template.html.getElementsByClassName(_class);
+					Array.from(elements).forEach(element =>
+					{
+						element.innerHTML = content;
+					});
+					this.template.update();
+				},
+				attributes: (_class, key, value) =>
 				{
-					element.setAttribute(key, value);
-				});
-				this.template.update();
+					const elements = this.template.html.getElementsByClassName(_class);
+					Array.from(elements).forEach(element =>
+					{
+						element.setAttribute(key, value);
+					});
+					this.template.update();
+				}
 			}
 		}
 	}

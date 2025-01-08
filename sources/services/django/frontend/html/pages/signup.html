@@ -2,22 +2,23 @@
 	<div class="container d-flex justify-content-center anim-slide-down" style="margin-top: 10vh;">
 		<div class="row text-center border rounded m-2 m-sm-3 m-md-5 p-2 p-sm-3 p-md-5">
 			<h1 class="p-2">Sign up</h1>
-			<form>
+			<form onsubmit="event.preventDefault(); signup();">
 				<div class="input-group my-2">
-					<span class="input-group-text">~</span>
-					<input type="text" class="form-control" placeholder="Username" aria-label="username" required>
+					<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
+					<input type="text" class="form-control" placeholder="Username" aria-label="username" id="signup_username" required>
 				</div>
 				<div class="input-group my-2">
-					<span class="input-group-text">@</span>
-					<input type="email" class="form-control" placeholder="Email" aria-label="email" required>
+					<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+					<input type="email" class="form-control" placeholder="Email" aria-label="email" id="signup_email" required>
 				</div>
 				<div class="input-group my-2">
-					<span class="input-group-text">$</span>
-					<input type="password" class="form-control" placeholder="Password" aria-label="password1" required>
+					<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
+					<input type="password" class="form-control" placeholder="Password" aria-label="password1" id="signup_password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" required>
+					<span class="input-group-text" data-bs-toggle="tooltip" data-bs-title="Require at least 8 characters, one digit, one lowercase letter, one uppercase letter, and one special character."><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
 				</div>
 				<div class="input-group my-2">
-					<span class="input-group-text">$</span>
-					<input type="password" class="form-control" placeholder="Confirm password" aria-label="password2" required>
+					<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
+					<input type="password" class="form-control" placeholder="Confirm password" aria-label="password2" id="signup_password_confirm" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" required>
 				</div>
 				<button type="submit" class="btn btn-outline-primary mt-3">Submit</button>
 			</form>
