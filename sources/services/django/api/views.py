@@ -4,8 +4,8 @@ from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
 
-from .models import User
-from .serializers import UserSerializer
+from .models import User, Match
+from .serializers import UserSerializer, MatchSerializer
 
 from django.contrib.auth import get_user_model
 
@@ -13,6 +13,7 @@ from rest_framework import generics, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 # Create your views here.
 
@@ -41,10 +42,34 @@ class UserList(generics.ListCreateAPIView):
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAdminUser]
+	permission_classes = [permissions.IsAuthenticated]
+
+class CurrentUser(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+			'password': user.password,
+            'email': user.email,
+            'avatar_url': getattr(user, 'avatar_url', None),
+            'language_code': getattr(user, 'language_code', 'en'),
+        })
+
+class MatchList(generics.ListCreateAPIView):
+	queryset = Match.objects.all()
+	serializer_class = MatchSerializer
+	permission_classes = [permissions.AllowAny]
+
+class MatchDetail(generics.RetrieveDestroyAPIView):
+	queryset = Match.objects.all()
+	serializer_class = MatchSerializer
+	permission_classes = [permissions.AllowAny]
 
 
-def index(request):
+def index(request, path=None):
 	content = ""
 	with open("frontend/index.html", "r") as file:
 		content = file.read()

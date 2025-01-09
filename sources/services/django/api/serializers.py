@@ -42,10 +42,6 @@ class FriendshipSerializer(serializers.ModelSerializer):
 
 # Match Serializer
 class MatchSerializer(serializers.ModelSerializer):
-    # Optionally nested users
-    player = UserSerializer(read_only=True, source='player_user')
-    opponent = UserSerializer(read_only=True, source='opponent_user')
-
     class Meta:
         model = Match
         fields = [

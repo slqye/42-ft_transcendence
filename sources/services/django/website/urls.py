@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 
 from api import views
 
@@ -27,8 +27,10 @@ urlpatterns = [
     path('api/', include('api.urls')),
 
     # Frontend files
-    re_path(r'^frontend/(?P<path>.*)$', views.frontend, name='frontend-file'),
+    path('frontend/<path:path>', views.frontend, name='frontend-file'),
 
     # Catch-all for any other URL -> index view
-    re_path(r'^(?!api|admin|frontend).*$', views.index, name='index'),
+    path('', views.index, name='index'),
+    path('<path:path>', views.index, name='catch-all-index'),
+
 ]
