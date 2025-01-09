@@ -13,6 +13,7 @@ from rest_framework import generics, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 # Create your views here.
 
@@ -42,6 +43,20 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
 	permission_classes = [permissions.IsAuthenticated]
+
+class CurrentUser(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+			'password': user.password,
+            'email': user.email,
+            'avatar_url': getattr(user, 'avatar_url', None),
+            'language_code': getattr(user, 'language_code', 'en'),
+        })
 
 class MatchList(generics.ListCreateAPIView):
 	queryset = Match.objects.all()
