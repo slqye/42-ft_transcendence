@@ -1,9 +1,13 @@
+name: transcendence
+
 services:
   django:
     container_name: transcendence_django
     image: django
     build:
       context: services/django
+      labels:
+        is-transcendance: "yes"
     env_file: .env
     volumes:
       - ./services/django/.:/app
@@ -18,12 +22,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    labels:
+      is-transcendance: "yes"
 
   postgres:
     container_name: transcendence_postgres
     image: postgres
     build:
       context: services/postgres
+      labels:
+        is-transcendance: "yes"
     env_file: .env
     volumes:
       - transcendence_database_data:/var/lib/postgresql/data
@@ -34,6 +42,8 @@ services:
       - 5050
     ports:
       - 5050:5050
+    labels:
+      is-transcendance: "yes"
     healthcheck:
       test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
       interval: 10s
@@ -48,6 +58,8 @@ volumes:
       type: none
       device: ${PWD}/data/database_data
       o: bind
+    labels:
+      is-transcendance: "yes"
   transcendence_database_migrations:
     name: transcendence_database_migrations
     driver: local
@@ -55,8 +67,12 @@ volumes:
       type: none
       device: ${PWD}/data/database_migrations
       o: bind
+    labels:
+      is-transcendance: "yes"
 
 networks:
   transcendence_network_backend:
     name: transcendence_network_backend
     driver: bridge
+    labels:
+      is-transcendance: "yes"
