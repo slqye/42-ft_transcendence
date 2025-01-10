@@ -30,7 +30,6 @@ clean: down
 
 fclean: clean
 	@docker compose -f ./sources/docker-compose.yml down --rmi all
-	@docker network rm transcendence_network_backend
 	@docker image prune --filter label=is-transcendance=yes --force
 
 re:
