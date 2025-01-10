@@ -26,11 +26,12 @@ down :
 	@docker compose -f ./sources/docker-compose.yml down
 
 clean: down
-	@ { docker volume ls -q; echo null; } | xargs -r docker volume rm --force
+	@ { docker volume ls --filter label=is-transcendance=yes -q; echo null; } | xargs -r docker volume rm --force
 
 fclean: clean
 	@docker compose -f ./sources/docker-compose.yml down --rmi all
-	@docker image prune --all --force
+	@docker network rm transcendence_network_backend
+	@docker image prune --filter label=is-transcendance=yes --force
 
 re:
 	@make fclean
