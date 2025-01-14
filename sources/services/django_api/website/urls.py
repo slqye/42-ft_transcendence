@@ -26,9 +26,6 @@ urlpatterns = [
     # API URLs
     path('api/', include('api.urls')),
 
-    # Frontend files
-    path('frontend/<path:path>', views.frontend, name='frontend-file'),
-
     # Catch-all for any other URL -> index view
     path('', views.index, name='index'),
     path('<path:path>', views.index, name='catch-all-index'),

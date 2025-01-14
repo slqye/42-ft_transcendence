@@ -11,7 +11,6 @@ services:
     env_file: .env
     volumes:
       - ./services/django_frontend/.:/app
-      - transcendence_database_migrations:/migrations
     networks:
       - transcendence_network_backend
     expose:
@@ -20,6 +19,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      django_api:
+        condition: service_started
     labels:
       is-transcendance: "yes"
 
@@ -80,8 +81,6 @@ services:
     ports:
       - 80:80
     depends_on:
-      django_frontend:
-        condition: service_started
       django_api:
         condition: service_started
     labels:

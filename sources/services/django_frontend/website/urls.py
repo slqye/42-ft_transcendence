@@ -23,9 +23,6 @@ urlpatterns = [
     # Admin URLs
     path('admin/', admin.site.urls),
 
-    # API URLs
-    path('api/', include('api.urls')),
-
     # Frontend files
     path('frontend/<path:path>', views.frontend, name='frontend-file'),
 
