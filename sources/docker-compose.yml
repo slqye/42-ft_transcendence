@@ -1,23 +1,43 @@
 name: transcendence
 
 services:
-  django:
-    container_name: transcendence_django
-    image: django
+  django_frontend:
+    container_name: transcendence_django_frontend
+    image: django_frontend
     build:
-      context: services/django
+      context: services/django_frontend
       labels:
         is-transcendance: "yes"
     env_file: .env
     volumes:
-      - ./services/django/.:/app
+      - ./services/django_frontend/.:/app
       - transcendence_database_migrations:/migrations
     networks:
       - transcendence_network_backend
-    ports:
-      - 8080:8080
-    environment:
-      - DEBUG=1
+    expose:
+      - 8080
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      is-transcendance: "yes"
+
+  django_api:
+    container_name: transcendence_django_api
+    image: django_api
+    build:
+      context: services/django_api
+      labels:
+        is-transcendance: "yes"
+    env_file: .env
+    volumes:
+      - ./services/django_api/.:/app
+      - transcendence_database_migrations:/migrations
+    networks:
+      - transcendence_network_backend
+    expose:
+      - 8081
     restart: on-failure
     depends_on:
       postgres:
@@ -39,9 +59,7 @@ services:
       - transcendence_network_backend
     restart: always
     expose:
-      - 5050
-    ports:
-      - 5050:5050
+      - 5432
     labels:
       is-transcendance: "yes"
     healthcheck:
@@ -49,6 +67,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  nginx:
+    container_name: transcendence_nginx
+    image: nginx
+    build:
+      context: services/nginx
+      labels:
+        is-transcendance: "yes"
+    networks:
+      - transcendence_network_backend
+    ports:
+      - 80:80
+    depends_on:
+      django_frontend:
+        condition: service_started
+      django_api:
+        condition: service_started
+    labels:
+      is-transcendance: "yes"
 
 volumes:
   transcendence_database_data:
