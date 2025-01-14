@@ -18,6 +18,31 @@ async function load_navbar() {
 	}
 	if (isLogin())
 	{
+		fetch("http://localhost:8080/api/users/me/", {
+			method: "GET",
+			headers:
+			{
+				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
+				"Content-Type": "application/json"
+			}
+		})
+		.then(response =>
+		{
+			if (!response.ok)
+			{
+				new Toast(Toast.ERROR, "A network error occurred.");
+				throw new Error("A network error occurred.");
+			}
+			return (response.json());
+		})
+		.then(data =>
+		{
+			console.log(data);
+		})
+		.catch(error =>
+		{
+			new Toast(Toast.ERROR, "An error occurred.");
+		});
 		navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 		navbar.edit.id.set.attribute("profile", "class", "nav-item");
 	}
