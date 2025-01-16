@@ -17,14 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from api import views
+from . import views
 
 urlpatterns = [
     # Admin URLs
     path('admin/', admin.site.urls),
-
-    # API URLs
-    path('api/', include('api.urls')),
 
     # Frontend files
     path('frontend/<path:path>', views.frontend, name='frontend-file'),
