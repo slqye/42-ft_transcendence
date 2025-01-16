@@ -30,7 +30,7 @@ async function	signup()
 			new Toast(Toast.ERROR, "A network error occurred.");
 			throw new Error("A network error occurred.");
 		}
-		response.json();
+		return (response.json());
 	})
 	.then(data =>
 	{
