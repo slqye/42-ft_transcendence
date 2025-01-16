@@ -111,10 +111,39 @@ async function load_signin() {
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
+	
 	load_navbar();
 	content.innerHTML = template.string;
+
+	// Adapt the 42 logo based on the current theme
+	const theme = document.body.getAttribute("data-bs-theme");
+	const logo = document.getElementById("logo_42");
+	const signin_42_btn = document.getElementById("signin_42");
+
+	if (theme === "dark")
+	{
+		if (logo)
+			logo.src = "/frontend/assets/42logo_dark.svg";
+		if (signin_42_btn)
+		{
+			signin_42_btn.classList.remove("btn-outline-dark");
+			signin_42_btn.classList.add("btn-outline-light");
+		}
+	}
+	else
+	{
+		if (logo)
+			logo.src = "/frontend/assets/42logo_light.svg";
+		if (signin_42_btn)
+		{
+			signin_42_btn.classList.remove("btn-outline-light");
+			signin_42_btn.classList.add("btn-outline-dark");
+		}
+	}
+
 	if (window.location.pathname !== "/signin")
 		history.pushState({ page: "signin" }, "Signin", "/signin");
+	
 	init_tooltips();
 }
 
