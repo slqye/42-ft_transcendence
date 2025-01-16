@@ -16,13 +16,13 @@ services:
     expose:
       - 8080
     restart: on-failure
-    depends_on:
-      postgres:
-        condition: service_healthy
-      django_api:
-        condition: service_started
     labels:
       is-transcendance: "yes"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   django_api:
     container_name: transcendence_django_api
@@ -45,6 +45,11 @@ services:
         condition: service_healthy
     labels:
       is-transcendance: "yes"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/api/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     container_name: transcendence_postgres
@@ -82,7 +87,9 @@ services:
       - 8000:443
     depends_on:
       django_api:
-        condition: service_started
+        condition: service_healthy
+      django_frontend:
+        condition: service_healthy
     labels:
       is-transcendance: "yes"
 

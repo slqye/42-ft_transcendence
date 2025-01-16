@@ -70,7 +70,4 @@ class MatchDetail(generics.RetrieveDestroyAPIView):
 
 
 def index(request, path=None):
-	content = ""
-	with open("frontend/index.html", "r") as file:
-		content = file.read()
-	return HttpResponse(content)
+	return HttpResponse("")
