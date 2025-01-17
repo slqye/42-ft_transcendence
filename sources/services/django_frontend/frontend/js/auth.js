@@ -123,8 +123,31 @@ async function	signin_42_callback()
 }
 
 async function signOut() {
-	// Remove the auth token and redirect to home
 	localStorage.removeItem("auth-token");
 	new Toast(Toast.SUCCESS, "Signed out successfully!");
 	load_home();
+}
+
+async function	isLogin()
+{
+	if (localStorage.getItem("auth-token") == null)
+		return (false);
+	try
+	{
+		const response = await fetch("/api/users/me/", {
+			method: "GET",
+			headers:
+			{
+				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
+				"Content-Type": "application/json"
+			}
+		});
+		if (!response.ok)
+			return (false);
+	}
+	catch (error)
+	{
+		return (false);
+	}
+	return (true);
 }

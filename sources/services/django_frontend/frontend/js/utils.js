@@ -56,11 +56,6 @@ function	switch_theme_dark(body)
 	}
 }
 
-function	isLogin()
-{
-	return (localStorage.getItem("auth-token") == null ? false : true);
-}
-
 function	isMobile()
 {
 	const userAgent = navigator.userAgent.toLowerCase();

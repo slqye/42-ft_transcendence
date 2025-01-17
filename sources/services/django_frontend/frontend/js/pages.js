@@ -17,7 +17,7 @@ async function load_navbar() {
 		navbar.edit.id.set.attribute("theme_icon_sun", "class", "px-2 d-none d-lg-none");
 		navbar.edit.id.set.attribute("theme_icon_moon", "class", "px-2 d-none d-lg-inline-block");
 	}
-	if (isLogin())
+	if (await isLogin())
 	{
 		try
 		{
