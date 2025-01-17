@@ -18,7 +18,7 @@ async function load_navbar() {
 	}
 	if (isLogin())
 	{
-		fetch("http://localhost:8080/api/users/me/", {
+		fetch("/api/users/me/", {
 			method: "GET",
 			headers:
 			{

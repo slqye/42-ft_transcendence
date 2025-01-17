@@ -2,9 +2,19 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-    avatar_url = models.CharField(max_length=255, blank=True, null=True)
-    language_code = models.CharField(max_length=2, default='en')
-    created_at = models.DateTimeField(auto_now_add=True)
+	avatar_url = models.CharField(max_length=255, blank=True, default='https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360')
+	language_code = models.CharField(max_length=2, default='en')
+	created_at = models.DateTimeField(auto_now_add=True)
+	pong_matches_played = models.PositiveIntegerField(default=0)
+	pong_wins = models.PositiveIntegerField(default=0)
+	pong_draws = models.PositiveIntegerField(default=0)
+	pong_losses = models.PositiveIntegerField(default=0)
+
+	tictactoe_matches_played = models.PositiveIntegerField(default=0)
+	tictactoe_wins = models.PositiveIntegerField(default=0)
+	tictactoe_draws = models.PositiveIntegerField(default=0)
+	tictactoe_losses = models.PositiveIntegerField(default=0)
+
 
 class Friendship(models.Model):
 	user_id_1 = models.ForeignKey(User, related_name='friendship_user_1', on_delete=models.CASCADE)
