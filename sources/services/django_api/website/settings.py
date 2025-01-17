@@ -148,4 +148,5 @@ API_42_REDIRECT_URI = MAIN_URL + "/api/42oauth/callback/"
 
 CORS_ALLOWED_ORIGINS = [
     "https://localhost:8000",
+	MAIN_URL,
 ]
