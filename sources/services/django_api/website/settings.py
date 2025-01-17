@@ -147,5 +147,5 @@ MAIN_URL = os.environ['MAIN_URL']
 API_42_REDIRECT_URI = MAIN_URL + "/api/42oauth/callback/"
 
 CORS_ALLOWED_ORIGINS = [
-    "http://briganscendence.fr:8081",
+    "https://localhost:8000",
 ]
