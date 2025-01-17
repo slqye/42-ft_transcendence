@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+	'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,7 @@ MIDDLEWARE = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ]
 }
 
@@ -138,3 +140,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+API_42_UID = os.environ['API_42_UID']
+API_42_SECRET = os.environ['API_42_SECRET']
+MAIN_URL = os.environ['MAIN_URL']
+API_42_REDIRECT_URI = MAIN_URL + "/api/42oauth/callback/"
+
+CORS_ALLOWED_ORIGINS = [
+    "http://briganscendence.fr:8081",
+]
