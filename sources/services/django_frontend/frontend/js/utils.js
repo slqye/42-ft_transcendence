@@ -12,6 +12,8 @@ function	switch_theme_light(body)
 {
 	const icon_sun = document.getElementById("theme_icon_sun");
 	const icon_moon = document.getElementById("theme_icon_moon");
+	const signin_42_btn = document.getElementById("signin_42");
+	const logo_42 = document.getElementById("logo_42");
 
 	body.setAttribute("data-bs-theme", "light");
 	body.classList.remove("bg-dark");
@@ -20,12 +22,22 @@ function	switch_theme_light(body)
 	icon_sun.classList.add("d-lg-none");
 	icon_moon.classList.remove("d-lg-none");
 	icon_moon.classList.add("d-lg-inline-block");
+
+	if (logo_42) {
+		logo_42.src = "/frontend/assets/42logo_light.svg";
+	}
+
+	if (signin_42_btn) {
+		signin_42_btn.classList.remove("btn-outline-light");
+		signin_42_btn.classList.add("btn-outline-dark");
+	}
 }
 function	switch_theme_dark(body)
 {
 	const icon_sun = document.getElementById("theme_icon_sun");
 	const icon_moon = document.getElementById("theme_icon_moon");
-
+	const logo_42 = document.getElementById("logo_42");
+	const signin_42_btn = document.getElementById("signin_42");
 	body.setAttribute("data-bs-theme", "dark");
 	body.classList.remove("bg-light");
 	body.classList.add("bg-dark");
@@ -33,6 +45,15 @@ function	switch_theme_dark(body)
 	icon_moon.classList.add("d-lg-none");
 	icon_sun.classList.remove("d-lg-none");
 	icon_sun.classList.add("d-lg-inline-block");
+
+	if (logo_42) {
+		logo_42.src = "/frontend/assets/42logo_dark.svg";
+	}
+
+	if (signin_42_btn) {
+		signin_42_btn.classList.remove("btn-outline-dark");
+		signin_42_btn.classList.add("btn-outline-light");
+	}
 }
 
 function	isLogin()

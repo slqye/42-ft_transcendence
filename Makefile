@@ -25,26 +25,29 @@ start :
 down :
 	@docker compose -f ./sources/docker-compose.yml down
 
-clean: down
+clean : down
 	@ { docker volume ls --filter label=is-transcendance=yes -q; echo null; } | xargs -r docker volume rm --force
 
-fclean: clean
+fclean : clean
 	@docker compose -f ./sources/docker-compose.yml down --rmi all
 	@docker image prune --filter label=is-transcendance=yes --force
 
-re:
+re :
 	@make fclean
 	@make build
 	@make up
 
-clean_data:
-	@rm -rf ${PWD}/data
+flush_database :
+	@docker exec -it transcendence_django_api python manage.py flush --no-input
 
-cre:
+drop_database :
+	@docker exec -it transcendence_django_api python manage.py reset_db --noinput
 	@make fclean
-	@make clean_data
+
+new_db_re :
+	@make drop_database
 	@make build
 	@make up
 
-.PHONY:	all re down clean fclean up build clean_data cre
+.PHONY:	all re down clean fclean up build flush_database drop_database new_db_re
 

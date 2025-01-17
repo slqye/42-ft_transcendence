@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from . import views
 
 urlpatterns = [
@@ -9,4 +9,6 @@ urlpatterns = [
 	path("users/<int:pk>", views.UserDetail.as_view(), name="user-detail"),
 	path("match/", views.MatchList.as_view(), name="match-list"),
 	path("match/<int:pk>", views.MatchDetail.as_view(), name="match-detail"),
+	path('42oauth/', views.OAuthCallbackView.as_view(), name='oauth-callback'),
+	path('config/', views.FrontendConfigView.as_view(), name="config"),
 ]
