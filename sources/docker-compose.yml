@@ -66,6 +66,8 @@ services:
     restart: always
     expose:
       - 5432
+    ports:
+      - 5432:5432
     labels:
       is-transcendance: "yes"
     healthcheck:
