@@ -158,6 +158,32 @@ async function load_signup() {
 	init_tooltips();
 }
 
+async function load_profile() {
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/profile.html").load();
+
+	if (template == null)
+		return console.error(ERROR_TEMPLATE);
+	load_navbar();
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/profile")
+		history.pushState({ page: "profile" }, "Profile", "/profile");
+	init_tooltips();
+}
+
+async function load_settings() {
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/settings.html").load();
+
+	if (template == null)
+		return console.error(ERROR_TEMPLATE);
+	load_navbar();
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/settings")
+		history.pushState({ page: "settings" }, "Settings", "/settings");
+	init_tooltips();
+}
+
 window.onpopstate = async function (event) {
 	if (event.state)
 	{
