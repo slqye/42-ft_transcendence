@@ -8,6 +8,7 @@ async function load_navbar() {
 	const body = document.querySelector("body");
 	const header = document.getElementById("header");
 	let navbar = await new Template("frontend/html/navbar.html").load();
+	let user_data;
 
 	if (navbar == null)
 		return console.error(ERROR_TEMPLATE);
@@ -18,33 +19,30 @@ async function load_navbar() {
 	}
 	if (isLogin())
 	{
-		fetch("/api/users/me/", {
-			method: "GET",
-			headers:
-			{
-				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-				"Content-Type": "application/json"
-			}
-		})
-		.then(response =>
+		try
 		{
+			const response = await fetch("/api/users/me/", {
+				method: "GET",
+				headers:
+				{
+					"Authorization": `Token ${localStorage.getItem("auth-token")}`,
+					"Content-Type": "application/json"
+				}
+			});
 			if (!response.ok)
 			{
 				new Toast(Toast.ERROR, "A network error occurred.");
 				throw new Error("A network error occurred.");
 			}
-			return (response.json());
-		})
-		.then(data =>
+			const data = await response.json();
+			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
+			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
+			navbar.edit.id.set.attribute("profile", "class", "nav-item");
+		}
+		catch (error)
 		{
-			console.log(data);
-		})
-		.catch(error =>
-		{
-			new Toast(Toast.ERROR, "An error occurred.");
-		});
-		navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
-		navbar.edit.id.set.attribute("profile", "class", "nav-item");
+			new Toast(Toast.ERROR, error);
+		}
 	}
 	header.innerHTML = navbar.string;
 }
