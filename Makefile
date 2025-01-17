@@ -42,6 +42,7 @@ flush_database :
 
 drop_database :
 	@docker exec -it transcendence_django_api python manage.py reset_db --noinput
+	@rm -f ${PWD}/data/database_migrations/done
 	@make fclean
 
 new_db_re :
