@@ -4,9 +4,10 @@ import requests
 from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
+from django.db import models
 
-from .models import User, Match
-from .serializers import UserSerializer, MatchSerializer
+from .models import User, Match, TournamentParticipant
+from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer
 
 from django.contrib.auth import get_user_model, login
 
@@ -15,7 +16,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 # Create your views here.
 
@@ -59,6 +60,50 @@ class CurrentUser(APIView):
             'avatar_url': getattr(user, 'avatar_url', None),
             'language_code': getattr(user, 'language_code', 'en'),
         })
+
+class UserPongMatches(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
+
+		matches = Match.objects.filter(is_pong=True).filter(
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user))
+		serializer = MatchSerializer(matches, many=True)
+		return Response(serializer.data)
+
+class UserTicTacToeMatches(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
+		matches = Match.objects.filter(
+			is_pong=False
+		).filter(
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
+		)
+
+		serializer = MatchSerializer(matches, many=True)
+		return Response(serializer.data)
+
+class UserTournaments(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            target_user = request.user
+        else:
+            target_user = get_object_or_404(User, pk=pk)
+
+        participants = TournamentParticipant.objects.filter(user=target_user)
+        serializer = TournamentParticipantSerializer(participants, many=True)
+        return Response(serializer.data)
 
 class MatchList(generics.ListCreateAPIView):
 	queryset = Match.objects.all()
