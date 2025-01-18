@@ -61,6 +61,8 @@ async function load_home() {
 }
 
 async function load_pong() {
+	if (!await isLogin())
+		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/pong.html").load();
 
@@ -77,6 +79,8 @@ async function load_pong() {
 }
 
 async function load_tictactoe() {
+	if (!await isLogin())
+		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/tictactoe.html").load();
 
@@ -159,6 +163,8 @@ async function load_signup() {
 }
 
 async function load_profile() {
+	if (!await isLogin())
+		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/profile.html").load();
 
@@ -172,6 +178,8 @@ async function load_profile() {
 }
 
 async function load_settings() {
+	if (!await isLogin())
+		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/settings.html").load();
 
