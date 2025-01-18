@@ -202,6 +202,10 @@ window.onpopstate = async function (event) {
 				await load_signin(); break;
 			case "signup":
 				await load_signup(); break;
+			case "profile":
+				await load_profile(); break;
+			case "settings":
+				await load_settings(); break;
 			default:
 				console.error("Page not found:", page); break;
 		}
