@@ -61,6 +61,52 @@ class CurrentUser(APIView):
             'language_code': getattr(user, 'language_code', 'en'),
         })
 
+class UserStats(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            target_user = request.user
+        else:
+            target_user = get_object_or_404(User, pk=pk)
+
+        pong_matches = target_user.pong_matches_played
+        pong_wins = target_user.pong_wins
+        pong_draws = target_user.pong_draws
+        pong_losses = target_user.pong_losses
+
+        if pong_matches > 0:
+            pong_winrate = round((pong_wins / pong_matches) * 100, 2)
+        else:
+            pong_winrate = 0.0
+
+        # Tic Tac Toe data
+        ttt_matches = target_user.tictactoe_matches_played
+        ttt_wins = target_user.tictactoe_wins
+        ttt_draws = target_user.tictactoe_draws
+        ttt_losses = target_user.tictactoe_losses
+
+        if ttt_matches > 0:
+            ttt_winrate = round((ttt_wins / ttt_matches) * 100, 2)
+        else:
+            ttt_winrate = 0.0
+
+        response_data = {
+            "pong_matches_played": pong_matches,
+            "pong_wins": pong_wins,
+            "pong_draws": pong_draws,
+            "pong_losses": pong_losses,
+            "pong_winrate": pong_winrate, # percent
+
+            "tictactoe_matches_played": ttt_matches,
+            "tictactoe_wins": ttt_wins,
+            "tictactoe_draws": ttt_draws,
+            "tictactoe_losses": ttt_losses,
+            "tictactoe_winrate": ttt_winrate,  # percent
+        }
+
+        return Response(response_data)
+
 class UserPongMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
