@@ -173,16 +173,20 @@ class OAuthCallbackView(APIView):
 			return Response({"error": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
 		# Exchange code for access token
-		token_response = requests.post(
-			'https://api.intra.42.fr/oauth/token',
-			data={
+		try:
+			token_response = requests.post(
+				'https://api.intra.42.fr/oauth/token',
+				data={
 				'grant_type': 'authorization_code',
 				'client_id': os.environ['API_42_UID'],
 				'client_secret': os.environ['API_42_SECRET'],
 				'code': code,
-				'redirect_uri': os.environ['API_42_REDIRECT_URI'],
-			}
-		)
+					'redirect_uri': settings.API_42_REDIRECT_URI,
+				}
+			)
+		except Exception as e:
+			print("Error", e)
+			return Response({"error": "Failed to obtain access token"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 		
 		if token_response.status_code != 200:
 			return Response({"error": "Failed to obtain access token"}, status=status.HTTP_400_BAD_REQUEST)
@@ -190,10 +194,14 @@ class OAuthCallbackView(APIView):
 		access_token = token_response.json().get('access_token')
 
 		# Fetch user information
-		user_response = requests.get(
-			'https://api.intra.42.fr/v2/me',
-			headers={'Authorization': f'Bearer {access_token}'}
-		)
+		try:
+			user_response = requests.get(
+				'https://api.intra.42.fr/v2/me',
+				headers={'Authorization': f'Bearer {access_token}'}
+			)
+		except Exception as e:
+			print("Error", e)
+			return Response({"error": "Failed to fetch user information"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 		
 		if user_response.status_code != 200:
 			return Response({"error": "Failed to fetch user information"}, status=status.HTTP_400_BAD_REQUEST)
@@ -213,7 +221,7 @@ class OAuthCallbackView(APIView):
 		token, _ = Token.objects.get_or_create(user=user)
 
 		# Redirect to frontend with token
-		return redirect(f"{settings.MAIN_URL}/?token={token.key}")
+		return redirect(f"{settings.MAIN_URL}/home?token={token.key}")
 
 class FrontendConfigView(APIView):
 	permission_classes = [permissions.AllowAny]
