@@ -13,6 +13,7 @@ urlpatterns = [
     path("users/<str:pk>/matches/pong/", views.UserPongMatches.as_view(), name="user-pong-matches"),
     path("users/<str:pk>/tournaments/", views.UserTournaments.as_view(), name="user-tournaments"),
 	path("users/<str:pk>/stats/", views.UserStats.as_view(), name="user-stats"),
+	path("users/update/<str:field>/", views.UpdateUserField.as_view(), name="update-user-field"),
 
 	path("match/", views.MatchList.as_view(), name="match-list"),
 	path("match/<int:pk>", views.MatchDetail.as_view(), name="match-detail"),

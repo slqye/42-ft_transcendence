@@ -47,6 +47,27 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class = UserSerializer
 	permission_classes = [permissions.IsAuthenticated]
 
+class UpdateUserField(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, field, *args, **kwargs):
+        allowed_fields = ['email', 'username', 'avatar_url', 'language_code', 'password']
+        
+        if field not in allowed_fields:
+            return Response({"error": "Invalid field"}, status=400)
+        new_value = request.data.get(field, None)
+        if new_value is None:
+            return Response({"error": f"{field} is required."}, status=400)
+
+        user = request.user
+        if field == "password":
+            user.set_password(new_value)
+        else:
+            setattr(user, field, new_value)
+
+        user.save()
+        return Response({field: getattr(user, field)}, status=200)
+
 class CurrentUser(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
