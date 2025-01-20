@@ -45,7 +45,7 @@ drop_database :
 	@rm -f ${PWD}/data/database_migrations/done
 	@make fclean
 
-new_db_re :
+new_database_re :
 	@make drop_database
 	@make build
 	@make up
