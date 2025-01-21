@@ -4,9 +4,10 @@ import requests
 from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
+from django.db import models
 
-from .models import User, Match
-from .serializers import UserSerializer, MatchSerializer
+from .models import User, Match, TournamentParticipant
+from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer
 
 from django.contrib.auth import get_user_model, login
 
@@ -15,7 +16,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 # Create your views here.
 
@@ -46,6 +47,27 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class = UserSerializer
 	permission_classes = [permissions.IsAuthenticated]
 
+class UpdateUserField(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, field, *args, **kwargs):
+        allowed_fields = ['email', 'username', 'avatar_url', 'language_code', 'password']
+        
+        if field not in allowed_fields:
+            return Response({"error": "Invalid field"}, status=400)
+        new_value = request.data.get(field, None)
+        if new_value is None:
+            return Response({"error": f"{field} is required."}, status=400)
+
+        user = request.user
+        if field == "password":
+            user.set_password(new_value)
+        else:
+            setattr(user, field, new_value)
+
+        user.save()
+        return Response({field: getattr(user, field)}, status=200)
+
 class CurrentUser(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -59,6 +81,96 @@ class CurrentUser(APIView):
             'avatar_url': getattr(user, 'avatar_url', None),
             'language_code': getattr(user, 'language_code', 'en'),
         })
+
+class UserStats(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            target_user = request.user
+        else:
+            target_user = get_object_or_404(User, pk=pk)
+
+        pong_matches = target_user.pong_matches_played
+        pong_wins = target_user.pong_wins
+        pong_draws = target_user.pong_draws
+        pong_losses = target_user.pong_losses
+
+        if pong_matches > 0:
+            pong_winrate = round((pong_wins / pong_matches) * 100, 2)
+        else:
+            pong_winrate = 0.0
+
+        # Tic Tac Toe data
+        ttt_matches = target_user.tictactoe_matches_played
+        ttt_wins = target_user.tictactoe_wins
+        ttt_draws = target_user.tictactoe_draws
+        ttt_losses = target_user.tictactoe_losses
+
+        if ttt_matches > 0:
+            ttt_winrate = round((ttt_wins / ttt_matches) * 100, 2)
+        else:
+            ttt_winrate = 0.0
+
+        response_data = {
+            "pong_matches_played": pong_matches,
+            "pong_wins": pong_wins,
+            "pong_draws": pong_draws,
+            "pong_losses": pong_losses,
+            "pong_winrate": pong_winrate, # percent
+
+            "tictactoe_matches_played": ttt_matches,
+            "tictactoe_wins": ttt_wins,
+            "tictactoe_draws": ttt_draws,
+            "tictactoe_losses": ttt_losses,
+            "tictactoe_winrate": ttt_winrate,  # percent
+        }
+
+        return Response(response_data)
+
+class UserPongMatches(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
+
+		matches = Match.objects.filter(is_pong=True).filter(
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)).order_by('-created_at')
+		serializer = MatchSerializer(matches, many=True)
+		return Response(serializer.data)
+
+class UserTicTacToeMatches(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
+		matches = Match.objects.filter(
+			is_pong=False
+		).filter(
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
+		).order_by('-created_at')
+
+		serializer = MatchSerializer(matches, many=True)
+		return Response(serializer.data)
+
+class UserTournaments(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            target_user = request.user
+        else:
+            target_user = get_object_or_404(User, pk=pk)
+
+        participants = TournamentParticipant.objects.filter(user=target_user)
+        serializer = TournamentParticipantSerializer(participants, many=True)
+        return Response(serializer.data)
 
 class MatchList(generics.ListCreateAPIView):
 	queryset = Match.objects.all()
@@ -82,16 +194,20 @@ class OAuthCallbackView(APIView):
 			return Response({"error": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
 		# Exchange code for access token
-		token_response = requests.post(
-			'https://api.intra.42.fr/oauth/token',
-			data={
+		try:
+			token_response = requests.post(
+				'https://api.intra.42.fr/oauth/token',
+				data={
 				'grant_type': 'authorization_code',
 				'client_id': os.environ['API_42_UID'],
 				'client_secret': os.environ['API_42_SECRET'],
 				'code': code,
-				'redirect_uri': os.environ['API_42_REDIRECT_URI'],
-			}
-		)
+					'redirect_uri': settings.API_42_REDIRECT_URI,
+				}
+			)
+		except Exception as e:
+			print("Error", e)
+			return Response({"error": "Failed to obtain access token"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 		
 		if token_response.status_code != 200:
 			return Response({"error": "Failed to obtain access token"}, status=status.HTTP_400_BAD_REQUEST)
@@ -99,10 +215,14 @@ class OAuthCallbackView(APIView):
 		access_token = token_response.json().get('access_token')
 
 		# Fetch user information
-		user_response = requests.get(
-			'https://api.intra.42.fr/v2/me',
-			headers={'Authorization': f'Bearer {access_token}'}
-		)
+		try:
+			user_response = requests.get(
+				'https://api.intra.42.fr/v2/me',
+				headers={'Authorization': f'Bearer {access_token}'}
+			)
+		except Exception as e:
+			print("Error", e)
+			return Response({"error": "Failed to fetch user information"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 		
 		if user_response.status_code != 200:
 			return Response({"error": "Failed to fetch user information"}, status=status.HTTP_400_BAD_REQUEST)
@@ -122,7 +242,7 @@ class OAuthCallbackView(APIView):
 		token, _ = Token.objects.get_or_create(user=user)
 
 		# Redirect to frontend with token
-		return redirect(f"{settings.MAIN_URL}/?token={token.key}")
+		return redirect(f"{settings.MAIN_URL}/home?token={token.key}")
 
 class FrontendConfigView(APIView):
 	permission_classes = [permissions.AllowAny]

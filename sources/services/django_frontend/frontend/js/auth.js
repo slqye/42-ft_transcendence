@@ -117,12 +117,13 @@ async function	signin_42_callback()
 
 	if (token) {
 		localStorage.setItem("auth-token", token);
+		history.pushState({ page: "home" }, "Home", "/home");
 		new Toast(Toast.SUCCESS, "Logged in with 42!");
-		load_home();
 	}
 }
 
 async function signOut() {
+
 	localStorage.removeItem("auth-token");
 	new Toast(Toast.SUCCESS, "Signed out successfully!");
 	load_home();
