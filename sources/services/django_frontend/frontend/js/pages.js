@@ -57,7 +57,6 @@ async function load_home() {
 		return console.error(ERROR_TEMPLATE);
 	if (window.location.pathname === "/home" && token)
 		signin_42_callback();
-	console.log("load navbar");
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/home")
