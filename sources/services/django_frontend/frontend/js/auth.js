@@ -19,7 +19,7 @@ async function	signup()
 			"username": username,
 			"email": email,
 			"password": password,
-			"avatar_url": "https://example.com/avatar.png",
+			"avatar_url": "/frontend/assets/default_profile_icon.webp",
 			"language_code": "en"
 		})
 	})
@@ -39,7 +39,7 @@ async function	signup()
 	})
 	.catch(error =>
 	{
-		new Toast(Toast.ERROR, "An error occurred.");
+		new Toast(Toast.ERROR, error);
 	});
 }
 
@@ -91,15 +91,15 @@ async function	signin_42()
 {
 	let config = {};
 
-    try {
-        const response = await fetch('/api/config/');
-        if (!response.ok) {
-            throw new Error('Failed to fetch frontend configuration.');
-        }
-        config = await response.json();
-    } catch (error) {
-        console.error('Error fetching frontend configuration:', error);
-    }
+	try {
+		const response = await fetch('/api/config/');
+		if (!response.ok) {
+			throw new Error('Failed to fetch frontend configuration.');
+		}
+		config = await response.json();
+	} catch (error) {
+		console.error('Error fetching frontend configuration:', error);
+	}
 
 	if (!config.API_42_UID || !config.API_42_REDIRECT_URI) {
 		console.error("OAuth configuration is missing.");
@@ -123,8 +123,32 @@ async function	signin_42_callback()
 }
 
 async function signOut() {
-    // Remove the auth token and redirect to home
-    localStorage.removeItem("auth-token");
-    new Toast(Toast.SUCCESS, "Signed out successfully!");
+
+	localStorage.removeItem("auth-token");
+	new Toast(Toast.SUCCESS, "Signed out successfully!");
 	load_home();
+}
+
+async function	isLogin()
+{
+	if (localStorage.getItem("auth-token") == null)
+		return (false);
+	try
+	{
+		const response = await fetch("/api/users/me/", {
+			method: "GET",
+			headers:
+			{
+				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
+				"Content-Type": "application/json"
+			}
+		});
+		if (!response.ok)
+			return (false);
+	}
+	catch (error)
+	{
+		return (false);
+	}
+	return (true);
 }

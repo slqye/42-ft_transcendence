@@ -1,0 +1,55 @@
+<section id="settings">
+	<div class="container d-flex justify-content-center anim-slide-down">
+		<div class="container mt-5">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">Edit profile informations</h5>
+					<form class="input-group mb-3" onsubmit="event.preventDefault();">
+						<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
+						<input type="text" class="form-control" id="input_edit_profile_username" placeholder="Username" required>
+						<button class="btn btn-primary" type="submit" id="edit_profile_username">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+								<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+								<path d="M13.5 6.5l4 4" />
+							</svg>
+						</button>
+					</form>
+					<form class="input-group mb-3" onsubmit="event.preventDefault();">
+						<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+						<input type="email" class="form-control" id="input_edit_profile_email" placeholder="Email" required>
+						<button class="btn btn-primary" type="submit" id="edit_profile_email">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+								<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+								<path d="M13.5 6.5l4 4" />
+							</svg>
+						</button>
+					</form>
+					<form class="input-group mb-3" onsubmit="event.preventDefault();">
+						<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
+						<input type="password" class="form-control" id="input_edit_profile_password" placeholder="Password" required>
+						<button class="btn btn-primary" type="submit" id="edit_profile_password">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+								<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+								<path d="M13.5 6.5l4 4" />
+							</svg>
+						</button>
+					</form>
+					<form class="input-group mb-3" onsubmit="event.preventDefault();">
+						<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-pen"><path d="M11.5 15H7a4 4 0 0 0-4 4v2"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="7" r="4"/></svg></span>
+						<input type="file" class="form-control" id="input_edit_profile_picture" accept="image/*" required>
+						<button class="btn btn-primary" type="submit" id="edit_profile_picture">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+								<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+								<path d="M13.5 6.5l4 4" />
+							</svg>
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

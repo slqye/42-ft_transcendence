@@ -1,0 +1,11 @@
+#profile_icon {
+	width: 50%;
+	height: auto;
+
+	border-radius: 100%;
+}
+
+.game_icon {
+	width: 5%;
+	height: auto;
+}

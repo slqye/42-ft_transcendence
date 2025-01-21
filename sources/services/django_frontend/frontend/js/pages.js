@@ -8,6 +8,7 @@ async function load_navbar() {
 	const body = document.querySelector("body");
 	const header = document.getElementById("header");
 	let navbar = await new Template("frontend/html/navbar.html").load();
+	let user_data;
 
 	if (navbar == null)
 		return console.error(ERROR_TEMPLATE);
@@ -16,35 +17,32 @@ async function load_navbar() {
 		navbar.edit.id.set.attribute("theme_icon_sun", "class", "px-2 d-none d-lg-none");
 		navbar.edit.id.set.attribute("theme_icon_moon", "class", "px-2 d-none d-lg-inline-block");
 	}
-	if (isLogin())
+	if (await isLogin())
 	{
-		fetch("/api/users/me/", {
-			method: "GET",
-			headers:
-			{
-				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-				"Content-Type": "application/json"
-			}
-		})
-		.then(response =>
+		try
 		{
+			const response = await fetch("/api/users/me/", {
+				method: "GET",
+				headers:
+				{
+					"Authorization": `Token ${localStorage.getItem("auth-token")}`,
+					"Content-Type": "application/json"
+				}
+			});
 			if (!response.ok)
 			{
 				new Toast(Toast.ERROR, "A network error occurred.");
 				throw new Error("A network error occurred.");
 			}
-			return (response.json());
-		})
-		.then(data =>
+			const data = await response.json();
+			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
+			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
+			navbar.edit.id.set.attribute("profile", "class", "nav-item");
+		}
+		catch (error)
 		{
-			console.log(data);
-		})
-		.catch(error =>
-		{
-			new Toast(Toast.ERROR, "An error occurred.");
-		});
-		navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
-		navbar.edit.id.set.attribute("profile", "class", "nav-item");
+			new Toast(Toast.ERROR, error);
+		}
 	}
 	header.innerHTML = navbar.string;
 }
@@ -68,6 +66,8 @@ async function load_home() {
 }
 
 async function load_pong() {
+	if (!await isLogin())
+		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/pong.html").load();
 
@@ -84,6 +84,8 @@ async function load_pong() {
 }
 
 async function load_tictactoe() {
+	if (!await isLogin())
+		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/tictactoe.html").load();
 
@@ -165,6 +167,58 @@ async function load_signup() {
 	init_tooltips();
 }
 
+async function load_profile() {
+	if (!await isLogin())
+		return (load_home());
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/profile.html").load();
+
+	if (template == null)
+		return console.error(ERROR_TEMPLATE);
+	load_navbar();
+	try
+	{
+		const response = await fetch("/api/users/me/", {
+			method: "GET",
+			headers:
+			{
+				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
+				"Content-Type": "application/json"
+			}
+		});
+		if (!response.ok)
+		{
+			new Toast(Toast.ERROR, "A network error occurred.");
+			throw new Error("A network error occurred.");
+		}
+		const data = await response.json();
+		template.edit.id.set.content("profile_user_name", "@" + data.username);
+	}
+	catch (error)
+	{
+		new Toast(Toast.ERROR, error);
+	}
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/profile")
+		history.pushState({ page: "profile" }, "Profile", "/profile");
+	init_tooltips();
+}
+
+async function load_settings() {
+	if (!await isLogin())
+		return (load_home());
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/settings.html").load();
+
+	if (template == null)
+		return console.error(ERROR_TEMPLATE);
+	load_navbar();
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/settings")
+		history.pushState({ page: "settings" }, "Settings", "/settings");
+	init_tooltips();
+}
+
 window.onpopstate = async function (event) {
 	if (event.state)
 	{
@@ -183,6 +237,10 @@ window.onpopstate = async function (event) {
 				await load_signin(); break;
 			case "signup":
 				await load_signup(); break;
+			case "profile":
+				await load_profile(); break;
+			case "settings":
+				await load_settings(); break;
 			default:
 				console.error("Page not found:", page); break;
 		}
