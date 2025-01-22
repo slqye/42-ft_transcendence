@@ -7,17 +7,17 @@ services:
     build:
       context: services/django_frontend
       labels:
-        is-transcendance: "yes"
+        is-transcendence: "yes"
     env_file: .env
     volumes:
-      - ./services/django_frontend/.:/app
+      - ./services/django_frontend/:/app
     networks:
       - transcendence_network_backend
     expose:
       - 8080
     restart: on-failure
     labels:
-      is-transcendance: "yes"
+      is-transcendence: "yes"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 10s
@@ -30,11 +30,10 @@ services:
     build:
       context: services/django_api
       labels:
-        is-transcendance: "yes"
+        is-transcendence: "yes"
     env_file: .env
     volumes:
-      - ./services/django_api/.:/app
-      - transcendence_database_migrations:/migrations
+      - ./services/django_api/:/app
     networks:
       - transcendence_network_backend
     expose:
@@ -44,7 +43,7 @@ services:
       postgres:
         condition: service_healthy
     labels:
-      is-transcendance: "yes"
+      is-transcendence: "yes"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/api/"]
       interval: 10s
@@ -57,7 +56,7 @@ services:
     build:
       context: services/postgres
       labels:
-        is-transcendance: "yes"
+        is-transcendence: "yes"
     env_file: .env
     volumes:
       - transcendence_database_data:/var/lib/postgresql/data
@@ -69,7 +68,7 @@ services:
     ports:
       - 5432:5432
     labels:
-      is-transcendance: "yes"
+      is-transcendence: "yes"
     healthcheck:
       test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
       interval: 10s
@@ -82,7 +81,7 @@ services:
     build:
       context: services/nginx
       labels:
-        is-transcendance: "yes"
+        is-transcendence: "yes"
     networks:
       - transcendence_network_backend
     ports:
@@ -93,7 +92,7 @@ services:
       django_frontend:
         condition: service_healthy
     labels:
-      is-transcendance: "yes"
+      is-transcendence: "yes"
 
 volumes:
   transcendence_database_data:
@@ -104,20 +103,11 @@ volumes:
       device: ${PWD}/data/database_data
       o: bind
     labels:
-      is-transcendance: "yes"
-  transcendence_database_migrations:
-    name: transcendence_database_migrations
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/data/database_migrations
-      o: bind
-    labels:
-      is-transcendance: "yes"
+      is-transcendence: "yes"
 
 networks:
   transcendence_network_backend:
     name: transcendence_network_backend
     driver: bridge
     labels:
-      is-transcendance: "yes"
+      is-transcendence: "yes"
