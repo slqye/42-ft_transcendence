@@ -78,6 +78,42 @@ async function	signin()
 	})
 	.catch(error =>
 	{
+		console.error(error);
+		new Toast(Toast.ERROR, error);
+	});
+}
+
+async function	opponent_signin()
+{
+	const username = document.getElementById("opponent_signin_username").value;
+	const password = document.getElementById("opponent_signin_password").value;
+
+	fetch("/api/token-auth/",
+	{
+		method: "POST",
+		headers:
+		{
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(
+		{
+			"username": username,
+			"password": password,
+		})
+	})
+	.then(response =>
+	{
+		if (!response.ok)
+			throw new Error("Opponent's credentials are invalid.");
+		return (response.json());
+	})
+	.then(data =>
+	{
+		localStorage.setItem("opponent_auth-token", data.token);
+		new Toast(Toast.SUCCESS, "Opponent logged-in!");
+	})
+	.catch(error =>
+	{
 		new Toast(Toast.ERROR, error);
 	});
 }
