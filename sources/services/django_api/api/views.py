@@ -51,7 +51,7 @@ class UpdateUserField(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, field, *args, **kwargs):
-        allowed_fields = ['email', 'username', 'avatar_url', 'language_code', 'password']
+        allowed_fields = ['email', 'display_name', 'avatar_url', 'language_code', 'password']
         
         if field not in allowed_fields:
             return Response({"error": "Invalid field"}, status=400)
@@ -75,6 +75,7 @@ class CurrentUser(APIView):
         user = request.user
         return Response({
             'id': user.id,
+			'display_name': user.display_name,
             'username': user.username,
 			'password': user.password,
             'email': user.email,
