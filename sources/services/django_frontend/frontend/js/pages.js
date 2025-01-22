@@ -83,6 +83,22 @@ async function load_pong() {
 	launch("pong");
 }
 
+async function load_start_game_tictactoe() {
+	if (!await isLogin())
+		return (load_home());
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/start_game_tictactoe.html").load();
+
+	if (template == null)
+		return console.error(ERROR_TEMPLATE);
+	load_navbar();
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/start_game_tictactoe")
+		history.pushState({ page: "start_game_tictactoe" }, "Start Game TicTacToe", "/start_game_tictactoe");
+	init_tooltips();
+	launch("start_game_tictactoe");
+}
+
 async function load_tictactoe() {
 	if (!await isLogin())
 		return (load_home());
@@ -229,6 +245,8 @@ window.onpopstate = async function (event) {
 				await load_home(); break;
 			case "pong":
 				await load_pong(); break;
+			case "start_game_tictactoe":
+				await load_start_game_tictactoe(); break;
 			case "tictactoe":
 				await load_tictactoe(); break;
 			case "about":
