@@ -27,6 +27,7 @@ async function	signup()
 	{
 		if (!response.ok)
 		{
+			console.log(response);
 			new Toast(Toast.ERROR, "A network error occurred.");
 			throw new Error("A network error occurred.");
 		}
@@ -83,44 +84,93 @@ async function	signin()
 	});
 }
 
-async function	opponent_signin()
-{
+async function opponent_signin(event) {
+	event.preventDefault();
 	const username = document.getElementById("opponent_signin_username").value;
 	const password = document.getElementById("opponent_signin_password").value;
 
-	fetch("/api/token-auth/",
-	{
+	console.log("Attempting to sign in as opponent...");
+	fetch("/api/token-auth/", {
 		method: "POST",
-		headers:
-		{
+		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify(
-		{
+		body: JSON.stringify({
 			"username": username,
 			"password": password,
 		})
 	})
-	.then(response =>
-	{
+	.then(response => {
 		if (!response.ok)
 			throw new Error("Opponent's credentials are invalid.");
-		return (response.json());
+		return response.json();
 	})
-	.then(data =>
-	{
+	.then(data => {
 		localStorage.setItem("opponent_auth-token", data.token);
 		new Toast(Toast.SUCCESS, "Opponent logged-in!");
+		console.log("Opponent logged-in!");
+
+		// Disable the opponent sign-in inputs
+		document.getElementById("opponent_signin_username").disabled = true;
+		document.getElementById("opponent_signin_password").disabled = true;
+
+		// Update UI to show opponent avatar and logout button
+		document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
+		document.getElementById("opponent_info").classList.remove('d-none');
+
+		// Fetch opponent's avatar
+		console.log("Fetching opponent's avatar...");
+		fetch("/api/users/me/", {
+			method: "GET",
+			headers: {
+				"Authorization": `Token ${data.token}`,
+				"Content-Type": "application/json"
+			}
+		})
+		.then(response => {
+			console.log("Response:", response);
+			if (!response.ok) {
+				throw new Error("Failed to fetch opponent's profile.");
+			}
+			return response.json();
+		})
+		.then(opponentData => {
+			console.log("Opponent data:", opponentData);
+			document.getElementById("opponent_icon_display").src = opponentData.avatar_url;
+		})
+		.catch(error => {
+			console.error(error);
+			new Toast(Toast.ERROR, "Failed to load opponent's avatar.");
+		});
 	})
-	.catch(error =>
-	{
-		new Toast(Toast.ERROR, error);
+	.catch(error => {
+		new Toast(Toast.ERROR, error.message);
 	});
+}
+
+function opponent_signout() {
+	// Remove opponent token from localStorage
+	localStorage.removeItem("opponent_auth-token");
+	new Toast(Toast.SUCCESS, "Opponent signed out!");
+
+	// Re-enable the opponent sign-in inputs
+	document.getElementById("opponent_signin_username").disabled = false;
+	document.getElementById("opponent_signin_password").disabled = false;
+
+	document.getElementById("sign_in_as_opponent_button").classList.remove('d-none');
+	document.getElementById("opponent_info").classList.add('d-none');
+	document.getElementById("opponent_icon_display").src = "/frontend/assets/default_profile_icon.webp";
+
+	// Optionally, you can also clear the input fields
+	document.getElementById("opponent_signin_username").value = "";
+	document.getElementById("opponent_signin_password").value = "";
 }
 
 function	signout()
 {
 	localStorage.removeItem("auth-token");
+	localStorage.removeItem("opponent_auth-token");
+	new Toast(Toast.SUCCESS, "Signed out successfully!");
 }
 
 async function	signin_42()
