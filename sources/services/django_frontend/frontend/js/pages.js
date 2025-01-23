@@ -6,7 +6,11 @@ function	init_tooltips()
 
 async function load_navbar() {
 	if (window.location.href !== "/start_game_tictactoe")
-		localStorage.removeItem("opponent_auth-token");
+		if (localStorage.getItem("opponent_auth-token") !== null)
+		{
+			localStorage.removeItem("opponent_auth-token");
+			new Toast(Toast.SUCCESS, "Opponent signed out!");
+		}
 	const body = document.querySelector("body");
 	const header = document.getElementById("header");
 	let navbar = await new Template("frontend/html/navbar.html").load();

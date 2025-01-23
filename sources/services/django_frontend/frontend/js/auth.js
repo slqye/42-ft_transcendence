@@ -102,7 +102,7 @@ async function opponent_signin(event) {
 	})
 	.then(response => {
 		if (!response.ok)
-			throw new Error("Opponent's credentials are invalid.");
+			throw new Error(response.statusText);
 		return response.json();
 	})
 	.then(data => {
@@ -119,7 +119,6 @@ async function opponent_signin(event) {
 		document.getElementById("opponent_info").classList.remove('d-none');
 
 		// Fetch opponent's avatar
-		console.log("Fetching opponent's avatar...");
 		fetch("/api/users/me/", {
 			method: "GET",
 			headers: {
@@ -128,14 +127,12 @@ async function opponent_signin(event) {
 			}
 		})
 		.then(response => {
-			console.log("Response:", response);
 			if (!response.ok) {
 				throw new Error("Failed to fetch opponent's profile.");
 			}
 			return response.json();
 		})
 		.then(opponentData => {
-			console.log("Opponent data:", opponentData);
 			document.getElementById("opponent_icon_display").src = opponentData.avatar_url;
 		})
 		.catch(error => {
@@ -150,7 +147,8 @@ async function opponent_signin(event) {
 
 function opponent_signout() {
 	// Remove opponent token from localStorage
-	localStorage.removeItem("opponent_auth-token");
+	if (localStorage.getItem("opponent_auth-token") !== null)
+		localStorage.removeItem("opponent_auth-token");
 	new Toast(Toast.SUCCESS, "Opponent signed out!");
 
 	// Re-enable the opponent sign-in inputs
@@ -168,8 +166,10 @@ function opponent_signout() {
 
 function	signout()
 {
-	localStorage.removeItem("auth-token");
-	localStorage.removeItem("opponent_auth-token");
+	if (localStorage.getItem("auth-token") !== null)
+		localStorage.removeItem("auth-token");
+	if (localStorage.getItem("opponent_auth-token") !== null)
+		localStorage.removeItem("opponent_auth-token");
 	new Toast(Toast.SUCCESS, "Signed out successfully!");
 }
 
@@ -196,7 +196,7 @@ async function	signin_42()
 	window.location.href = authUrl;
 }
 
-async function	signin_42_callback()
+function	signin_42_callback()
 {
 	const urlParams = new URLSearchParams(window.location.search);
 	const token = urlParams.get('token');
@@ -206,13 +206,6 @@ async function	signin_42_callback()
 		history.pushState({ page: "home" }, "Home", "/home");
 		new Toast(Toast.SUCCESS, "Logged in with 42!");
 	}
-}
-
-async function signOut() {
-
-	localStorage.removeItem("auth-token");
-	new Toast(Toast.SUCCESS, "Signed out successfully!");
-	load_home();
 }
 
 async function	isLogin()
