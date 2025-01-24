@@ -128,6 +128,21 @@ class UserStats(APIView):
 
         return Response(response_data)
 
+class UserMatches(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
+		matches = Match.objects.filter(
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
+		).order_by('-created_at')[:10]
+
+		serializer = MatchSerializer(matches, many=True)
+		return Response(serializer.data)
+
 class UserPongMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
