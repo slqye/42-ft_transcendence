@@ -138,7 +138,7 @@ class UserMatches(APIView):
             target_user = get_object_or_404(User, pk=pk)
         
         matches = Match.objects.filter(
-            Q(player_user=target_user) | Q(opponent_user=target_user)
+            models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
         ).select_related('pong_game_stats', 'tictactoe_game_stats').order_by('-created_at')[:10]
 
         serializer = MatchSerializer(matches, many=True)
