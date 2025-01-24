@@ -11,7 +11,7 @@ from .serializers import UserSerializer, MatchSerializer, TournamentParticipantS
 
 from django.contrib.auth import get_user_model, login
 
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -129,19 +129,35 @@ class UserStats(APIView):
         return Response(response_data)
 
 class UserMatches(APIView):
-	permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
-	def get(self, request, pk, *args, **kwargs):
-		if pk == "me":
-			target_user = request.user
-		else:
-			target_user = get_object_or_404(User, pk=pk)
-		matches = Match.objects.filter(
-			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
-		).order_by('-created_at')[:10]
+    def get(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            target_user = request.user
+        else:
+            target_user = get_object_or_404(User, pk=pk)
+        
+        matches = Match.objects.filter(
+            Q(player_user=target_user) | Q(opponent_user=target_user)
+        ).select_related('pong_game_stats', 'tictactoe_game_stats').order_by('-created_at')[:10]
 
-		serializer = MatchSerializer(matches, many=True)
-		return Response(serializer.data)
+        serializer = MatchSerializer(matches, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            player_user = request.user
+        else:
+            player_user = get_object_or_404(User, pk=pk)
+        
+        data = request.data.copy()
+        data['player_user'] = player_user.id  # Ensure the player_user is set to the authenticated user
+
+        serializer = MatchSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserPongMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -153,7 +169,7 @@ class UserPongMatches(APIView):
 			target_user = get_object_or_404(User, pk=pk)
 
 		matches = Match.objects.filter(is_pong=True).filter(
-			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)).order_by('-created_at')
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)).select_related('pong_game_stats').order_by('-created_at')
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)
 
@@ -169,7 +185,7 @@ class UserTicTacToeMatches(APIView):
 			is_pong=False
 		).filter(
 			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
-		).order_by('-created_at')
+		).select_related('tictactoe_game_stats').order_by('-created_at')
 
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)
