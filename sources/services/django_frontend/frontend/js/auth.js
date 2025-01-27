@@ -21,13 +21,13 @@ async function	signup()
 			"password": password,
 			"avatar_url": "/frontend/assets/default_profile_icon.webp",
 			"language_code": "en"
-		})
+		}),
+		credentials: 'include'
 	})
 	.then(response =>
 	{
 		if (!response.ok)
 		{
-			console.log(response);
 			new Toast(Toast.ERROR, "A network error occurred.");
 			throw new Error("A network error occurred.");
 		}
@@ -60,7 +60,8 @@ async function	signin()
 		{
 			"username": username,
 			"password": password,
-		})
+		}),
+		credentials: 'include'
 	})
 	.then(response =>
 	{
@@ -73,7 +74,6 @@ async function	signin()
 	})
 	.then(data =>
 	{
-		localStorage.setItem("auth-token", data.token);
 		new Toast(Toast.SUCCESS, "Logged-in!");
 		load_home();
 	})
@@ -84,93 +84,22 @@ async function	signin()
 	});
 }
 
-async function opponent_signin(event) {
-	event.preventDefault();
-	const username = document.getElementById("opponent_signin_username").value;
-	const password = document.getElementById("opponent_signin_password").value;
-
-	console.log("Attempting to sign in as opponent...");
-	fetch("/api/token-auth/", {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			"username": username,
-			"password": password,
-		})
-	})
-	.then(response => {
-		if (!response.ok)
-			throw new Error(response.statusText);
-		return response.json();
-	})
-	.then(data => {
-		localStorage.setItem("opponent_auth-token", data.token);
-		new Toast(Toast.SUCCESS, "Opponent logged-in!");
-		console.log("Opponent logged-in!");
-
-		// Disable the opponent sign-in inputs
-		document.getElementById("opponent_signin_username").disabled = true;
-		document.getElementById("opponent_signin_password").disabled = true;
-
-		// Update UI to show opponent avatar and logout button
-		document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
-		document.getElementById("opponent_info").classList.remove('d-none');
-
-		// Fetch opponent's avatar
-		fetch("/api/users/me/", {
-			method: "GET",
-			headers: {
-				"Authorization": `Token ${data.token}`,
-				"Content-Type": "application/json"
-			}
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error("Failed to fetch opponent's profile.");
-			}
-			return response.json();
-		})
-		.then(opponentData => {
-			document.getElementById("opponent_icon_display").src = opponentData.avatar_url;
-		})
-		.catch(error => {
-			console.error(error);
-			new Toast(Toast.ERROR, "Failed to load opponent's avatar.");
-		});
-	})
-	.catch(error => {
-		new Toast(Toast.ERROR, error.message);
-	});
-}
-
-function opponent_signout() {
-	// Remove opponent token from localStorage
-	if (localStorage.getItem("opponent_auth-token") !== null)
-		localStorage.removeItem("opponent_auth-token");
-	new Toast(Toast.SUCCESS, "Opponent signed out!");
-
-	// Re-enable the opponent sign-in inputs
-	document.getElementById("opponent_signin_username").disabled = false;
-	document.getElementById("opponent_signin_password").disabled = false;
-
-	document.getElementById("sign_in_as_opponent_button").classList.remove('d-none');
-	document.getElementById("opponent_info").classList.add('d-none');
-	document.getElementById("opponent_icon_display").src = "/frontend/assets/default_profile_icon.webp";
-
-	// Optionally, you can also clear the input fields
-	document.getElementById("opponent_signin_username").value = "";
-	document.getElementById("opponent_signin_password").value = "";
-}
-
 function	signout()
 {
-	if (localStorage.getItem("auth-token") !== null)
-		localStorage.removeItem("auth-token");
-	if (localStorage.getItem("opponent_auth-token") !== null)
-		localStorage.removeItem("opponent_auth-token");
-	new Toast(Toast.SUCCESS, "Signed out successfully!");
+	fetch("/api/logout_host/", {
+		method: "POST",
+		credentials: 'include'
+	})
+	.then(response => {
+		if (!response.ok) {
+			throw new Error("Failed to sign out.");
+		}
+		new Toast(Toast.SUCCESS, "Signed out successfully!");
+	})
+	.catch(error => {
+		console.error(error);
+		new Toast(Toast.ERROR, "Failed to sign out.");
+	});
 }
 
 async function	signin_42()
@@ -202,7 +131,6 @@ function	signin_42_callback()
 	const token = urlParams.get('token');
 
 	if (token) {
-		localStorage.setItem("auth-token", token);
 		history.pushState({ page: "home" }, "Home", "/home");
 		new Toast(Toast.SUCCESS, "Logged in with 42!");
 	}
@@ -210,24 +138,12 @@ function	signin_42_callback()
 
 async function	isLogin()
 {
-	if (localStorage.getItem("auth-token") == null)
-		return (false);
-	try
-	{
-		const response = await fetch("/api/users/me/", {
-			method: "GET",
-			headers:
-			{
-				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-				"Content-Type": "application/json"
-			}
-		});
-		if (!response.ok)
-			return (false);
+	try {
+		const data = await fetch_me();
+		if (!data)
+			return false;
+	} catch (error) {
+		return false;
 	}
-	catch (error)
-	{
-		return (false);
-	}
-	return (true);
+	return true;
 }

@@ -5,12 +5,6 @@ function	init_tooltips()
 }
 
 async function load_navbar() {
-	if (window.location.href !== "/start_game_tictactoe")
-		if (localStorage.getItem("opponent_auth-token") !== null)
-		{
-			localStorage.removeItem("opponent_auth-token");
-			new Toast(Toast.SUCCESS, "Opponent signed out!");
-		}
 	const body = document.querySelector("body");
 	const header = document.getElementById("header");
 	let navbar = await new Template("frontend/html/navbar.html").load();
@@ -27,20 +21,7 @@ async function load_navbar() {
 	{
 		try
 		{
-			const response = await fetch("/api/users/me/", {
-				method: "GET",
-				headers:
-				{
-					"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-					"Content-Type": "application/json"
-				}
-			});
-			if (!response.ok)
-			{
-				new Toast(Toast.ERROR, "A network error occurred.");
-				throw new Error("A network error occurred.");
-			}
-			const data = await response.json();
+			const data = await fetch_me();
 			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
 			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 			navbar.edit.id.set.attribute("profile", "class", "nav-item");
@@ -59,12 +40,10 @@ async function load_home() {
 	const urlParams = new URLSearchParams(window.location.search);
 	const token = urlParams.get('token');
 
-	console.log("load home function");
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	if (window.location.pathname === "/home" && token)
 		signin_42_callback();
-	console.log("load navbar from load home function");
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/home")
@@ -201,20 +180,12 @@ async function load_profile() {
 	load_navbar();
 	try
 	{
-		const response = await fetch("/api/users/me/", {
-			method: "GET",
-			headers:
-			{
-				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-				"Content-Type": "application/json"
-			}
-		});
-		if (!response.ok)
+		const data = await fetch_me();
+		if (!data)
 		{
 			new Toast(Toast.ERROR, "A network error occurred.");
 			throw new Error("A network error occurred.");
 		}
-		const data = await response.json();
 		template.edit.id.set.content("profile_user_name", "@" + data.username);
 	}
 	catch (error)

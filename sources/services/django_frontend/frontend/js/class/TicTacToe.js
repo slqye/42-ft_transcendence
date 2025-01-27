@@ -93,8 +93,6 @@ class TicTacToe
 		console.clear();
 		winningConditions.forEach(condition => {
 			const [a, b, c] = condition;
-			console.log("testing condition :", condition);
-			console.log("testing board :", this.board[a], this.board[b], this.board[c]);
 			if (this.board[a] === this.currentPlayer && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
 				this.endGame(this.currentPlayer + " wins!");
 				win = true;
