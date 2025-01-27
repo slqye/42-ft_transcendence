@@ -40,12 +40,12 @@ class Match(models.Model):
 	opponent_user = models.ForeignKey(User, related_name='opponent_user', on_delete=models.CASCADE)
 	result = models.CharField(max_length=4)
 	is_pong = models.BooleanField()
-	pong_game_stats = models.OneToOneField(
-		PongGameStats, null=True, blank=True, on_delete=models.SET_NULL, related_name='match'
-	)
-	tictactoe_game_stats = models.OneToOneField(
-		TicTacToeGameStats, null=True, blank=True, on_delete=models.SET_NULL, related_name='match'
-	)
+	# pong_game_stats = models.OneToOneField(
+	# 	PongGameStats, null=True, blank=True, on_delete=models.SET_NULL, related_name='match'
+	# )
+	# tictactoe_game_stats = models.OneToOneField(
+	# 	TicTacToeGameStats, null=True, blank=True, on_delete=models.SET_NULL, related_name='match'
+	# )
 	tournament_id = models.IntegerField(null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 

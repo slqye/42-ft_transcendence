@@ -139,7 +139,7 @@ class UserMatches(APIView):
         
         matches = Match.objects.filter(
             models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
-        ).select_related('pong_game_stats', 'tictactoe_game_stats').order_by('-created_at')[:10]
+        ).order_by('-created_at')[:10]
 
         serializer = MatchSerializer(matches, many=True)
         return Response(serializer.data)
@@ -169,7 +169,7 @@ class UserPongMatches(APIView):
 			target_user = get_object_or_404(User, pk=pk)
 
 		matches = Match.objects.filter(is_pong=True).filter(
-			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)).select_related('pong_game_stats').order_by('-created_at')
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)).order_by('-created_at')
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)
 
@@ -185,7 +185,7 @@ class UserTicTacToeMatches(APIView):
 			is_pong=False
 		).filter(
 			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
-		).select_related('tictactoe_game_stats').order_by('-created_at')
+		).order_by('-created_at')
 
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)

@@ -58,21 +58,21 @@ class MatchSerializer(serializers.ModelSerializer):
         model = Match
         fields = '__all__'
 
-    def create(self, validated_data):
-        pong_stats_data = validated_data.pop('pong_game_stats', None)
-        tictactoe_stats_data = validated_data.pop('tictactoe_game_stats', None)
-        match = Match.objects.create(**validated_data)
+    # def create(self, validated_data):
+    #     pong_stats_data = validated_data.pop('pong_game_stats', None)
+    #     tictactoe_stats_data = validated_data.pop('tictactoe_game_stats', None)
+    #     match = Match.objects.create(**validated_data)
 
-        if pong_stats_data:
-            pong_stats = PongGameStats.objects.create(**pong_stats_data)
-            match.pong_game_stats = pong_stats
+    #     if pong_stats_data:
+    #         pong_stats = PongGameStats.objects.create(**pong_stats_data)
+    #         match.pong_game_stats = pong_stats
 
-        if tictactoe_stats_data:
-            tictactoe_stats = TicTacToeGameStats.objects.create(**tictactoe_stats_data)
-            match.tictactoe_game_stats = tictactoe_stats
+    #     if tictactoe_stats_data:
+    #         tictactoe_stats = TicTacToeGameStats.objects.create(**tictactoe_stats_data)
+    #         match.tictactoe_game_stats = tictactoe_stats
 
-        match.save()
-        return match
+    #     match.save()
+    #     return match
 
 
 # Tournament Serializer
