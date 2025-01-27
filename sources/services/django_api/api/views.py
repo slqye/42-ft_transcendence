@@ -25,11 +25,11 @@ User = get_user_model()
 class RegisterUser(generics.CreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 # We override the post method to return the token more explicitly if needed
 class CustomAuthToken(ObtainAuthToken):
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 	def post(self, request, *args, **kwargs):
 		response = super().post(request, *args, **kwargs)
@@ -206,18 +206,18 @@ class UserTournaments(APIView):
 class MatchList(generics.ListCreateAPIView):
 	queryset = Match.objects.all()
 	serializer_class = MatchSerializer
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 class MatchDetail(generics.RetrieveDestroyAPIView):
 	queryset = Match.objects.all()
 	serializer_class = MatchSerializer
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 def index(request, path=None):
 	return HttpResponse("")
 
 class OAuthCallbackView(APIView):
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 	def get(self, request):
 		code = request.GET.get('code')
@@ -276,7 +276,7 @@ class OAuthCallbackView(APIView):
 		return redirect(f"{settings.MAIN_URL}/home?token={token.key}")
 
 class FrontendConfigView(APIView):
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 	def get(self, request):
 		config = {
