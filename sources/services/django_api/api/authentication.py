@@ -1,37 +1,40 @@
+# api/authentication.py
+
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 class DualCookieJWTAuthentication(JWTAuthentication):
     """
-    A custom authentication class that looks in two separate cookies:
-      - 'user_access'
-      - 'opponent_access'
-    It returns the first valid token it finds.
+    Custom authentication class that checks for 'user_access' and 'opponent_access' cookies.
+    Determines which token to use based on the 'X-User-Type' header.
     """
 
     def authenticate(self, request):
-        # 1) Look for user_access cookie
-        user_token = request.COOKIES.get("user_access", None)
-        if user_token:
-            validated = self._validate_token(user_token)
-            if validated is not None:  # if valid, return it
-                return validated
+        user_type = request.headers.get('X-User-Type', 'user').lower()
 
-        # 2) If not found or invalid, look for opponent_access cookie
-        opponent_token = request.COOKIES.get("opponent_access", None)
-        if opponent_token:
-            validated = self._validate_token(opponent_token)
-            if validated is not None:
-                return validated
+        if user_type == 'user':
+            token = request.COOKIES.get("user_access")
+            if token:
+                validated = self._validate_token(token)
+                if validated:
+                    return validated
+        elif user_type == 'opponent':
+            token = request.COOKIES.get("opponent_access")
+            if token:
+                validated = self._validate_token(token)
+                if validated:
+                    return validated
+        else:
+            raise AuthenticationFailed("Invalid X-User-Type header. Must be 'user' or 'opponent'.")
 
-        # If neither token is provided or both invalid, no authentication is done
+        # If no valid token found for the specified user type
         return None
 
     def _validate_token(self, raw_token):
         """
-        Helper to validate a raw token string using JWTAuthentication's methods.
-        If valid, returns (user, token); if not valid, returns None.
+        Validates the raw token and returns (user, token) if valid.
+        Returns None if invalid.
         """
         try:
             validated_token = self.get_validated_token(raw_token)
