@@ -59,7 +59,8 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-		"rest_framework_simplejwt.authentication.JWTAuthentication",
+        'api.authentication.DualCookieJWTAuthentication',
+		# "rest_framework_simplejwt.authentication.JWTAuthentication",
         # 'rest_framework.authentication.TokenAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
     ]
@@ -74,6 +75,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+				'django.template.context_processors.csrf',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -149,6 +151,11 @@ MAIN_URL = os.environ['MAIN_URL']
 API_42_REDIRECT_URI = MAIN_URL + "/api/42oauth/callback/"
 
 CORS_ALLOWED_ORIGINS = [
+    "https://localhost:8000",
+	MAIN_URL,
+]
+
+CSRF_TRUSTED_ORIGINS = [
     "https://localhost:8000",
 	MAIN_URL,
 ]
