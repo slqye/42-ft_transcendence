@@ -22,7 +22,6 @@ async function	signup()
 			"avatar_url": "/frontend/assets/default_profile_icon.webp",
 			"language_code": "en"
 		}),
-		//credentials: 'include'
 	})
 	.then(response =>
 	{
@@ -61,7 +60,6 @@ async function	signin()
 			"username": username,
 			"password": password,
 		}),
-		//credentials: 'include'
 	})
 	.then(response =>
 	{
@@ -88,7 +86,6 @@ function	signout()
 {
 	fetch("/api/user/logout/", {
 		method: "POST",
-		//credentials: 'include'
 	})
 	.then(response => {
 		if (!response.ok) {
