@@ -19,6 +19,7 @@ async function load_navbar() {
 	}
 	if (await isLogin())
 	{
+		console.log("isLogin true");
 		try
 		{
 			const data = await fetch_me();

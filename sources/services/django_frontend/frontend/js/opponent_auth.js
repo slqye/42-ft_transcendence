@@ -1,26 +1,32 @@
-
 async function opponent_signin(event) {
 	event.preventDefault();
 	const username = document.getElementById("opponent_signin_username").value;
 	const password = document.getElementById("opponent_signin_password").value;
 
-	fetch("/api/token-auth/", {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			"username": username,
-			"password": password,
-		}),
-		credentials: 'include'
-	})
-	.then(response => {
+	try {
+		const response = await fetch("/api/opponent/login/", {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				"username": username,
+				"password": password,
+			}),
+			credentials: 'include'
+		});
+
 		if (!response.ok)
 			throw new Error(response.statusText);
-		return response.json();
-	})
-	.then(data => {
+
+		const data = await response.json();
+
+		const opponentData = await fetch_opponent();
+		if (opponentData) {
+			document.getElementById("opponent_icon_display").src = opponentData.avatar_url;
+		} else {
+			throw new Error("Failed to fetch opponent's avatar.");
+		}
 		new Toast(Toast.SUCCESS, "Opponent logged-in!");
 
 		// Disable the opponent sign-in inputs
@@ -32,34 +38,13 @@ async function opponent_signin(event) {
 		document.getElementById("opponent_info").classList.remove('d-none');
 
 		// Fetch opponent's avatar
-		fetch("/api/users/me/", {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			credentials: 'include'
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error("Failed to fetch opponent's profile.");
-			}
-			return response.json();
-		})
-		.then(opponentData => {
-			document.getElementById("opponent_icon_display").src = opponentData.avatar_url;
-		})
-		.catch(error => {
-			console.error(error);
-			new Toast(Toast.ERROR, "Failed to load opponent's avatar.");
-		});
-	})
-	.catch(error => {
-		new Toast(Toast.ERROR, error.message);
-	});
+	} catch (error) {
+		new Toast(Toast.ERROR, error);
+	}
 }
 
 function opponent_signout() {
-	fetch("/api/logout_opponent/", {
+	fetch("/api/opponent/logout/", {
 		method: "POST",
 		credentials: 'include'
 	})

@@ -49,7 +49,7 @@ async function	signin()
 	const username = document.getElementById("signin_username").value;
 	const password = document.getElementById("signin_password").value;
 
-	fetch("/api/token-auth/",
+	fetch("/api/user/login/",
 	{
 		method: "POST",
 		headers:
@@ -86,7 +86,7 @@ async function	signin()
 
 function	signout()
 {
-	fetch("/api/logout_host/", {
+	fetch("/api/user/logout/", {
 		method: "POST",
 		credentials: 'include'
 	})
@@ -138,8 +138,11 @@ function	signin_42_callback()
 
 async function	isLogin()
 {
+	console.log("isLogin");
 	try {
+		console.log("isLogin try");
 		const data = await fetch_me();
+		console.log("isLogin try data", data);
 		if (!data)
 			return false;
 	} catch (error) {
