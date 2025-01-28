@@ -32,6 +32,7 @@ function	switch_theme_light(body)
 		signin_42_btn.classList.add("btn-outline-dark");
 	}
 }
+
 function	switch_theme_dark(body)
 {
 	const icon_sun = document.getElementById("theme_icon_sun");
@@ -60,4 +61,18 @@ function	isMobile()
 {
 	const userAgent = navigator.userAgent.toLowerCase();
 	return (/iphone|ipod|android|webos|blackberry|iemobile|opera mini/.test(userAgent));
+}
+
+async function	fetch_me()
+{
+	const response = await fetch("/api/users/me/", {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		credentials: 'include'
+	});
+	if (!response.ok)
+		return null;
+	return await response.json();
 }
