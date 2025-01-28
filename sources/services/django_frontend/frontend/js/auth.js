@@ -22,7 +22,7 @@ async function	signup()
 			"avatar_url": "/frontend/assets/default_profile_icon.webp",
 			"language_code": "en"
 		}),
-		credentials: 'include'
+		//credentials: 'include'
 	})
 	.then(response =>
 	{
@@ -61,7 +61,7 @@ async function	signin()
 			"username": username,
 			"password": password,
 		}),
-		credentials: 'include'
+		//credentials: 'include'
 	})
 	.then(response =>
 	{
@@ -88,7 +88,7 @@ function	signout()
 {
 	fetch("/api/user/logout/", {
 		method: "POST",
-		credentials: 'include'
+		//credentials: 'include'
 	})
 	.then(response => {
 		if (!response.ok) {
@@ -138,11 +138,8 @@ function	signin_42_callback()
 
 async function	isLogin()
 {
-	console.log("isLogin");
 	try {
-		console.log("isLogin try");
 		const data = await fetch_me();
-		console.log("isLogin try data", data);
 		if (!data)
 			return false;
 	} catch (error) {

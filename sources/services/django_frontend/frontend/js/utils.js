@@ -70,7 +70,7 @@ async function	fetch_me()
 		headers: {
 		"Content-Type": "application/json"
 		},
-			credentials: 'include'
+		//credentials: 'include'
 		});
 	if (!response.ok)
 		return null;
@@ -79,18 +79,14 @@ async function	fetch_me()
 
 async function	fetch_opponent()
 {
-	if (document.cookie.includes("opponent_access"))
-	{
-		const response = await fetch("/api/opponent/me/", {
-			method: "GET",
-			headers: {
-			"Content-Type": "application/json"
-			},
-			credentials: 'include'
-		});
-		if (!response.ok)
-			return null;
-		return await response.json();
-	}
-	return null;
+	const response = await fetch("/api/opponent/me/", {
+		method: "GET",
+		headers: {
+		"Content-Type": "application/json"
+		},
+		//credentials: 'include'
+	});
+	if (!response.ok)
+		return null;
+	return await response.json();
 }
