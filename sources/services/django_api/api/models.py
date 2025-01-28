@@ -23,14 +23,12 @@ class Friendship(models.Model):
 
 class PongGameStats(models.Model):
     pong_game_stats_id = models.AutoField(primary_key=True)
-    game_duration = models.DurationField()
     score_player = models.PositiveIntegerField(default=0)
     score_opponent = models.PositiveIntegerField(default=0)
     number_of_bounces = models.PositiveIntegerField(default=0) 
 
 class TicTacToeGameStats(models.Model):
     tictactoe_game_stats_id = models.AutoField(primary_key=True)
-    game_duration = models.DurationField()
     total_moves = models.PositiveIntegerField(default=0)
     winning_move_number = models.PositiveIntegerField(null=True, blank=True)
     board_state = models.JSONField(default=dict)
