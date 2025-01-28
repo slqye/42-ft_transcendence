@@ -9,11 +9,11 @@ from django.db import models
 from .models import User, Match, TournamentParticipant
 from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer
 
-from django.contrib.auth import get_user_model, login
+from django.contrib.auth import get_user_model, login, authenticate
 
 from rest_framework import generics, permissions, status
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
+# from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import redirect, get_object_or_404
@@ -22,20 +22,95 @@ from django.shortcuts import redirect, get_object_or_404
 
 User = get_user_model()
 
+class UserLogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        response = Response({"detail": "Both users logged out"})
+        # Delete the player_user cookies
+        response.delete_cookie("user_access")
+        response.delete_cookie("user_refresh")
+        return response
+    
+class OpponentLogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        response = Response({"detail": "Both users logged out"})
+        response.delete_cookie("opponent_access")
+        response.delete_cookie("opponent_refresh")
+        return response
+
+class UserLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if not user:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = Response({"detail": "User logged in successfully"})
+        # Set HttpOnly cookies
+        # secure=True and samesite='None' typically required if you’re over HTTPS or cross-site
+        response.set_cookie(
+            "user_access",
+            access_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        response.set_cookie(
+            "user_refresh",
+            refresh_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        return response
+
+class OpponentLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if not user:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = Response({"detail": "Opponent user logged in successfully"})
+        response.set_cookie(
+            "opponent_access",
+            access_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        response.set_cookie(
+            "opponent_refresh",
+            refresh_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        return response
+
 class RegisterUser(generics.CreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAuthenticated]
-
-# We override the post method to return the token more explicitly if needed
-class CustomAuthToken(ObtainAuthToken):
-	permission_classes = [permissions.IsAuthenticated]
-
-	def post(self, request, *args, **kwargs):
-		response = super().post(request, *args, **kwargs)
-		# response.data contains 'token' if success
-		return response
-
+	permission_classes = [permissions.AllowAny]
 
 class UserList(generics.ListCreateAPIView):
 	queryset = User.objects.all()
