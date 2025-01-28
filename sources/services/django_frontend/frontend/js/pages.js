@@ -8,7 +8,6 @@ async function load_navbar() {
 	const body = document.querySelector("body");
 	const header = document.getElementById("header");
 	let navbar = await new Template("frontend/html/navbar.html").load();
-	let user_data;
 
 	if (navbar == null)
 		return console.error(ERROR_TEMPLATE);

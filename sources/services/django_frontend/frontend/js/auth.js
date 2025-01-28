@@ -22,7 +22,7 @@ async function	signup()
 			"avatar_url": "/frontend/assets/default_profile_icon.webp",
 			"language_code": "en"
 		}),
-		credentials: 'include'
+		//credentials: 'include'
 	})
 	.then(response =>
 	{
@@ -49,7 +49,7 @@ async function	signin()
 	const username = document.getElementById("signin_username").value;
 	const password = document.getElementById("signin_password").value;
 
-	fetch("/api/token-auth/",
+	fetch("/api/user/login/",
 	{
 		method: "POST",
 		headers:
@@ -61,7 +61,7 @@ async function	signin()
 			"username": username,
 			"password": password,
 		}),
-		credentials: 'include'
+		//credentials: 'include'
 	})
 	.then(response =>
 	{
@@ -86,9 +86,9 @@ async function	signin()
 
 function	signout()
 {
-	fetch("/api/logout_host/", {
+	fetch("/api/user/logout/", {
 		method: "POST",
-		credentials: 'include'
+		//credentials: 'include'
 	})
 	.then(response => {
 		if (!response.ok) {
