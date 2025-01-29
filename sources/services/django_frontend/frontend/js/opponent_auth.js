@@ -53,7 +53,7 @@ function opponent_signout() {
 		}
 		new Toast(Toast.SUCCESS, "Opponent signed out!");
 
-		if (window.location.pathname === "/start_pong_game" || window.location.pathname === "/start_tictactoe_game")
+		if (window.location.pathname === "/start_game_pong" || window.location.pathname === "/start_game_tictactoe")
 		{
 			document.getElementById("opponent_signin_username").disabled = false;
 			document.getElementById("opponent_signin_password").disabled = false;
@@ -65,8 +65,6 @@ function opponent_signout() {
 			document.getElementById("opponent_signin_username").value = "";
 			document.getElementById("opponent_signin_password").value = "";
 		}
-		// else //Not sure if we need this
-		// 	load_home();
 	})
 	.catch(error => {
 		console.error(error);
