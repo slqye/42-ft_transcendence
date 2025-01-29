@@ -67,7 +67,7 @@ function opponent_signout() {
 			document.getElementById("opponent_signin_username").value = "";
 			document.getElementById("opponent_signin_password").value = "";
 
-			document.getElementById("start-game-tictactoe").classList.add('d-none');
+			document.getElementById("start-game-button").classList.add('d-none');
 		}
 	})
 	.catch(error => {

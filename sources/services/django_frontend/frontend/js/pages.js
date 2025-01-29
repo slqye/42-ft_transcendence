@@ -81,21 +81,20 @@ async function load_start_game_tictactoe() {
 	if (window.location.pathname !== "/start_game_tictactoe")
 		history.pushState({ page: "start_game_tictactoe" }, "Start Game TicTacToe", "/start_game_tictactoe");
 	init_tooltips();
-	launch("start_game_tictactoe");
 }
 
-async function load_tictactoe() {
+async function load_match_tictactoe() {
 	if (!await isLogin())
 		return (load_home());
 	const content = document.getElementById("content");
-	let template = await new Template("frontend/html/pages/tictactoe.html").load();
+	let template = await new Template("frontend/html/pages/match_tictactoe.html").load();
 
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
 	content.innerHTML = template.string;
-	if (window.location.pathname !== "/tictactoe")
-		history.pushState({ page: "tictactoe" }, "TicTacToe", "/tictactoe");
+	if (window.location.pathname !== "/match_tictactoe")
+		history.pushState({ page: "match_tictactoe" }, "Match TicTacToe", "/match_tictactoe");
 	init_tooltips();
 	launch("tictactoe");
 }
@@ -212,8 +211,8 @@ window.onpopstate = async function (event) {
 				await load_pong(); break;
 			case "start_game_tictactoe":
 				await load_start_game_tictactoe(); break;
-			case "tictactoe":
-				await load_tictactoe(); break;
+			case "match_tictactoe":
+				await load_match_tictactoe(); break;
 			case "about":
 				await load_about(); break;
 			case "signin":

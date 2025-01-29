@@ -1,5 +1,6 @@
 function	launch(value)
 {
+	
 	if (value == "pong")
 	{
 		let game = document.getElementById("game");
@@ -9,7 +10,17 @@ function	launch(value)
 	}
 	else if (value == "tictactoe")
 	{
-		var game = new TicTacToe(new Player("loupy"), new Player("slqye"));
-		game.init();
+		start_game_tictactoe();
 	}
+}
+
+async function	start_game_tictactoe()
+{
+	let win_condition = document.getElementById("win-condition").value;
+	// fetch user display name
+	const user = await fetch_user();
+	if (!user)
+		return;
+	var game = new TicTacToe(new Player(user.display_name), new Player("slqye"), win_condition);
+	game.init();
 }
