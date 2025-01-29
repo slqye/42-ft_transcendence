@@ -23,141 +23,141 @@ from django.shortcuts import redirect, get_object_or_404
 User = get_user_model()
 
 class UserTokenRefreshView(APIView):
-    permission_classes = [permissions.AllowAny]  # Allow access without authentication
+	permission_classes = [permissions.AllowAny]  # Allow access without authentication
 
-    def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get('user_refresh')
+	def post(self, request, *args, **kwargs):
+		refresh_token = request.COOKIES.get('user_refresh')
 
-        if refresh_token is None:
-            return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+		if refresh_token is None:
+			return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            refresh = RefreshToken(refresh_token)
-            new_access_token = str(refresh.access_token)
+		try:
+			refresh = RefreshToken(refresh_token)
+			new_access_token = str(refresh.access_token)
 
-            response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
-            response.set_cookie(
-                "user_access",
-                new_access_token,
-                httponly=True,
-                secure=True,        # Ensure HTTPS in production
-                samesite='None'     # Adjust based on your frontend setup
-            )
-            return response
+			response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
+			response.set_cookie(
+				"user_access",
+				new_access_token,
+				httponly=True,
+				secure=True,		# Ensure HTTPS in production
+				samesite='None'	 # Adjust based on your frontend setup
+			)
+			return response
 
-        except TokenError:
-            return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
-        
+		except TokenError:
+			return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+
 class OpponentTokenRefreshView(APIView):
-    permission_classes = [permissions.AllowAny]  # Allow access without authentication
+	permission_classes = [permissions.AllowAny]  # Allow access without authentication
 
-    def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get('opponent_refresh')
+	def post(self, request, *args, **kwargs):
+		refresh_token = request.COOKIES.get('opponent_refresh')
 
-        if refresh_token is None:
-            return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+		if refresh_token is None:
+			return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            refresh = RefreshToken(refresh_token)
-            new_access_token = str(refresh.access_token)
+		try:
+			refresh = RefreshToken(refresh_token)
+			new_access_token = str(refresh.access_token)
 
-            response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
-            response.set_cookie(
-                "opponent_access",
-                new_access_token,
-                httponly=True,
-                secure=True,        # Ensure HTTPS in production
-                samesite='None'     # Adjust based on your frontend setup
-            )
-            return response
+			response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
+			response.set_cookie(
+				"opponent_access",
+				new_access_token,
+				httponly=True,
+				secure=True,		# Ensure HTTPS in production
+				samesite='None'	 # Adjust based on your frontend setup
+			)
+			return response
 
-        except TokenError:
-            return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
-        
+		except TokenError:
+			return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+		
 class UserLogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        response = Response({"detail": "Both users logged out"})
-        # Delete the player_user cookies
-        response.delete_cookie("user_access")
-        response.delete_cookie("user_refresh")
-        return response
-    
+	def post(self, request, *args, **kwargs):
+		response = Response({"detail": "Both users logged out"})
+		# Delete the player_user cookies
+		response.delete_cookie("user_access")
+		response.delete_cookie("user_refresh")
+		return response
+	
 class OpponentLogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        response = Response({"detail": "Both users logged out"})
-        response.delete_cookie("opponent_access")
-        response.delete_cookie("opponent_refresh")
-        return response
+	def post(self, request, *args, **kwargs):
+		response = Response({"detail": "Both users logged out"})
+		response.delete_cookie("opponent_access")
+		response.delete_cookie("opponent_refresh")
+		return response
 
 class UserLoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.AllowAny]
 
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+	def post(self, request, *args, **kwargs):
+		username = request.data.get('username')
+		password = request.data.get('password')
 
-        user = authenticate(request, username=username, password=password)
-        if not user:
-            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+		user = authenticate(request, username=username, password=password)
+		if not user:
+			return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        refresh_token = str(refresh)
+		refresh = RefreshToken.for_user(user)
+		access_token = str(refresh.access_token)
+		refresh_token = str(refresh)
 
-        response = Response({"detail": "User logged in successfully"})
-        # Set HttpOnly cookies
-        # secure=True and samesite='None' typically required if you’re over HTTPS or cross-site
-        response.set_cookie(
-            "user_access",
-            access_token,
-            httponly=True,
-            secure=True,
-            samesite='None'
-        )
-        response.set_cookie(
-            "user_refresh",
-            refresh_token,
-            httponly=True,
-            secure=True,
-            samesite='None'
-        )
-        return response
+		response = Response({"detail": "User logged in successfully"})
+		# Set HttpOnly cookies
+		# secure=True and samesite='None' typically required if you’re over HTTPS or cross-site
+		response.set_cookie(
+			"user_access",
+			access_token,
+			httponly=True,
+			secure=True,
+			samesite='None'
+		)
+		response.set_cookie(
+			"user_refresh",
+			refresh_token,
+			httponly=True,
+			secure=True,
+			samesite='None'
+		)
+		return response
 
 class OpponentLoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.AllowAny]
 
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+	def post(self, request, *args, **kwargs):
+		username = request.data.get('username')
+		password = request.data.get('password')
 
-        user = authenticate(request, username=username, password=password)
-        if not user:
-            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+		user = authenticate(request, username=username, password=password)
+		if not user:
+			return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        refresh_token = str(refresh)
+		refresh = RefreshToken.for_user(user)
+		access_token = str(refresh.access_token)
+		refresh_token = str(refresh)
 
-        response = Response({"detail": "Opponent user logged in successfully"})
-        response.set_cookie(
-            "opponent_access",
-            access_token,
-            httponly=True,
-            secure=True,
-            samesite='None'
-        )
-        response.set_cookie(
-            "opponent_refresh",
-            refresh_token,
-            httponly=True,
-            secure=True,
-            samesite='None'
-        )
-        return response
+		response = Response({"detail": "Opponent user logged in successfully"})
+		response.set_cookie(
+			"opponent_access",
+			access_token,
+			httponly=True,
+			secure=True,
+			samesite='None'
+		)
+		response.set_cookie(
+			"opponent_refresh",
+			refresh_token,
+			httponly=True,
+			secure=True,
+			samesite='None'
+		)
+		return response
 
 class RegisterUser(generics.CreateAPIView):
 	queryset = User.objects.all()
@@ -175,116 +175,116 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	permission_classes = [permissions.IsAuthenticated]
 
 class UpdateUserField(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, field, *args, **kwargs):
-        allowed_fields = ['email', 'username', 'avatar_url', 'language_code', 'password']
-        
-        if field not in allowed_fields:
-            return Response({"error": "Invalid field"}, status=400)
-        new_value = request.data.get(field, None)
-        if new_value is None:
-            return Response({"error": f"{field} is required."}, status=400)
+	def post(self, request, field, *args, **kwargs):
+		allowed_fields = ['email', 'username', 'avatar_url', 'language_code', 'password']
+		
+		if field not in allowed_fields:
+			return Response({"error": "Invalid field"}, status=400)
+		new_value = request.data.get(field, None)
+		if new_value is None:
+			return Response({"error": f"{field} is required."}, status=400)
 
-        user = request.user
-        if field == "password":
-            user.set_password(new_value)
-        else:
-            setattr(user, field, new_value)
+		user = request.user
+		if field == "password":
+			user.set_password(new_value)
+		else:
+			setattr(user, field, new_value)
 
-        user.save()
-        return Response({field: getattr(user, field)}, status=200)
+		user.save()
+		return Response({field: getattr(user, field)}, status=200)
 
 class CurrentUser(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        return Response({
-            'id': user.id,
-            'username': user.username,
+	def get(self, request, *args, **kwargs):
+		user = request.user
+		return Response({
+			'id': user.id,
+			'username': user.username,
 			'password': user.password,
-            'email': user.email,
-            'avatar_url': getattr(user, 'avatar_url', None),
-            'language_code': getattr(user, 'language_code', 'en'),
-        })
+			'email': user.email,
+			'avatar_url': getattr(user, 'avatar_url', None),
+			'language_code': getattr(user, 'language_code', 'en'),
+		})
 
 class UserStats(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, pk, *args, **kwargs):
-        if pk == "me":
-            target_user = request.user
-        else:
-            target_user = get_object_or_404(User, pk=pk)
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
 
-        pong_matches = target_user.pong_matches_played
-        pong_wins = target_user.pong_wins
-        pong_draws = target_user.pong_draws
-        pong_losses = target_user.pong_losses
+		pong_matches = target_user.pong_matches_played
+		pong_wins = target_user.pong_wins
+		pong_draws = target_user.pong_draws
+		pong_losses = target_user.pong_losses
 
-        if pong_matches > 0:
-            pong_winrate = round((pong_wins / pong_matches) * 100, 2)
-        else:
-            pong_winrate = 0.0
+		if pong_matches > 0:
+			pong_winrate = round((pong_wins / pong_matches) * 100, 2)
+		else:
+			pong_winrate = 0.0
 
-        # Tic Tac Toe data
-        ttt_matches = target_user.tictactoe_matches_played
-        ttt_wins = target_user.tictactoe_wins
-        ttt_draws = target_user.tictactoe_draws
-        ttt_losses = target_user.tictactoe_losses
+		# Tic Tac Toe data
+		ttt_matches = target_user.tictactoe_matches_played
+		ttt_wins = target_user.tictactoe_wins
+		ttt_draws = target_user.tictactoe_draws
+		ttt_losses = target_user.tictactoe_losses
 
-        if ttt_matches > 0:
-            ttt_winrate = round((ttt_wins / ttt_matches) * 100, 2)
-        else:
-            ttt_winrate = 0.0
+		if ttt_matches > 0:
+			ttt_winrate = round((ttt_wins / ttt_matches) * 100, 2)
+		else:
+			ttt_winrate = 0.0
 
-        response_data = {
-            "pong_matches_played": pong_matches,
-            "pong_wins": pong_wins,
-            "pong_draws": pong_draws,
-            "pong_losses": pong_losses,
-            "pong_winrate": pong_winrate, # percent
+		response_data = {
+			"pong_matches_played": pong_matches,
+			"pong_wins": pong_wins,
+			"pong_draws": pong_draws,
+			"pong_losses": pong_losses,
+			"pong_winrate": pong_winrate, # percent
 
-            "tictactoe_matches_played": ttt_matches,
-            "tictactoe_wins": ttt_wins,
-            "tictactoe_draws": ttt_draws,
-            "tictactoe_losses": ttt_losses,
-            "tictactoe_winrate": ttt_winrate,  # percent
-        }
+			"tictactoe_matches_played": ttt_matches,
+			"tictactoe_wins": ttt_wins,
+			"tictactoe_draws": ttt_draws,
+			"tictactoe_losses": ttt_losses,
+			"tictactoe_winrate": ttt_winrate,  # percent
+		}
 
-        return Response(response_data)
+		return Response(response_data)
 
 class UserMatches(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, pk, *args, **kwargs):
-        if pk == "me":
-            target_user = request.user
-        else:
-            target_user = get_object_or_404(User, pk=pk)
-        
-        matches = Match.objects.filter(
-            models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
-        ).order_by('-created_at')[:10]
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
+		
+		matches = Match.objects.filter(
+			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
+		).order_by('-created_at')[:10]
 
-        serializer = MatchSerializer(matches, many=True)
-        return Response(serializer.data)
+		serializer = MatchSerializer(matches, many=True)
+		return Response(serializer.data)
 
-    def post(self, request, pk, *args, **kwargs):
-        if pk == "me":
-            player_user = request.user
-        else:
-            player_user = get_object_or_404(User, pk=pk)
-        
-        data = request.data.copy()
-        data['player_user'] = player_user.id  # Ensure the player_user is set to the authenticated user
+	def post(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			player_user = request.user
+		else:
+			player_user = get_object_or_404(User, pk=pk)
+		
+		data = request.data.copy()
+		data['player_user'] = player_user.id  # Ensure the player_user is set to the authenticated user
 
-        serializer = MatchSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+		serializer = MatchSerializer(data=data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserPongMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -318,17 +318,17 @@ class UserTicTacToeMatches(APIView):
 		return Response(serializer.data)
 
 class UserTournaments(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, pk, *args, **kwargs):
-        if pk == "me":
-            target_user = request.user
-        else:
-            target_user = get_object_or_404(User, pk=pk)
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
 
-        participants = TournamentParticipant.objects.filter(user=target_user)
-        serializer = TournamentParticipantSerializer(participants, many=True)
-        return Response(serializer.data)
+		participants = TournamentParticipant.objects.filter(user=target_user)
+		serializer = TournamentParticipantSerializer(participants, many=True)
+		return Response(serializer.data)
 
 class MatchList(generics.ListCreateAPIView):
 	queryset = Match.objects.all()
