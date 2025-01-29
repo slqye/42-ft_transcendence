@@ -9,3 +9,9 @@
 	width: 5%;
 	height: auto;
 }
+
+#opponent_icon_display {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+}

@@ -40,21 +40,39 @@ class FriendshipSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-# Match Serializer
+class PongGameStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PongGameStats
+        fields = '__all__'
+
+class TicTacToeGameStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TicTacToeGameStats
+        fields = '__all__'
+
 class MatchSerializer(serializers.ModelSerializer):
+    pong_game_stats = PongGameStatsSerializer(required=False)
+    tictactoe_game_stats = TicTacToeGameStatsSerializer(required=False)
+
     class Meta:
         model = Match
-        fields = [
-            'id',  # Default primary key from Django
-            'player_user',
-            'opponent_user',
-            'result',
-            'is_pong',
-            'game_stats_id',
-            'tournament_id',
-            'created_at',
-        ]
-        read_only_fields = ['id', 'created_at']
+        fields = '__all__'
+
+    # def create(self, validated_data):
+    #     pong_stats_data = validated_data.pop('pong_game_stats', None)
+    #     tictactoe_stats_data = validated_data.pop('tictactoe_game_stats', None)
+    #     match = Match.objects.create(**validated_data)
+
+    #     if pong_stats_data:
+    #         pong_stats = PongGameStats.objects.create(**pong_stats_data)
+    #         match.pong_game_stats = pong_stats
+
+    #     if tictactoe_stats_data:
+    #         tictactoe_stats = TicTacToeGameStats.objects.create(**tictactoe_stats_data)
+    #         match.tictactoe_game_stats = tictactoe_stats
+
+    #     match.save()
+    #     return match
 
 
 # Tournament Serializer
@@ -84,17 +102,3 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
             'rank',
         ]
         read_only_fields = ['id']
-
-
-class PongGameStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PongGameStats
-        fields = ['pong_game_stats_id']
-        read_only_fields = ['pong_game_stats_id']
-
-
-class TicTacToeGameStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TicTacToeGameStats
-        fields = ['tictactoe_game_stats_id']
-        read_only_fields = ['tictactoe_game_stats_id']

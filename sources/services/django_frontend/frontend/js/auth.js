@@ -21,7 +21,7 @@ async function	signup()
 			"password": password,
 			"avatar_url": "/frontend/assets/default_profile_icon.webp",
 			"language_code": "en"
-		})
+		}),
 	})
 	.then(response =>
 	{
@@ -48,7 +48,7 @@ async function	signin()
 	const username = document.getElementById("signin_username").value;
 	const password = document.getElementById("signin_password").value;
 
-	fetch("/api/token-auth/",
+	fetch("/api/user/login/",
 	{
 		method: "POST",
 		headers:
@@ -59,7 +59,7 @@ async function	signin()
 		{
 			"username": username,
 			"password": password,
-		})
+		}),
 	})
 	.then(response =>
 	{
@@ -72,19 +72,32 @@ async function	signin()
 	})
 	.then(data =>
 	{
-		localStorage.setItem("auth-token", data.token);
 		new Toast(Toast.SUCCESS, "Logged-in!");
 		load_home();
 	})
 	.catch(error =>
 	{
+		console.error(error);
 		new Toast(Toast.ERROR, error);
 	});
 }
 
 function	signout()
 {
-	localStorage.removeItem("auth-token");
+	fetch("/api/user/logout/", {
+		method: "POST",
+		credentials: 'include',
+	})
+	.then(response => {
+		if (!response.ok) {
+			throw new Error("Failed to sign out.");
+		}
+		new Toast(Toast.SUCCESS, "Signed out successfully!");
+	})
+	.catch(error => {
+		console.error(error);
+		new Toast(Toast.ERROR, "Failed to sign out.");
+	});
 }
 
 async function	signin_42()
@@ -110,45 +123,25 @@ async function	signin_42()
 	window.location.href = authUrl;
 }
 
-async function	signin_42_callback()
+function	signin_42_callback()
 {
 	const urlParams = new URLSearchParams(window.location.search);
 	const token = urlParams.get('token');
 
 	if (token) {
-		localStorage.setItem("auth-token", token);
 		history.pushState({ page: "home" }, "Home", "/home");
 		new Toast(Toast.SUCCESS, "Logged in with 42!");
 	}
 }
 
-async function signOut() {
-
-	localStorage.removeItem("auth-token");
-	new Toast(Toast.SUCCESS, "Signed out successfully!");
-	load_home();
-}
-
 async function	isLogin()
 {
-	if (localStorage.getItem("auth-token") == null)
-		return (false);
-	try
-	{
-		const response = await fetch("/api/users/me/", {
-			method: "GET",
-			headers:
-			{
-				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-				"Content-Type": "application/json"
-			}
-		});
-		if (!response.ok)
-			return (false);
+	try {
+		const data = await fetch_me();
+		if (!data)
+			return false;
+	} catch (error) {
+		return false;
 	}
-	catch (error)
-	{
-		return (false);
-	}
-	return (true);
+	return true;
 }

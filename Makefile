@@ -10,7 +10,6 @@ $(NAME) : build up
 
 build :
 	@mkdir -p ${PWD}/data/database_data
-	@mkdir -p ${PWD}/data/database_migrations
 	@docker compose -f ./sources/docker-compose.yml build
 		
 up :
@@ -26,11 +25,11 @@ down :
 	@docker compose -f ./sources/docker-compose.yml down
 
 clean : down
-	@ { docker volume ls --filter label=is-transcendance=yes -q; echo null; } | xargs -r docker volume rm --force
+	@ { docker volume ls --filter label=is-transcendence=yes -q; echo null; } | xargs -r docker volume rm --force
 
 fclean : clean
 	@docker compose -f ./sources/docker-compose.yml down --rmi all
-	@docker image prune --filter label=is-transcendance=yes --force
+	@docker image prune --filter label=is-transcendence=yes --force
 
 re :
 	@make fclean
@@ -42,7 +41,6 @@ flush_database :
 
 drop_database :
 	@docker exec -it transcendence_django_api python manage.py reset_db --noinput
-	@rm -f ${PWD}/data/database_migrations/done
 	@make fclean
 
 new_database_re :
@@ -50,5 +48,4 @@ new_database_re :
 	@make build
 	@make up
 
-.PHONY:	all re down clean fclean up build flush_database drop_database new_db_re
-
+.PHONY:	all re down clean fclean up build flush_database drop_database new_database_re

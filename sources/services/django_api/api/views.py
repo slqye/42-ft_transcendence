@@ -9,11 +9,11 @@ from django.db import models
 from .models import User, Match, TournamentParticipant
 from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer
 
-from django.contrib.auth import get_user_model, login
+from django.contrib.auth import get_user_model, login, authenticate
 
-from rest_framework import generics, permissions
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
+from rest_framework import generics, permissions, status
+# from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import redirect, get_object_or_404
@@ -22,20 +22,147 @@ from django.shortcuts import redirect, get_object_or_404
 
 User = get_user_model()
 
+class UserTokenRefreshView(APIView):
+    permission_classes = [permissions.AllowAny]  # Allow access without authentication
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('user_refresh')
+
+        if refresh_token is None:
+            return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+
+            response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
+            response.set_cookie(
+                "user_access",
+                new_access_token,
+                httponly=True,
+                secure=True,        # Ensure HTTPS in production
+                samesite='None'     # Adjust based on your frontend setup
+            )
+            return response
+
+        except TokenError:
+            return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class OpponentTokenRefreshView(APIView):
+    permission_classes = [permissions.AllowAny]  # Allow access without authentication
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('opponent_refresh')
+
+        if refresh_token is None:
+            return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+
+            response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
+            response.set_cookie(
+                "opponent_access",
+                new_access_token,
+                httponly=True,
+                secure=True,        # Ensure HTTPS in production
+                samesite='None'     # Adjust based on your frontend setup
+            )
+            return response
+
+        except TokenError:
+            return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class UserLogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        response = Response({"detail": "Both users logged out"})
+        # Delete the player_user cookies
+        response.delete_cookie("user_access")
+        response.delete_cookie("user_refresh")
+        return response
+    
+class OpponentLogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        response = Response({"detail": "Both users logged out"})
+        response.delete_cookie("opponent_access")
+        response.delete_cookie("opponent_refresh")
+        return response
+
+class UserLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if not user:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = Response({"detail": "User logged in successfully"})
+        # Set HttpOnly cookies
+        # secure=True and samesite='None' typically required if you’re over HTTPS or cross-site
+        response.set_cookie(
+            "user_access",
+            access_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        response.set_cookie(
+            "user_refresh",
+            refresh_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        return response
+
+class OpponentLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if not user:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = Response({"detail": "Opponent user logged in successfully"})
+        response.set_cookie(
+            "opponent_access",
+            access_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        response.set_cookie(
+            "opponent_refresh",
+            refresh_token,
+            httponly=True,
+            secure=True,
+            samesite='None'
+        )
+        return response
+
 class RegisterUser(generics.CreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
 	permission_classes = [permissions.AllowAny]
-
-# We override the post method to return the token more explicitly if needed
-class CustomAuthToken(ObtainAuthToken):
-	permission_classes = [permissions.AllowAny]
-
-	def post(self, request, *args, **kwargs):
-		response = super().post(request, *args, **kwargs)
-		# response.data contains 'token' if success
-		return response
-
 
 class UserList(generics.ListCreateAPIView):
 	queryset = User.objects.all()
@@ -129,6 +256,37 @@ class UserStats(APIView):
 
         return Response(response_data)
 
+class UserMatches(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            target_user = request.user
+        else:
+            target_user = get_object_or_404(User, pk=pk)
+        
+        matches = Match.objects.filter(
+            models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
+        ).order_by('-created_at')[:10]
+
+        serializer = MatchSerializer(matches, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk, *args, **kwargs):
+        if pk == "me":
+            player_user = request.user
+        else:
+            player_user = get_object_or_404(User, pk=pk)
+        
+        data = request.data.copy()
+        data['player_user'] = player_user.id  # Ensure the player_user is set to the authenticated user
+
+        serializer = MatchSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class UserPongMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
@@ -176,18 +334,18 @@ class UserTournaments(APIView):
 class MatchList(generics.ListCreateAPIView):
 	queryset = Match.objects.all()
 	serializer_class = MatchSerializer
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 class MatchDetail(generics.RetrieveDestroyAPIView):
 	queryset = Match.objects.all()
 	serializer_class = MatchSerializer
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 def index(request, path=None):
 	return HttpResponse("")
 
 class OAuthCallbackView(APIView):
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 	def get(self, request):
 		code = request.GET.get('code')
@@ -246,7 +404,7 @@ class OAuthCallbackView(APIView):
 		return redirect(f"{settings.MAIN_URL}/home?token={token.key}")
 
 class FrontendConfigView(APIView):
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAuthenticated]
 
 	def get(self, request):
 		config = {

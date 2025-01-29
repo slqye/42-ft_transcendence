@@ -8,7 +8,6 @@ async function load_navbar() {
 	const body = document.querySelector("body");
 	const header = document.getElementById("header");
 	let navbar = await new Template("frontend/html/navbar.html").load();
-	let user_data;
 
 	if (navbar == null)
 		return console.error(ERROR_TEMPLATE);
@@ -21,20 +20,7 @@ async function load_navbar() {
 	{
 		try
 		{
-			const response = await fetch("/api/users/me/", {
-				method: "GET",
-				headers:
-				{
-					"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-					"Content-Type": "application/json"
-				}
-			});
-			if (!response.ok)
-			{
-				new Toast(Toast.ERROR, "A network error occurred.");
-				throw new Error("A network error occurred.");
-			}
-			const data = await response.json();
+			const data = await fetch_me();
 			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
 			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 			navbar.edit.id.set.attribute("profile", "class", "nav-item");
@@ -80,6 +66,22 @@ async function load_pong() {
 		history.pushState({ page: "pong" }, "Pong", "/pong");
 	init_tooltips();
 	launch("pong");
+}
+
+async function load_start_game_tictactoe() {
+	if (!await isLogin())
+		return (load_home());
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/start_game_tictactoe.html").load();
+
+	if (template == null)
+		return console.error(ERROR_TEMPLATE);
+	load_navbar();
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/start_game_tictactoe")
+		history.pushState({ page: "start_game_tictactoe" }, "Start Game TicTacToe", "/start_game_tictactoe");
+	init_tooltips();
+	launch("start_game_tictactoe");
 }
 
 async function load_tictactoe() {
@@ -208,6 +210,8 @@ window.onpopstate = async function (event) {
 				await load_home(); break;
 			case "pong":
 				await load_pong(); break;
+			case "start_game_tictactoe":
+				await load_start_game_tictactoe(); break;
 			case "tictactoe":
 				await load_tictactoe(); break;
 			case "about":
