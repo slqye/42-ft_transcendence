@@ -2,7 +2,6 @@ class	Api
 {
 	static SUCCESS = 0;
 	static ERROR = 1;
-	static UNDEFINED = 2;
 	static USER = "user";
 	static OPPONENT = "opponent";
 
@@ -19,36 +18,50 @@ class	Api
 		this.headers = Api.DEFAULT_HEADERS;
 		this.credentials = Api.DEFAULT_CREDENTIALS;
 		this.body = Api.DEFAULT_BODY; 
-		this.status = Api.UNDEFINED;
+		this.status = Api.SUCCESS;
 		this.response = null;
+		this.log = null;
 
 		this.add_header("X-User-Type", this.type)
 	}
 
 	async request()
 	{
-		const response = await fetch(this.endpoint,
+		try
 		{
-			method: this.method,
-			headers: this.headers,
-			credentials: this.credentials,
-			body: this.body
-		});
-		if (response.status == 401 && this.endpoint != "/api/refresh/")
-		{
-			this.status = Api.UNDEFINED;
-			const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
-			if (refresh_response.status == Api.ERROR)
+			const response = await fetch(this.endpoint,
+			{
+				method: this.method,
+				headers: this.headers,
+				credentials: this.credentials,
+				body: this.body
+			});
+			if (response.status == 401 && this.endpoint != "/api/refresh/")
+			{
+				const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
+				if (refresh_response.status == Api.ERROR)
+				{
+					this.status = Api.ERROR;
+					this.log = "Token refreshing failed.";
+				}
+				else if (refresh_response.status == Api.SUCCESS)
+					this.request();
+			}
+			else if (!response.ok)
+			{
 				this.status = Api.ERROR;
-			else if (refresh_response.status == Api.SUCCESS)
-				this.request();
+				this.log = "Undefined network error.";
+			}
+			else
+			{
+				this.status = Api.SUCCESS;
+				this.response = response.json();
+			}
 		}
-		else if (!response.ok)
-			this.status = Api.ERROR;
-		else
+		catch (error)
 		{
-			this.status = Api.SUCCESS;
-			this.response = response.json();
+			this.status = Api.ERROR;
+			this.log = error;
 		}
 	}
 

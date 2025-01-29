@@ -1,5 +1,6 @@
 async function	signup()
 {
+	const display_name = "default";
 	const username = document.getElementById("signup_username").value;
 	const email = document.getElementById("signup_email").value;
 	const password = document.getElementById("signup_password").value;
@@ -7,40 +8,26 @@ async function	signup()
 
 	if (password != password_confirm)
 		return (new Toast(Toast.ERROR, "Password does not match."));
-	fetch("/api/register/",
+	const request_body = JSON.stringify(
 	{
-		method: "POST",
-		headers:
-		{
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(
-		{
-			"username": username,
-			"email": email,
-			"password": password,
-			"avatar_url": "/frontend/assets/default_profile_icon.webp",
-			"language_code": "en"
-		}),
-	})
-	.then(response =>
-	{
-		if (!response.ok)
-		{
-			new Toast(Toast.ERROR, "A network error occurred.");
-			throw new Error("A network error occurred.");
-		}
-		return (response.json());
-	})
-	.then(data =>
-	{
-		new Toast(Toast.SUCCESS, "Account has been created!");
-		load_home();
-	})
-	.catch(error =>
-	{
-		new Toast(Toast.ERROR, error);
+		"display_name": display_name,
+		"username": username,
+		"email": email,
+		"password": password,
+		"avatar_url": "/frontend/assets/default_profile_icon.webp",
+		"language_code": "en"
 	});
+	const request = await new Api("/api/user/signup/", Api.USER).set_method("POST").set_body(request_body).request();
+	if (request.status == Api.ERROR)
+	{
+		new Toast(Toast.ERROR, request.log);
+		throw new Error(request.log);
+	}
+	else
+	{
+		new Toast(Toast.SUCCESS, "Account has been created.");
+		load_home();
+	}
 }
 
 async function	signin()
