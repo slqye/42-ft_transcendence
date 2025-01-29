@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model, login, authenticate
 
 from rest_framework import generics, permissions, status
 # from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import redirect, get_object_or_404
@@ -22,6 +22,58 @@ from django.shortcuts import redirect, get_object_or_404
 
 User = get_user_model()
 
+class UserTokenRefreshView(APIView):
+    permission_classes = [permissions.AllowAny]  # Allow access without authentication
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('user_refresh')
+
+        if refresh_token is None:
+            return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+
+            response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
+            response.set_cookie(
+                "user_access",
+                new_access_token,
+                httponly=True,
+                secure=True,        # Ensure HTTPS in production
+                samesite='None'     # Adjust based on your frontend setup
+            )
+            return response
+
+        except TokenError:
+            return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class OpponentTokenRefreshView(APIView):
+    permission_classes = [permissions.AllowAny]  # Allow access without authentication
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('opponent_refresh')
+
+        if refresh_token is None:
+            return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+
+            response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
+            response.set_cookie(
+                "opponent_access",
+                new_access_token,
+                httponly=True,
+                secure=True,        # Ensure HTTPS in production
+                samesite='None'     # Adjust based on your frontend setup
+            )
+            return response
+
+        except TokenError:
+            return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+        
 class UserLogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

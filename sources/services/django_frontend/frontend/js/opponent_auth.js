@@ -13,7 +13,6 @@ async function opponent_signin(event) {
 				"username": username,
 				"password": password,
 			}),
-			//credentials: 'include'
 		});
 
 		if (!response.ok)
@@ -46,7 +45,7 @@ async function opponent_signin(event) {
 function opponent_signout() {
 	fetch("/api/opponent/logout/", {
 		method: "POST",
-		//credentials: 'include'
+		credentials: 'include',
 	})
 	.then(response => {
 		if (!response.ok) {

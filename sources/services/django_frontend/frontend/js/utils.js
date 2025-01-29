@@ -68,9 +68,10 @@ async function	fetch_me()
 	const response = await fetch("/api/users/me/", {
 		method: "GET",
 		headers: {
-		"Content-Type": "application/json"
+		"Content-Type": "application/json",
+		"X-User-Type": "user"
 		},
-		//credentials: 'include'
+		credentials: 'include',
 		});
 	if (!response.ok)
 		return null;
@@ -79,12 +80,13 @@ async function	fetch_me()
 
 async function	fetch_opponent()
 {
-	const response = await fetch("/api/opponent/me/", {
+	const response = await fetch("/api/users/me/", {
 		method: "GET",
 		headers: {
-		"Content-Type": "application/json"
+		"Content-Type": "application/json",
+		"X-User-Type": "opponent"
 		},
-		//credentials: 'include'
+		credentials: 'include',
 	});
 	if (!response.ok)
 		return null;
