@@ -86,6 +86,7 @@ async function	fetch_opponent()
 		"Content-Type": "application/json",
 		"X-User-Type": "opponent"
 		},
+		credentials: 'include',
 	});
 	if (!response.ok)
 		return null;

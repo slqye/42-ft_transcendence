@@ -86,6 +86,7 @@ function	signout()
 {
 	fetch("/api/user/logout/", {
 		method: "POST",
+		credentials: 'include',
 	})
 	.then(response => {
 		if (!response.ok) {

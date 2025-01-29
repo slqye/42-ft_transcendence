@@ -45,6 +45,7 @@ async function opponent_signin(event) {
 function opponent_signout() {
 	fetch("/api/opponent/logout/", {
 		method: "POST",
+		credentials: 'include',
 	})
 	.then(response => {
 		if (!response.ok) {
