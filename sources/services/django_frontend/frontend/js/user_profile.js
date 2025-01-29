@@ -4,11 +4,8 @@ async function	set_profile(template)
 	{
 		const response = await fetch("/api/users/me/", {
 			method: "GET",
-			headers:
-			{
-				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-				"Content-Type": "application/json"
-			}
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
 		});
 		if (!response.ok)
 		{
@@ -16,6 +13,7 @@ async function	set_profile(template)
 			throw new Error("A network error occurred.");
 		}
 		const data = await response.json();
+		template.edit.id.set.content("profile_display_name", "@" + data.display_name);
 		template.edit.id.set.content("profile_user_name", "@" + data.username);
 	}
 	catch (error)
@@ -26,46 +24,7 @@ async function	set_profile(template)
 
 async function	set_profile_history(template)
 {
-	// const pong_matches = await retrieve_pong_matches();
-	// const tictactoe_matches = await retrieve_tictactoe_matches();
-
-	const pong_matches = [
-		{
-			"type": "PONG",
-			"id": 101,
-			"player_user": "pasellio",
-			"opponent_user": "john_doe",
-			"result": "WIN",
-			"created_at": "2024-01-15T14:00:00Z"
-		}
-	];
-	const tictactoe_matches = [
-		{
-			"type": "TICTACTOE",
-			"id": 101,
-			"player_user": "pasellio",
-			"opponent_user": "john_doe",
-			"result": "WIN",
-			"created_at": "2024-01-15T13:00:00Z"
-		},
-		{
-			"type": "TICTACTOE",
-			"id": 102,
-			"player_user": "pasellio",
-			"opponent_user": "john_doe",
-			"result": "LOSS",
-			"created_at": "2024-01-15T15:00:00Z"
-		}
-	];
-
-
-	if (pong_matches == null || tictactoe_matches == null)
-	{
-		new Toast(Toast.ERROR, "A network error occurred.");
-		throw new Error("A network error occurred.");
-	}
-
-	const all_matches = [...pong_matches, ...tictactoe_matches];
+	const all_matches = retrieve_matches();
 	all_matches.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
 	const history = template.edit.id.get.element("history");
@@ -87,33 +46,11 @@ async function	set_profile_history(template)
 	}
 }
 
-async function retrieve_pong_matches()
+async function retrieve_matches()
 {
 	try
 	{
-		const response = await fetch("/api/users/me/matches/pong/", {
-			method: "GET",
-			headers:
-			{
-				"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-				"Content-Type": "application/json"
-			}
-		});
-		if (!response.ok)
-			return (null);
-		return (response.json());
-	}
-	catch (error)
-	{
-		return (null);
-	}
-}
-
-async function retrieve_tictactoe_matches()
-{
-	try
-	{
-		const response = await fetch("/api/users/me/matches/tictactoe/", {
+		const response = await fetch("/api/users/me/matches/", {
 			method: "GET",
 			headers:
 			{

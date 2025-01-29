@@ -3,15 +3,9 @@ async function	edit_personal_info(key, value)
 	fetch(`/api/users/update/${key}/`,
 	{
 		method: "POST",
-		headers:
-		{
-			"Authorization": `Token ${localStorage.getItem("auth-token")}`,
-			"Content-Type": 'application/json',
-		},
-		body: JSON.stringify(
-		{
-			key: value
-		})
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+		body: JSON.stringify({ [key]: value })
 	})
 	.then(response =>
 	{
