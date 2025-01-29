@@ -177,20 +177,8 @@ async function load_profile() {
 	if (template == null)
 		return console.error(ERROR_TEMPLATE);
 	load_navbar();
-	try
-	{
-		const data = await fetch_me();
-		if (!data)
-		{
-			new Toast(Toast.ERROR, "A network error occurred.");
-			throw new Error("A network error occurred.");
-		}
-		template.edit.id.set.content("profile_user_name", "@" + data.username);
-	}
-	catch (error)
-	{
-		new Toast(Toast.ERROR, error);
-	}
+	set_profile(template);
+	set_profile_history(template);
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/profile")
 		history.pushState({ page: "profile" }, "Profile", "/profile");

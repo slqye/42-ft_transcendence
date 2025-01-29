@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-	avatar_url = models.CharField(max_length=255, blank=True, default='https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360')
+	avatar_url = models.CharField(max_length=None, blank=True, default='https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360')
+	display_name= models.CharField(max_length=30, blank=False, default="newuser")
 	language_code = models.CharField(max_length=2, default='en')
 	created_at = models.DateTimeField(auto_now_add=True)
 	pong_matches_played = models.PositiveIntegerField(default=0)
