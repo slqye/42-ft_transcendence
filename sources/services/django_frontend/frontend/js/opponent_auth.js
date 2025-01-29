@@ -36,6 +36,8 @@ async function opponent_signin(event) {
 		document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
 		document.getElementById("opponent_info").classList.remove('d-none');
 
+		document.getElementById("start-game-tictactoe").classList.remove('d-none');
+
 		// Fetch opponent's avatar
 	} catch (error) {
 		new Toast(Toast.ERROR, error);
@@ -64,6 +66,8 @@ function opponent_signout() {
 
 			document.getElementById("opponent_signin_username").value = "";
 			document.getElementById("opponent_signin_password").value = "";
+
+			document.getElementById("start-game-tictactoe").classList.add('d-none');
 		}
 	})
 	.catch(error => {
