@@ -60,7 +60,7 @@ MIDDLEWARE = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'api.authentication.DualCookieJWTAuthentication',
-		# "rest_framework_simplejwt.authentication.JWTAuthentication",
+		#"rest_framework_simplejwt.authentication.JWTAuthentication",
         # 'rest_framework.authentication.TokenAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
     ]
@@ -154,6 +154,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://localhost:8000",
 	MAIN_URL,
 ]
+
+CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:8000",

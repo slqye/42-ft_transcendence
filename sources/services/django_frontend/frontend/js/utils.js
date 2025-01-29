@@ -71,6 +71,7 @@ async function	fetch_me()
 		"Content-Type": "application/json",
 		"X-User-Type": "user"
 		},
+		credentials: 'include',
 		});
 	if (!response.ok)
 		return null;
