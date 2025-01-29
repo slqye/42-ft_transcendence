@@ -7,7 +7,7 @@ class	Api
 
 	static DEFAULT_METHOD = "GET";
 	static DEFAULT_HEADERS = { "Content-Type": "application/json" };
-	static DEFAULT_CREDENTIALS = null;
+	static DEFAULT_CREDENTIALS = "omit";
 	static DEFAULT_BODY = {};
 
 	constructor(endpoint, type)
@@ -50,7 +50,7 @@ class	Api
 			else if (!response.ok)
 			{
 				this.status = Api.ERROR;
-				this.log = "Undefined network error.";
+				this.log = response.status + " network error.";
 			}
 			else
 			{
@@ -63,15 +63,16 @@ class	Api
 			this.status = Api.ERROR;
 			this.log = error;
 		}
+		return (this);
 	}
 
 	// Setters
-	set_method(method) { this.method = method; }
-	set_headers(headers) { this.header = headers; }
-	set_credentials(credentials) { this.credentials = credentials; }
-	set_body(body) { this.body = body; }
+	set_method(method) { this.method = method; return (this); }
+	set_headers(headers) { this.header = headers; return (this); }
+	set_credentials(credentials) { this.credentials = credentials; return (this); }
+	set_body(body) { this.body = body; return (this); }
 
 	// Adders
-	add_header(key, value) { this.headers[key] = value; }
-	add_body(key, value) { this.body[key] = value; }
+	add_header(key, value) { this.headers[key] = value; return (this); }
+	add_body(key, value) { this.body[key] = value; return (this); }
 }
