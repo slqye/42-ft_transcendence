@@ -36,6 +36,7 @@ class	Api
 				credentials: this.credentials,
 				body: this.body
 			});
+			console.log(response.status);
 			if (response.status == 401 && this.endpoint != "/api/refresh/")
 			{
 				const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
@@ -55,7 +56,7 @@ class	Api
 			else
 			{
 				this.status = Api.SUCCESS;
-				this.response = response.json();
+				this.response = await response.json();
 			}
 		}
 		catch (error)
@@ -64,6 +65,14 @@ class	Api
 			this.log = error;
 		}
 		return (this);
+	}
+
+	static async is_login()
+	{
+		const request = await new Api("/api/users/me/", Api.USER).set_credentials("include").request();
+		if (request.status == Api.ERROR)
+			return (false);
+		return (true);
 	}
 
 	// Setters

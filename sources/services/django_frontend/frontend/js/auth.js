@@ -1,6 +1,6 @@
 async function	signup()
 {
-	const display_name = "default";
+	const display_name = document.getElementById("signup_display_name").value;
 	const username = document.getElementById("signup_username").value;
 	const email = document.getElementById("signup_email").value;
 	const password = document.getElementById("signup_password").value;
@@ -26,7 +26,7 @@ async function	signup()
 	else
 	{
 		new Toast(Toast.SUCCESS, "Account has been created.");
-		load_home();
+		load_signin();
 	}
 }
 
@@ -35,56 +35,37 @@ async function	signin()
 	const username = document.getElementById("signin_username").value;
 	const password = document.getElementById("signin_password").value;
 
-	fetch("/api/user/login/",
+	const request_body = JSON.stringify(
 	{
-		method: "POST",
-		headers:
-		{
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(
-		{
-			"username": username,
-			"password": password,
-		}),
-	})
-	.then(response =>
-	{
-		if (!response.ok)
-		{
-			new Toast(Toast.ERROR, "Invalid credentials.");
-			throw new Error("Invalid credentials.");
-		}
-		return (response.json());
-	})
-	.then(data =>
-	{
-		new Toast(Toast.SUCCESS, "Logged-in!");
-		load_home();
-	})
-	.catch(error =>
-	{
-		console.error(error);
-		new Toast(Toast.ERROR, error);
+		"username": username,
+		"password": password
 	});
+	const request = await new Api("/api/user/login/", Api.USER).set_method("POST").set_body(request_body).request();
+	if (request.status == Api.ERROR)
+	{
+		new Toast(Toast.ERROR, request.log);
+		throw new Error(request.log);
+	}
+	else
+	{
+		new Toast(Toast.SUCCESS, "Logged-in.");
+		load_home();
+	}
 }
 
-function	signout()
+async function	signout()
 {
-	fetch("/api/user/logout/", {
-		method: "POST",
-		credentials: 'include',
-	})
-	.then(response => {
-		if (!response.ok) {
-			throw new Error("Failed to sign out.");
-		}
-		new Toast(Toast.SUCCESS, "Signed out successfully!");
-	})
-	.catch(error => {
-		console.error(error);
-		new Toast(Toast.ERROR, "Failed to sign out.");
-	});
+	const request = await new Api("/api/user/logout/", Api.USER).set_method("POST").set_credentials("include").request();
+	if (request.status == Api.ERROR)
+	{
+		new Toast(Toast.ERROR, request.log);
+		throw new Error(request.log);
+	}
+	else
+	{
+		new Toast(Toast.SUCCESS, "Signed out.");
+		load_home();
+	}
 }
 
 async function	signin_42()
@@ -119,16 +100,4 @@ function	signin_42_callback()
 		history.pushState({ page: "home" }, "Home", "/home");
 		new Toast(Toast.SUCCESS, "Logged in with 42!");
 	}
-}
-
-async function	isLogin()
-{
-	try {
-		const data = await fetch_me();
-		if (!data)
-			return false;
-	} catch (error) {
-		return false;
-	}
-	return true;
 }

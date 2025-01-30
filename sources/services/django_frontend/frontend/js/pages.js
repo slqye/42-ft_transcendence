@@ -16,7 +16,7 @@ async function load_navbar() {
 		navbar.edit.id.set.attribute("theme_icon_sun", "class", "px-2 d-none d-lg-none");
 		navbar.edit.id.set.attribute("theme_icon_moon", "class", "px-2 d-none d-lg-inline-block");
 	}
-	if (await isLogin())
+	if (await Api.is_login())
 	{
 		try
 		{
@@ -51,7 +51,7 @@ async function load_home() {
 }
 
 async function load_pong() {
-	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/pong.html").load();
@@ -69,7 +69,7 @@ async function load_pong() {
 }
 
 async function load_start_game_tictactoe() {
-	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/start_game_tictactoe.html").load();
@@ -85,7 +85,7 @@ async function load_start_game_tictactoe() {
 }
 
 async function load_tictactoe() {
-	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/tictactoe.html").load();
@@ -169,7 +169,7 @@ async function load_signup() {
 }
 
 async function load_profile() {
-	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/profile.html").load();
@@ -186,7 +186,7 @@ async function load_profile() {
 }
 
 async function load_settings() {
-	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/settings.html").load();
