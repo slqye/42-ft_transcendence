@@ -36,7 +36,6 @@ class	Api
 				credentials: this.credentials,
 				body: this.body
 			});
-			console.log(response.status);
 			if (response.status == 401 && this.endpoint != "/api/refresh/")
 			{
 				const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
@@ -46,7 +45,7 @@ class	Api
 					this.log = "Token refreshing failed.";
 				}
 				else if (refresh_response.status == Api.SUCCESS)
-					this.request();
+					return (this.request());
 			}
 			else if (!response.ok)
 			{
