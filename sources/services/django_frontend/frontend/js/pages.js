@@ -21,6 +21,8 @@ async function load_navbar() {
 		try
 		{
 			const data = await fetch_me();
+			if (!data)
+				throw new Error("Failed to fetch user data");
 			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
 			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 			navbar.edit.id.set.attribute("profile", "class", "nav-item");
