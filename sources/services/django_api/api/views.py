@@ -40,10 +40,8 @@ class UserTokenRefreshView(APIView):
 				"user_access",
 				new_access_token,
 				httponly=True,
-				secure=True,        # Ensure HTTPS in production
-				samesite='None'     # Adjust based on your frontend setup
-				secure=True,		# Ensure HTTPS in production
-				samesite='None'	 # Adjust based on your frontend setup
+				secure=True,
+				samesite='None'
 			)
 			return response
 
