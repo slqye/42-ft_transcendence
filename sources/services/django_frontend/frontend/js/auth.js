@@ -23,11 +23,8 @@ async function	signup()
 		new Toast(Toast.ERROR, request.log);
 		throw new Error(request.log);
 	}
-	else
-	{
-		new Toast(Toast.SUCCESS, "Account has been created.");
-		load_signin();
-	}
+	new Toast(Toast.SUCCESS, "Account has been created.");
+	load_signin();
 }
 
 async function	signin()
@@ -46,11 +43,8 @@ async function	signin()
 		new Toast(Toast.ERROR, request.log);
 		throw new Error(request.log);
 	}
-	else
-	{
-		new Toast(Toast.SUCCESS, "Logged-in.");
-		load_home();
-	}
+	new Toast(Toast.SUCCESS, "Logged-in.");
+	load_home();
 }
 
 async function	signout()
@@ -61,11 +55,8 @@ async function	signout()
 		new Toast(Toast.ERROR, request.log);
 		throw new Error(request.log);
 	}
-	else
-	{
-		new Toast(Toast.SUCCESS, "Signed out.");
-		load_home();
-	}
+	new Toast(Toast.SUCCESS, "Signed out.");
+	load_home();
 }
 
 async function	signin_42()
