@@ -39,6 +39,21 @@ class Editor
 						element.setAttribute(key, value);
 					this.template.update();
 				}
+			},
+			add: {
+				content: (_id, content) => {
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						element.innerHTML += content;
+					this.template.update();
+				},
+				attribute: (_id, key, value) =>
+				{
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						element.setAttribute(key, element.getAttribute(key) + value);
+					this.template.update();
+				}
 			}
 		};
 		this.class = {

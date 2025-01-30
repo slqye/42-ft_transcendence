@@ -10,13 +10,13 @@ async function load_navbar() {
 	let navbar = await new Template("frontend/html/navbar.html").load();
 
 	if (navbar == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	if (body.getAttribute("data-bs-theme") != "dark")
 	{
 		navbar.edit.id.set.attribute("theme_icon_sun", "class", "px-2 d-none d-lg-none");
 		navbar.edit.id.set.attribute("theme_icon_moon", "class", "px-2 d-none d-lg-inline-block");
 	}
-	if (await isLogin())
+	if (await Api.is_login())
 	{
 		try
 		{
@@ -40,7 +40,7 @@ async function load_home() {
 	const token = urlParams.get('token');
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	if (window.location.pathname === "/home" && token)
 		signin_42_callback();
 	load_navbar();
@@ -50,14 +50,15 @@ async function load_home() {
 	init_tooltips();
 }
 
-async function load_pong() {
+async function load_pong_match() {
 	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/pong.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	if (isMobile())
 		template.edit.class.set.attributes("player-slider", "class", "player-slider col-12 d-flex m-1");
@@ -65,39 +66,36 @@ async function load_pong() {
 	if (window.location.pathname !== "/pong")
 		history.pushState({ page: "pong" }, "Pong", "/pong");
 	init_tooltips();
-	launch("pong");
 }
 
-async function load_start_game_tictactoe() {
-	if (!await isLogin())
+async function load_create_tictactoe_match() {
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/start_game_tictactoe.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/start_game_tictactoe")
 		history.pushState({ page: "start_game_tictactoe" }, "Start Game TicTacToe", "/start_game_tictactoe");
 	init_tooltips();
-	launch("start_game_tictactoe");
 }
 
-async function load_tictactoe() {
-	if (!await isLogin())
+async function load_tictactoe_match() {
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
-	let template = await new Template("frontend/html/pages/tictactoe.html").load();
+	let template = await new Template("frontend/html/pages/match_tictactoe.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.string;
-	if (window.location.pathname !== "/tictactoe")
-		history.pushState({ page: "tictactoe" }, "TicTacToe", "/tictactoe");
+	if (window.location.pathname !== "/match_tictactoe")
+		history.pushState({ page: "match_tictactoe" }, "Match TicTacToe", "/match_tictactoe");
 	init_tooltips();
-	launch("tictactoe");
 }
 
 async function load_about() {
@@ -105,7 +103,7 @@ async function load_about() {
 	let template = await new Template("frontend/html/pages/about.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/about")
@@ -118,7 +116,7 @@ async function load_signin() {
 	let template = await new Template("frontend/html/pages/signin.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	
 	load_navbar();
 	content.innerHTML = template.string;
@@ -160,7 +158,7 @@ async function load_signup() {
 	let template = await new Template("frontend/html/pages/signup.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/signup")
@@ -169,28 +167,16 @@ async function load_signup() {
 }
 
 async function load_profile() {
-	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/profile.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	try
-	{
-		const data = await fetch_me();
-		if (!data)
-		{
-			new Toast(Toast.ERROR, "A network error occurred.");
-			throw new Error("A network error occurred.");
-		}
-		template.edit.id.set.content("profile_user_name", "@" + data.username);
-	}
-	catch (error)
-	{
-		new Toast(Toast.ERROR, error);
-	}
+	await set_profile(template);
+	await set_profile_history(template);
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/profile")
 		history.pushState({ page: "profile" }, "Profile", "/profile");
@@ -198,13 +184,13 @@ async function load_profile() {
 }
 
 async function load_settings() {
-	if (!await isLogin())
+	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/settings.html").load();
 
 	if (template == null)
-		return console.error(ERROR_TEMPLATE);
+		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/settings")
@@ -223,9 +209,9 @@ window.onpopstate = async function (event) {
 			case "pong":
 				await load_pong(); break;
 			case "start_game_tictactoe":
-				await load_start_game_tictactoe(); break;
-			case "tictactoe":
-				await load_tictactoe(); break;
+				await load_create_tictactoe_match(); break;
+			case "match_tictactoe":
+				await load_tictactoe_match(); break;
 			case "about":
 				await load_about(); break;
 			case "signin":

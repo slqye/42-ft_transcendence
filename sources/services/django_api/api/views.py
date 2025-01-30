@@ -198,11 +198,12 @@ class UpdateUserField(APIView):
 class CurrentUser(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
-	def get(self, request, *args, **kwargs):
-		user = request.user
-		return Response({
-			'id': user.id,
-			'username': user.username,
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        return Response({
+          'id': user.id,
+			    'display_name': user.display_name,
+          'username': user.username,
 			'password': user.password,
 			'email': user.email,
 			'avatar_url': getattr(user, 'avatar_url', None),

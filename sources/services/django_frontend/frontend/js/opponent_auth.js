@@ -36,6 +36,8 @@ async function opponent_signin(event) {
 		document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
 		document.getElementById("opponent_info").classList.remove('d-none');
 
+		document.getElementById("start-game-button").classList.remove('d-none');
+
 		// Fetch opponent's avatar
 	} catch (error) {
 		new Toast(Toast.ERROR, error);
@@ -53,7 +55,7 @@ function opponent_signout() {
 		}
 		new Toast(Toast.SUCCESS, "Opponent signed out!");
 
-		if (window.location.pathname === "/start_pong_game" || window.location.pathname === "/start_tictactoe_game")
+		if (window.location.pathname === "/start_game_pong" || window.location.pathname === "/start_game_tictactoe")
 		{
 			document.getElementById("opponent_signin_username").disabled = false;
 			document.getElementById("opponent_signin_password").disabled = false;
@@ -64,9 +66,9 @@ function opponent_signout() {
 
 			document.getElementById("opponent_signin_username").value = "";
 			document.getElementById("opponent_signin_password").value = "";
+
+			document.getElementById("start-game-button").classList.add('d-none');
 		}
-		// else //Not sure if we need this
-		// 	load_home();
 	})
 	.catch(error => {
 		console.error(error);
