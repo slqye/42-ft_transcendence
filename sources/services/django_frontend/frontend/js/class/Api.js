@@ -78,6 +78,17 @@ class	Api
 		return (false);
 	}
 
+	static async is_opponent_login()
+	{
+		if (localStorage.getItem("opponent_authenticated") == "true")
+		{
+			const request = await new Api("/api/users/me/", Api.OPPONENT).request();
+			if (request.status != Api.ERROR)
+				return (true);
+		}
+		return (false);
+	}
+
 	// Setters
 	set_method(method) { this.method = method; return (this); }
 	set_headers(headers) { this.header = headers; return (this); }

@@ -58,14 +58,3 @@ async function opponent_signout() {
 		}
 	}
 }
-
-async function	isOpponentLogin()
-{
-	if (localStorage.getItem("opponent_authenticated") == "true")
-	{
-		const data = await fetch_opponent();
-		if (data)
-			return true;
-	}
-	return false;
-}
