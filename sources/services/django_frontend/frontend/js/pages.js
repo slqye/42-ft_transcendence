@@ -42,7 +42,7 @@ async function load_home() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	if (window.location.pathname === "/home" && callback)
-		signin_42_callback();
+		await signin_42_callback();
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/home")
