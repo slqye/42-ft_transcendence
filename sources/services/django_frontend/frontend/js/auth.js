@@ -76,8 +76,7 @@ async function	signin_42()
 	}
 	else
 	{
-		config = request.data;
-		console.log(config);
+		config = request.response;
 		if (!config.API_42_UID || !config.API_42_REDIRECT_URI)
 		{
 			new Toast(Toast.ERROR, "OAuth configuration is missing.");
@@ -91,14 +90,12 @@ async function	signin_42()
 	}
 }
 
-function	signin_42_callback()
+async function	signin_42_callback()
 {
-	const urlParams = new URLSearchParams(window.location.search);
-	const token = urlParams.get('token');
-
-	if (token) {
-		history.pushState({ page: "home" }, "Home", "/home");
-		new Toast(Toast.SUCCESS, "Logged in with 42!");
-		localStorage.setItem("user_authenticated", "true");
-	}
+	localStorage.setItem("user_authenticated", "true");
+	if (await Api.is_login())
+		new Toast(Toast.SUCCESS, "Logged in with 42! Make sure to change your password if you want to log in as an opponent in your friend's game.");
+	else
+		new Toast(Toast.ERROR, "An error occurred while logging in with 42.");
+	history.pushState({ page: "home" }, "Home", "/home");
 }

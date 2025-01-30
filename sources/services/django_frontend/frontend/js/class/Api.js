@@ -75,6 +75,7 @@ class	Api
 			if (request.status != Api.ERROR)
 				return (true);
 		}
+		localStorage.removeItem("user_authenticated");
 		return (false);
 	}
 
@@ -86,6 +87,7 @@ class	Api
 			if (request.status != Api.ERROR)
 				return (true);
 		}
+		localStorage.removeItem("opponent_authenticated");
 		return (false);
 	}
 
