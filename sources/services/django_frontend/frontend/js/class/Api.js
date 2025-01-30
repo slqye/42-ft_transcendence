@@ -69,10 +69,13 @@ class	Api
 
 	static async is_login()
 	{
-		const request = await new Api("/api/users/me/", Api.USER).request();
-		if (request.status == Api.ERROR)
-			return (false);
-		return (true);
+		if (localStorage.getItem("user_authenticated") == "true")
+		{
+			const request = await new Api("/api/users/me/", Api.USER).request();
+			if (request.status != Api.ERROR)
+				return (true);
+		}
+		return (false);
 	}
 
 	// Setters
