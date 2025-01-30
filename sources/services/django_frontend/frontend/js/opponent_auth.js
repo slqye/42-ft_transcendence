@@ -3,57 +3,44 @@ async function opponent_signin(event) {
 	const username = document.getElementById("opponent_signin_username").value;
 	const password = document.getElementById("opponent_signin_password").value;
 
-	try {
-		const response = await fetch("/api/opponent/login/", {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				"username": username,
-				"password": password,
-			}),
+	const request_body = JSON.stringify(
+		{
+			"username": username,
+			"password": password
 		});
-
-		if (!response.ok)
-			throw new Error(response.statusText);
-
-		const data = await response.json();
-
+	const request = await new Api("/api/opponent/login/", Api.USER).set_method("POST").set_body(request_body).request();
+	if (request.status == Api.ERROR)
+		new Toast(Toast.ERROR, request.log);
+	else
+	{
 		const opponentData = await fetch_opponent();
-		if (opponentData) {
+		if (!opponentData)
+			new Toast(Toast.ERROR, "Failed to fetch opponent's data.");
+		else
+		{
+			localStorage.setItem("opponent_authenticated", "true");
 			document.getElementById("opponent_icon_display").src = opponentData.avatar_url;
-		} else {
-			throw new Error("Failed to fetch opponent's avatar.");
+			new Toast(Toast.SUCCESS, "Opponent logged-in!");
+
+			document.getElementById("opponent_signin_username").disabled = true;
+			document.getElementById("opponent_signin_password").disabled = true;
+
+			document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
+			document.getElementById("opponent_info").classList.remove('d-none');
+
+			document.getElementById("start-game-button").classList.remove('d-none');
 		}
-		new Toast(Toast.SUCCESS, "Opponent logged-in!");
-
-		// Disable the opponent sign-in inputs
-		document.getElementById("opponent_signin_username").disabled = true;
-		document.getElementById("opponent_signin_password").disabled = true;
-
-		// Update UI to show opponent avatar and logout button
-		document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
-		document.getElementById("opponent_info").classList.remove('d-none');
-
-		document.getElementById("start-game-button").classList.remove('d-none');
-
-		// Fetch opponent's avatar
-	} catch (error) {
-		new Toast(Toast.ERROR, error);
 	}
 }
 
-function opponent_signout() {
-	fetch("/api/opponent/logout/", {
-		method: "POST",
-		credentials: 'include',
-	})
-	.then(response => {
-		if (!response.ok) {
-			throw new Error("Failed to sign out opponent.");
-		}
+async function opponent_signout() {
+	const request = await new Api("/api/opponent/logout/", Api.USER).set_method("POST").request();
+	if (request.status == Api.ERROR)
+		new Toast(Toast.ERROR, request.log);
+	else
+	{
 		new Toast(Toast.SUCCESS, "Opponent signed out!");
+		localStorage.removeItem("opponent_authenticated");
 
 		if (window.location.pathname === "/start_game_pong" || window.location.pathname === "/start_game_tictactoe")
 		{
@@ -69,17 +56,16 @@ function opponent_signout() {
 
 			document.getElementById("start-game-button").classList.add('d-none');
 		}
-	})
-	.catch(error => {
-		console.error(error);
-		new Toast(Toast.ERROR, "Failed to sign out opponent.");
-	});
+	}
 }
 
 async function	isOpponentLogin()
 {
-	const data = await fetch_opponent();
-	if (!data)
-		return false;
-	return true;
+	if (localStorage.getItem("opponent_authenticated") == "true")
+	{
+		const data = await fetch_opponent();
+		if (data)
+			return true;
+	}
+	return false;
 }
