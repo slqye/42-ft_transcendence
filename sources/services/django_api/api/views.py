@@ -404,8 +404,6 @@ class OAuthCallbackView(APIView):
 		return redirect(f"{settings.MAIN_URL}/home?token={token.key}")
 
 class FrontendConfigView(APIView):
-	permission_classes = [permissions.IsAuthenticated]
-
 	def get(self, request):
 		config = {
 			"API_42_UID": settings.API_42_UID,

@@ -37,7 +37,7 @@ class	Api
 			if (this.body != Api.DEFAULT_BODY)
 				options.body = this.body;
 			const response = await fetch(this.endpoint, options);
-			if (response.status == 401 && this.endpoint != "/api/refresh/")
+			if (this.credentials == "include" && response.status == 401 && this.endpoint != "/api/refresh/")
 			{
 				const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
 				if (refresh_response.status == Api.ERROR)

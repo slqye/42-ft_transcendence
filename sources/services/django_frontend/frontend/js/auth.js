@@ -77,6 +77,7 @@ async function	signin_42()
 	else
 	{
 		config = request.data;
+		console.log(config);
 		if (!config.API_42_UID || !config.API_42_REDIRECT_URI)
 		{
 			new Toast(Toast.ERROR, "OAuth configuration is missing.");
