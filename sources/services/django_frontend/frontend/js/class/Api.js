@@ -7,7 +7,7 @@ class	Api
 
 	static DEFAULT_METHOD = "GET";
 	static DEFAULT_HEADERS = { "Content-Type": "application/json" };
-	static DEFAULT_CREDENTIALS = "omit";
+	static DEFAULT_CREDENTIALS = "include";
 	static DEFAULT_BODY = {};
 
 	constructor(endpoint, type)
@@ -29,13 +29,14 @@ class	Api
 	{
 		try
 		{
-			const response = await fetch(this.endpoint,
-			{
+			const options = {
 				method: this.method,
 				headers: this.headers,
 				credentials: this.credentials,
-				body: this.body
-			});
+			};
+			if (this.body != Api.DEFAULT_BODY)
+				options.body = this.body;
+			const response = await fetch(this.endpoint, options);
 			if (response.status == 401 && this.endpoint != "/api/refresh/")
 			{
 				const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
@@ -68,7 +69,7 @@ class	Api
 
 	static async is_login()
 	{
-		const request = await new Api("/api/users/me/", Api.USER).set_credentials("include").request();
+		const request = await new Api("/api/users/me/", Api.USER).request();
 		if (request.status == Api.ERROR)
 			return (false);
 		return (true);

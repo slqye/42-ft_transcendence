@@ -17,7 +17,7 @@ async function	signup()
 		"avatar_url": "/frontend/assets/default_profile_icon.webp",
 		"language_code": "en"
 	});
-	const request = await new Api("/api/register/", Api.USER).set_method("POST").set_body(request_body).request();
+	const request = await new Api("/api/register/", Api.USER).set_method("POST").set_credentials("omit").set_body(request_body).request();
 	if (request.status == Api.ERROR)
 	{
 		new Toast(Toast.ERROR, request.log);
@@ -55,7 +55,7 @@ async function	signin()
 
 async function	signout()
 {
-	const request = await new Api("/api/user/logout/", Api.USER).set_method("POST").set_credentials("include").request();
+	const request = await new Api("/api/user/logout/", Api.USER).set_method("POST").request();
 	if (request.status == Api.ERROR)
 	{
 		new Toast(Toast.ERROR, request.log);
