@@ -42,12 +42,14 @@ class UserTokenRefreshView(APIView):
 				httponly=True,
 				secure=True,        # Ensure HTTPS in production
 				samesite='None'     # Adjust based on your frontend setup
+				secure=True,		# Ensure HTTPS in production
+				samesite='None'	 # Adjust based on your frontend setup
 			)
 			return response
 
 		except TokenError:
 			return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
-		
+
 class OpponentTokenRefreshView(APIView):
 	permission_classes = [permissions.AllowAny]  # Allow access without authentication
 
@@ -66,8 +68,8 @@ class OpponentTokenRefreshView(APIView):
 				"opponent_access",
 				new_access_token,
 				httponly=True,
-				secure=True,        # Ensure HTTPS in production
-				samesite='None'     # Adjust based on your frontend setup
+				secure=True,		# Ensure HTTPS in production
+				samesite='None'	 # Adjust based on your frontend setup
 			)
 			return response
 
@@ -198,13 +200,13 @@ class UpdateUserField(APIView):
 class CurrentUser(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
-	def get(self, request, *args, **kwargs):
-		user = request.user
-		return Response({
-			'id': user.id,
-			'display_name': user.display_name,
-			'username': user.username,
-			'password': user.password,
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        return Response({
+          'id': user.id,
+			    'display_name': user.display_name,
+          'username': user.username,
+		 	'password': user.password,
 			'email': user.email,
 			'avatar_url': getattr(user, 'avatar_url', None),
 			'language_code': getattr(user, 'language_code', 'en'),
