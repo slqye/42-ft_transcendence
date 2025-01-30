@@ -37,12 +37,12 @@ async function load_home() {
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/home.html").load();
 	const urlParams = new URLSearchParams(window.location.search);
-	const token = urlParams.get('token');
+	const callback = urlParams.get('callback');
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
-	if (window.location.pathname === "/home" && token)
-		signin_42_callback();
+	if (window.location.pathname === "/home" && callback)
+		await signin_42_callback();
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/home")

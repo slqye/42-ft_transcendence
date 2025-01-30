@@ -44,6 +44,7 @@ async function	signin()
 		throw new Error(request.log);
 	}
 	new Toast(Toast.SUCCESS, "Logged-in.");
+	localStorage.setItem("user_authenticated", "true");
 	load_home();
 }
 
@@ -55,40 +56,46 @@ async function	signout()
 		new Toast(Toast.ERROR, request.log);
 		throw new Error(request.log);
 	}
-	new Toast(Toast.SUCCESS, "Signed out.");
-	load_home();
+	else
+	{
+		new Toast(Toast.SUCCESS, "Signed out.");
+		localStorage.removeItem("user_authenticated");
+		load_home();
+	}
 }
 
 async function	signin_42()
 {
 	let config = {};
 
-	try {
-		const response = await fetch('/api/config/');
-		if (!response.ok) {
-			throw new Error('Failed to fetch frontend configuration.');
+	const request = await new Api("/api/config/", Api.USER).set_credentials("omit").request();
+	if (request.status == Api.ERROR)
+	{
+		new Toast(Toast.ERROR, request.log);
+		throw new Error(request.log);
+	}
+	else
+	{
+		config = request.response;
+		if (!config.API_42_UID || !config.API_42_REDIRECT_URI)
+		{
+			new Toast(Toast.ERROR, "OAuth configuration is missing.");
+			throw new Error("OAuth configuration is missing.");
 		}
-		config = await response.json();
-	} catch (error) {
-		console.error('Error fetching frontend configuration:', error);
+		else
+		{
+			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${encodeURIComponent(config.API_42_REDIRECT_URI)}&response_type=code`;
+			window.location.href = authUrl;
+		}
 	}
-
-	if (!config.API_42_UID || !config.API_42_REDIRECT_URI) {
-		console.error("OAuth configuration is missing.");
-		new Toast(Toast.ERROR, "OAuth configuration is missing.");
-		return;
-	}
-	const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${encodeURIComponent(config.API_42_REDIRECT_URI)}&response_type=code`;
-	window.location.href = authUrl;
 }
 
-function	signin_42_callback()
+async function	signin_42_callback()
 {
-	const urlParams = new URLSearchParams(window.location.search);
-	const token = urlParams.get('token');
-
-	if (token) {
-		history.pushState({ page: "home" }, "Home", "/home");
-		new Toast(Toast.SUCCESS, "Logged in with 42!");
-	}
+	localStorage.setItem("user_authenticated", "true");
+	if (await Api.is_login())
+		new Toast(Toast.SUCCESS, "Logged in with 42! Make sure to change your password if you want to log in as an opponent in your friend's game.");
+	else
+		new Toast(Toast.ERROR, "An error occurred while logging in with 42.");
+	history.pushState({ page: "home" }, "Home", "/home");
 }

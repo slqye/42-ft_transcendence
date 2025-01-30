@@ -40,6 +40,8 @@ class UserTokenRefreshView(APIView):
 				"user_access",
 				new_access_token,
 				httponly=True,
+				secure=True,        # Ensure HTTPS in production
+				samesite='None'     # Adjust based on your frontend setup
 				secure=True,		# Ensure HTTPS in production
 				samesite='None'	 # Adjust based on your frontend setup
 			)
@@ -204,7 +206,7 @@ class CurrentUser(APIView):
           'id': user.id,
 			    'display_name': user.display_name,
           'username': user.username,
-			'password': user.password,
+		 	'password': user.password,
 			'email': user.email,
 			'avatar_url': getattr(user, 'avatar_url', None),
 			'language_code': getattr(user, 'language_code', 'en'),
@@ -345,7 +347,7 @@ def index(request, path=None):
 	return HttpResponse("")
 
 class OAuthCallbackView(APIView):
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.AllowAny]
 
 	def get(self, request):
 		code = request.GET.get('code')
@@ -396,15 +398,29 @@ class OAuthCallbackView(APIView):
 			user.avatar_url = user_data.get('image', {}).get('link')
 			user.save()
 
-		# Log the user in and create a token
-		login(request, user)
-		token, _ = Token.objects.get_or_create(user=user)
-
-		# Redirect to frontend with token
-		return redirect(f"{settings.MAIN_URL}/home?token={token.key}")
+		refresh = RefreshToken.for_user(user)
+		access_token = str(refresh.access_token)
+		refresh_token = str(refresh)
+		
+		response = redirect(f"{settings.MAIN_URL}/home?callback=true")
+		response.set_cookie(
+			"user_access",
+			access_token,
+			httponly=True,
+			secure=True,
+			samesite='None'
+		)
+		response.set_cookie(
+			"user_refresh",
+			refresh_token,
+			httponly=True,
+			secure=True,
+			samesite='None'
+		)
+		return response
 
 class FrontendConfigView(APIView):
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.AllowAny]
 
 	def get(self, request):
 		config = {

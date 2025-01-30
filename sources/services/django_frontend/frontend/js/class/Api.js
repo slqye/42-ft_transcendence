@@ -37,7 +37,7 @@ class	Api
 			if (this.body != Api.DEFAULT_BODY)
 				options.body = this.body;
 			const response = await fetch(this.endpoint, options);
-			if (response.status == 401 && this.endpoint != "/api/refresh/")
+			if (this.credentials == "include" && response.status == 401 && this.endpoint != "/api/refresh/")
 			{
 				const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
 				if (refresh_response.status == Api.ERROR)
@@ -69,10 +69,26 @@ class	Api
 
 	static async is_login()
 	{
-		const request = await new Api("/api/users/me/", Api.USER).request();
-		if (request.status == Api.ERROR)
-			return (false);
-		return (true);
+		if (localStorage.getItem("user_authenticated") == "true")
+		{
+			const request = await new Api("/api/users/me/", Api.USER).request();
+			if (request.status != Api.ERROR)
+				return (true);
+		}
+		localStorage.removeItem("user_authenticated");
+		return (false);
+	}
+
+	static async is_opponent_login()
+	{
+		if (localStorage.getItem("opponent_authenticated") == "true")
+		{
+			const request = await new Api("/api/users/me/", Api.OPPONENT).request();
+			if (request.status != Api.ERROR)
+				return (true);
+		}
+		localStorage.removeItem("opponent_authenticated");
+		return (false);
 	}
 
 	// Setters

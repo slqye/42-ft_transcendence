@@ -65,30 +65,16 @@ function	isMobile()
 
 async function	fetch_me()
 {
-	const response = await fetch("/api/users/me/", {
-		method: "GET",
-		headers: {
-		"Content-Type": "application/json",
-		"X-User-Type": "user"
-		},
-		credentials: 'include',
-		});
-	if (!response.ok)
+	const request = await new Api("/api/users/me/", Api.USER).request();
+	if (request.status == Api.ERROR)
 		return null;
-	return await response.json();
+	return request.response;
 }
 
 async function	fetch_opponent()
 {
-	const response = await fetch("/api/users/me/", {
-		method: "GET",
-		headers: {
-		"Content-Type": "application/json",
-		"X-User-Type": "opponent"
-		},
-		credentials: 'include',
-	});
-	if (!response.ok)
+	const request = await new Api("/api/users/me/", Api.OPPONENT).request();
+	if (request.status == Api.ERROR)
 		return null;
-	return await response.json();
+	return request.response;
 }
