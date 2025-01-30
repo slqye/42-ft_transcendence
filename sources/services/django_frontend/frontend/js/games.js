@@ -1,26 +1,52 @@
-function	launch(value)
+async function	launch_pong_match()
 {
-	
-	if (value == "pong")
-	{
-		let game = document.getElementById("game");
-		let score = document.getElementById("score");
-		let pong = new Pong(game, score, new Player("p1_test"), new Player("p2_test"));
-		pong.start();
-	}
-	else if (value == "tictactoe")
-	{
-		start_game_tictactoe();
-	}
+	const user = await fetch_me();
+	if (!user)
+		return (new Toast("A host player must be logged in to play a game."));
+	const opponent = await fetch_opponent();
+	if (!opponent)
+		return (new Toast("An opponent must be logged in to play a game."));
+	// create game with API endpoint
+	//
+	// retrieve the data from the API endpoint
+	//
+	// create the game with the data
+	var game = new Pong(new Player(user.display_name), new Player(opponent.display_name));
+	// load the game page
+	await load_pong_match();
+	// initialize the game
 }
 
-async function	start_game_tictactoe()
+async function	launch_tictactoe_match()
 {
 	let win_condition = document.getElementById("win-condition").value;
-	// fetch user display name
-	const user = await fetch_user();
-	if (!user)
-		return;
-	var game = new TicTacToe(new Player(user.display_name), new Player("slqye"), win_condition);
+	const user = await fetch_me();
+	try
+	{
+		if (!user)
+			return (new Toast("A host player must be logged in to play a game."));
+	}
+	catch (error)
+	{
+		return (new Toast("A host player must be logged in to play a game."));
+	}
+	try
+	{
+		const opponent = await fetch_opponent();
+		if (!opponent)
+			return (new Toast("An opponent must be logged in to play a game."));
+	}
+	catch (error)
+	{
+		return (new Toast("An opponent must be logged in to play a game."));
+	}
+	// create game with API endpoint
+	//
+	// retrieve the data from the API endpoint
+	//
+	// load the game page
+	await load_tictactoe_match();
+	// create the game with the data and initialize it
+	var game = new TicTacToe(new Player(user.display_name), new Player(opponent.display_name), win_condition);
 	game.init();
 }

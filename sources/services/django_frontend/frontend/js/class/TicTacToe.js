@@ -8,8 +8,6 @@ class TicTacToe
 		this.roundActive = false;
 		this.currentPlayer = this.player2.name;
 
-		this.statusDisplay = document.getElementById('game-status');
-		this.cells = document.querySelectorAll('.cell');
 		this.handleGame = this.handleGame.bind(this);
 	}
 
@@ -40,7 +38,7 @@ class TicTacToe
 
 	setupCells()
 	{
-		this.cells.forEach(cell => {
+		document.querySelectorAll('.cell').forEach(cell => {
 			cell.addEventListener('click', (e) => this.handleCellClick(e));
 			cell.setAttribute('class', 'cell col cursor-pointer mb-2');
 			cell.textContent = '';
@@ -73,7 +71,7 @@ class TicTacToe
 	switchPlayer()
 	{
 		this.currentPlayer = this.currentPlayer === this.player1.name ? this.player2.name : this.player1.name;
-		this.statusDisplay.textContent = this.currentPlayer + "'s turn";
+		document.getElementById('game-status').textContent = this.currentPlayer + "'s turn";
 	}
 
 	checkWin()
@@ -104,8 +102,8 @@ class TicTacToe
 	endGame(result)
 	{
 		this.roundActive = false;
-		this.statusDisplay.textContent = result;
-		this.cells.forEach(cell => {
+		document.getElementById('game-status').textContent = result;
+		document.querySelectorAll('.cell').forEach(cell => {
 			cell.removeEventListener('click', this.handleCellClick);
 			cell.setAttribute('class', 'cell col mb-2');
 		});

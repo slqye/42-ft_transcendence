@@ -36,7 +36,7 @@ async function opponent_signin(event) {
 		document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
 		document.getElementById("opponent_info").classList.remove('d-none');
 
-		document.getElementById("start-game-tictactoe").classList.remove('d-none');
+		document.getElementById("start-game-button").classList.remove('d-none');
 
 		// Fetch opponent's avatar
 	} catch (error) {

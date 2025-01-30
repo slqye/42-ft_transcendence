@@ -27,15 +27,15 @@
 				<!-- Game Settings Menu -->
 				<div class="mb-3">
 					<label for="tictactoe-settings" class="form-label" style="font-size: 1.3em;">Game Settings</label>
-					<form id="tictactoe-settings" onsubmit="start_game_tictactoe(event);">
+					<form id="tictactoe-settings" onsubmit="event.preventDefault(); launch_tictactoe_match();">
 						<!-- Win Condition Input -->
 						<div class="my-2 d-flex flex-column align-items-center">
 							<label for="win-condition" class="form-label">Win Condition</label>
 							<input type="number" class="form-control w-50" id="win-condition" min="3" value="3">
-							<small class="form-text text-muted">Number of consecutive games needed to win the match.</small>
+							<small class="form-text text-muted">Number of games needed to win the match.</small>
 						</div>
 						<!-- Start Game Button -->
-						<button type="button" onclick="start_game_tictactoe();" class="btn btn-primary d-none" id="start-game-button">Start Game</button>
+						<button type="submit" class="btn btn-primary d-none" id="start-game-button">Start Game</button>
 					</form>
 				</div>
 			</div>
