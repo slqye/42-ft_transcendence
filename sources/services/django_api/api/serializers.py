@@ -4,23 +4,59 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+
+User = get_user_model()
+
 class UserSerializer(serializers.ModelSerializer):
-	password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'},
+        validators=[validate_password]
+    )
 
-	class Meta:
-		model = User
-		fields = ['id', 'username', 'display_name', 'password', 'avatar_url', 'language_code', 'created_at']
-		read_only_fields = ['id', 'created_at']
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'display_name', 'password', 'avatar_url', 'language_code', 'created_at']
+        read_only_fields = ['id', 'created_at']
 
-	def create(self, validated_data):
-		user = User(
-			username=validated_data['username'],
-			avatar_url=validated_data.get('avatar_url', ''),
-			language_code=validated_data.get('language_code', 'en')
-		)
-		user.set_password(validated_data['password'])
-		user.save()
-		return user
+    def create(self, validated_data):
+        user = User(
+            username=validated_data['username'],
+            display_name=validated_data['display_name'],
+            avatar_url=validated_data.get('avatar_url'),  # Let model handle default if not provided
+            language_code=validated_data.get('language_code', 'en')
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        if 'username' in validated_data:
+            instance.username = validated_data['username']
+        
+        if 'display_name' in validated_data:
+            instance.display_name = validated_data['display_name']
+        
+        if 'avatar_url' in validated_data:
+            instance.avatar_url = validated_data['avatar_url']
+        
+        if 'language_code' in validated_data:
+            instance.language_code = validated_data['language_code']
+        
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+        
+        instance.save()
+        return instance
+	
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop('password', None)
+        return representation
 
 
 # Friendship Serializer
