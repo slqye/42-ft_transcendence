@@ -94,7 +94,7 @@ async function	signin_42_callback()
 {
 	localStorage.setItem("user_authenticated", "true");
 	if (await Api.is_login())
-		new Toast(Toast.SUCCESS, "Logged in with 42! Make sure to change your password if you want to log in as an opponent in your friend's game.");
+		new Toast(Toast.SUCCESS, "Logged in with 42!\nMake sure to change your password if you want to log in as an opponent in your friend's game.");
 	else
 		new Toast(Toast.ERROR, "An error occurred while logging in with 42.");
 	history.pushState({ page: "home" }, "Home", "/home");

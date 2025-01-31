@@ -21,6 +21,8 @@ async function load_navbar() {
 		try
 		{
 			const data = await fetch_me();
+			if (!data)
+				throw new Error("Failed to fetch user data");
 			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
 			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 			navbar.edit.id.set.attribute("profile", "class", "nav-item");
@@ -48,10 +50,11 @@ async function load_home() {
 	if (window.location.pathname !== "/home")
 		history.pushState({ page: "home" }, "Home", "/home");
 	init_tooltips();
+	if (await Api.is_login())
+		document.getElementById("sign-in-button").classList.add("d-none");
 }
 
 async function load_pong_match() {
-	if (!await isLogin())
 	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
@@ -81,6 +84,13 @@ async function load_create_tictactoe_match() {
 	if (window.location.pathname !== "/start_game_tictactoe")
 		history.pushState({ page: "start_game_tictactoe" }, "Start Game TicTacToe", "/start_game_tictactoe");
 	init_tooltips();
+	const opponent_authenticated = await Api.is_opponent_login();
+	if (opponent_authenticated)
+	{
+		const opponentData = await fetch_opponent();
+		if (opponentData)
+			set_connected_opponent_form(opponentData);
+	}
 }
 
 async function load_tictactoe_match() {
@@ -112,6 +122,11 @@ async function load_about() {
 }
 
 async function load_signin() {
+	if (await Api.is_login())
+	{
+		new Toast(Toast.WARNING, "You are already logged in!");
+		return ;
+	}
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/signin.html").load();
 

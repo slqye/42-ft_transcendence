@@ -1,4 +1,13 @@
-# Makefile for Sauron
+# Makefile for briganscendence
+
+# Colors
+
+COLOR_GREEN = \033[0;32m
+COLOR_RED = \033[0;31m
+COLOR_YELLOW = \033[0;33m
+COLOR_RESET = \033[0m
+
+# Rules
 
 NAME = transcendence
 
@@ -49,4 +58,14 @@ new_database_re :
 	@make build
 	@make up
 
-.PHONY:	all re down clean fclean up build flush_database drop_database new_database_re
+status :
+	@echo "${COLOR_GREEN}Containers :${COLOR_RESET}"
+	@docker ps -a --filter label=is-transcendence=yes
+	@echo "${COLOR_GREEN}Volumes :${COLOR_RESET}"
+	@docker volume ls --filter label=is-transcendence=yes
+	@echo "${COLOR_GREEN}Networks :${COLOR_RESET}"
+	@docker network ls --filter label=is-transcendence=yes
+	@echo "${COLOR_GREEN}Images :${COLOR_RESET}"
+	@docker image ls --filter label=is-transcendence=yes
+
+.PHONY:	all re down clean fclean up build flush_database drop_database new_database_re status
