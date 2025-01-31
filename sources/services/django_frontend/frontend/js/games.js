@@ -20,9 +20,10 @@ async function	launch_pong_match()
 async function	launch_tictactoe_match()
 {
 	let win_condition = document.getElementById("win-condition").value;
-	const user = await fetch_me();
+	let user = null;
 	try
 	{
+		user = await fetch_me();
 		if (!user)
 			return (new Toast("A host player must be logged in to play a game."));
 	}
@@ -30,9 +31,10 @@ async function	launch_tictactoe_match()
 	{
 		return (new Toast("A host player must be logged in to play a game."));
 	}
+	let opponent = null;
 	try
 	{
-		const opponent = await fetch_opponent();
+		opponent = await fetch_opponent();
 		if (!opponent)
 			return (new Toast("An opponent must be logged in to play a game."));
 	}
@@ -40,13 +42,9 @@ async function	launch_tictactoe_match()
 	{
 		return (new Toast("An opponent must be logged in to play a game."));
 	}
-	// create game with API endpoint
-	//
-	// retrieve the data from the API endpoint
-	//
-	// load the game page
+	if (user.username === opponent.username)
+		return (new Toast("You cannot play against yourself!"));
 	await load_tictactoe_match();
-	// create the game with the data and initialize it
-	var game = new TicTacToe(new Player(user.display_name), new Player(opponent.display_name), win_condition);
+	var game = new TicTacToe(new Player(user.username), new Player(opponent.username), win_condition); //TODO: change to display_name once set up
 	game.init();
 }
