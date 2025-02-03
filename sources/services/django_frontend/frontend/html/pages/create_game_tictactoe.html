@@ -5,8 +5,8 @@
 				<h1>TicTacToe</h1>
 				<!-- Opponent Sign In Input-->
 				<div class="mb-3">
-					<label for="opponent-signin" style="font-size: 1.3em;" class="form-label">Opponent Sign In</label>
-					<form onsubmit="opponent_signin(event);">
+					<h2 style="font-size: 1.3em;">Opponent Sign In</h2>
+					<form onsubmit="opponent_signin(event);" id="opponent-signin">
 						<div class="input-group my-2">
 							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
 							<input type="text" class="form-control" placeholder="Username" aria-label="username" id="opponent_signin_username" required>
@@ -26,7 +26,7 @@
 
 				<!-- Game Settings Menu -->
 				<div class="mb-3">
-					<label for="tictactoe-settings" class="form-label" style="font-size: 1.3em;">Game Settings</label>
+					<h2 style="font-size: 1.3em;">Game Settings</h2>
 					<form id="tictactoe-settings" onsubmit="event.preventDefault(); launch_tictactoe_match();">
 						<!-- Win Condition Input -->
 						<div class="my-2 d-flex flex-column align-items-center">
