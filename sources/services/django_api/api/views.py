@@ -6,8 +6,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.db import models
 
-from .models import User, Match, TournamentParticipant
-from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer
+from .models import User, Match, TournamentParticipant, Invitation
+from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer, InvitationSerializer
 
 from django.contrib.auth import get_user_model, login, authenticate
 
@@ -255,6 +255,82 @@ class UserStats(APIView):
 		}
 
 		return Response(response_data)
+	
+class InvitationCreateView(generics.CreateAPIView):
+	"""
+	POST /api/invitations/
+	Body: { "to_user": <opponent_user_id> }
+	Requires: X-User-Type = 'player_user' (if you want to enforce that in permission or check)
+	Creates an invitation with status='pending'
+	"""
+	queryset = Invitation.objects.all()
+	serializer_class = InvitationSerializer
+	permission_classes = [permissions.IsAuthenticated]
+
+	def create(self, request, *args, **kwargs):
+		# 1) Optional: Check for "X-User-Type" header
+		user_type = request.headers.get('X_User_Type').lower()
+		if user_type != 'user':
+			return Response({"detail": "You must be a 'user' to create an invitation."},
+							status=status.HTTP_403_FORBIDDEN)
+
+		# 2) Use the default create flow
+		return super().create(request, *args, **kwargs)
+
+	def perform_create(self, serializer):
+		# from_user is injected via the serializer’s create() method
+		serializer.save()
+
+class InvitationAcceptView(APIView):
+	"""
+	POST /api/invitations/<invitation_id>/accept/
+	Body: { }
+	Requires: X-User-Type = 'opponent_user'
+	Accepts a pending invitation for the request.user (who must match to_user).
+	On success => Creates a Match record with player_user=from_user & opponent_user=to_user
+	"""
+	permission_classes = [permissions.IsAuthenticated]
+
+	def post(self, request, pk, *args, **kwargs):
+		# 1) Check header
+		user_type = request.headers.get('X_User_Type').lower()
+		if user_type != 'opponent':
+			return Response({"detail": "You must be an 'opponent' to accept an invitation."},
+							status=status.HTTP_403_FORBIDDEN)
+
+		# 2) Retrieve invitation
+		invitation = get_object_or_404(Invitation, pk=pk)
+
+		# 3) Check if request.user is the correct to_user
+		if invitation.to_user != request.user:
+			return Response({"detail": "You are not the invited opponent_user."},
+							status=status.HTTP_403_FORBIDDEN)
+
+		# 4) Check if invitation is still pending
+		if invitation.status != 'pending':
+			return Response({"detail": f"Cannot accept an invitation with status '{invitation.status}'."},
+							status=status.HTTP_400_BAD_REQUEST)
+
+		# 5) Accept invitation => set status to 'accepted'
+		invitation.status = 'accepted'
+		invitation.save()
+
+		# 6) Create a Match record from this invitation
+		#	Assuming your Match model requires: player_user, opponent_user, is_pong, etc.
+		match = Match.objects.create(
+			player_user=invitation.from_user,
+			opponent_user=invitation.to_user,
+			is_pong=invitation.is_pong,
+			tournament_id=invitation.tournament_id
+		)
+
+		# If you want to return the newly created Match in the response
+		match_data = MatchSerializer(match).data
+
+		return Response({
+			"detail": "Invitation accepted. Match created.",
+			"match": match_data
+		}, status=status.HTTP_201_CREATED)
 
 class UserMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]

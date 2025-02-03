@@ -16,7 +16,6 @@ class User(AbstractUser):
 	tictactoe_draws = models.PositiveIntegerField(default=0)
 	tictactoe_losses = models.PositiveIntegerField(default=0)
 
-
 class Friendship(models.Model):
 	user_id_1 = models.ForeignKey(User, related_name='friendship_user_1', on_delete=models.CASCADE)
 	user_id_2 = models.ForeignKey(User, related_name='friendship_user_2', on_delete=models.CASCADE)
@@ -38,7 +37,7 @@ class Match(models.Model):
 	player_user = models.ForeignKey(User, related_name='player_user', on_delete=models.CASCADE)
 	opponent_user = models.ForeignKey(User, related_name='opponent_user', on_delete=models.CASCADE)
 	result = models.CharField(max_length=4)
-	is_pong = models.BooleanField()
+	is_pong = models.BooleanField(blank=False, default=True)
 	pong_game_stats = models.OneToOneField(
 		PongGameStats, null=True, blank=True, on_delete=models.SET_NULL, related_name='match'
 	)
@@ -57,3 +56,33 @@ class TournamentParticipant(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	points = models.FloatField()
 	rank = models.IntegerField()
+
+class Invitation(models.Model):
+	STATUS_CHOICES = (
+		('pending', 'Pending'),
+		('accepted', 'Accepted'),
+		('declined', 'Declined'),
+	)
+
+	from_user = models.ForeignKey(
+		User,
+		on_delete=models.CASCADE,
+		related_name='invitations_sent'
+	)
+	to_user = models.ForeignKey(
+		User,
+		on_delete=models.CASCADE,
+		related_name='invitations_received'
+	)
+	status = models.CharField(
+		max_length=10,
+		choices=STATUS_CHOICES,
+		default='pending'
+	)
+	is_pong = models.BooleanField(blank=False, default=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+	tournament_id = models.IntegerField(null=True, blank=True)
+
+	def __str__(self):
+		return f"Invitation from {self.from_user} to {self.to_user} [{self.status}]"
