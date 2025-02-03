@@ -50,7 +50,7 @@ async function opponent_signin(event) {
 		{
 			localStorage.setItem("opponent_authenticated", "true");
 			new Toast(Toast.SUCCESS, "Opponent logged-in!");
-			if (window.location.pathname === "/start_game_pong" || window.location.pathname === "/start_game_tictactoe"	)
+			if (window.location.pathname === "/create_game_pong" || window.location.pathname === "/create_game_tictactoe"	)
 				set_connected_opponent_form(opponentData);
 		}
 	}
@@ -64,7 +64,7 @@ async function opponent_signout() {
 	{
 		localStorage.removeItem("opponent_authenticated");
 		new Toast(Toast.SUCCESS, "Opponent signed out!");
-		if (window.location.pathname === "/start_game_pong" || window.location.pathname === "/start_game_tictactoe")
+		if (window.location.pathname === "/create_game_pong" || window.location.pathname === "/create_game_tictactoe")
 			reset_opponent_form();
 	}
 }

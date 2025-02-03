@@ -1,31 +1,12 @@
 async function	launch_pong_match()
 {
-	const user = await fetch_me();
-	if (!user)
-		return (new Toast("A host player must be logged in to play a game."));
-	const opponent = await fetch_opponent();
-	if (!opponent)
-		return (new Toast("An opponent must be logged in to play a game."));
-	// create game with API endpoint
-	//
-	// retrieve the data from the API endpoint
-	//
-	// create the game with the data
-	var game = new Pong(new Player(user.display_name), new Player(opponent.display_name));
-	// load the game page
-	await load_pong_match();
-	// initialize the game
-}
-
-async function	launch_tictactoe_match()
-{
 	let win_condition = document.getElementById("win-condition").value;
 	let user = null;
 	try
 	{
 		user = await fetch_me();
 		if (!user)
-			return (new Toast("A host player must be logged in to play a game."));
+			throw new Error();
 	}
 	catch (error)
 	{
@@ -36,7 +17,7 @@ async function	launch_tictactoe_match()
 	{
 		opponent = await fetch_opponent();
 		if (!opponent)
-			return (new Toast("An opponent must be logged in to play a game."));
+			throw new Error();
 	}
 	catch (error)
 	{
@@ -44,7 +25,49 @@ async function	launch_tictactoe_match()
 	}
 	if (user.username === opponent.username)
 		return (new Toast("You cannot play against yourself!"));
+	if (win_condition < 3)
+		return (new Toast("The win condition must be at least 3!"));
+	else if (win_condition > 10)
+		return (new Toast("The win condition must be at most 10!"));
+	await load_pong_match();
+	let game = document.getElementById("game");
+	let score = document.getElementById("score");
+	var pong = new Pong(game, score, new Player(user.display_name), new Player(opponent.display_name), win_condition);
+	pong.init();
+}
+
+async function	launch_tictactoe_match()
+{
+	let win_condition = document.getElementById("win-condition").value;
+	let user = null;
+	try
+	{
+		user = await fetch_me();
+		if (!user)
+			throw new Error();
+	}
+	catch (error)
+	{
+		return (new Toast("A host player must be logged in to play a game."));
+	}
+	let opponent = null;
+	try
+	{
+		opponent = await fetch_opponent();
+		if (!opponent)
+			throw new Error();
+	}
+	catch (error)
+	{
+		return (new Toast("An opponent must be logged in to play a game."));
+	}
+	if (user.username === opponent.username)
+		return (new Toast("You cannot play against yourself!"));
+	if (win_condition < 3)
+		return (new Toast("The win condition must be at least 3!"));
+	else if (win_condition > 10)
+		return (new Toast("The win condition must be at most 10!"));
 	await load_tictactoe_match();
-	var game = new TicTacToe(new Player(user.username), new Player(opponent.username), win_condition); //TODO: change to display_name once set up
+	var game = new TicTacToe(new Player(user.display_name), new Player(opponent.display_name), win_condition);
 	game.init();
 }

@@ -6,23 +6,11 @@ class TicTacToe
 	constructor(player1, player2, win_condition)
 	{
 		this.board = Array(9).fill(null);
-		this.player1 = player1;
-		this.player1_symbol = TicTacToe.NOUGHT;
-		this.player1_score = 0;
-		this.player1_consecutive_wins = 0;
-		this.player1_max_consecutive_wins = 0;
-		this.player1_wins_as_crosses = 0;
-		this.player1_wins_as_noughts = 0;
-		this.player1_quickest_win_moves = 0;
 
+		this.player1 = player1;
+		this.player1.symbol = TicTacToe.NOUGHT;
 		this.player2 = player2;
-		this.player2_symbol = TicTacToe.CROSS;
-		this.player2_score = 0;
-		this.player2_consecutive_wins = 0;
-		this.player2_max_consecutive_wins = 0;
-		this.player2_wins_as_crosses = 0;
-		this.player2_wins_as_noughts = 0;
-		this.player2_quickest_win_moves = 0;
+		this.player2.symbol = TicTacToe.CROSS;
 
 		this.moves_count = 0;
 		this.roundActive = false;
@@ -56,15 +44,15 @@ class TicTacToe
 		this.board = Array(9).fill(null);
 		this.setupCells();
 		this.switchPlayer();
-		if (this.player1_symbol === TicTacToe.CROSS)
+		if (this.player1.symbol === TicTacToe.CROSS)
 		{
-			this.player1_symbol = TicTacToe.NOUGHT;
-			this.player2_symbol = TicTacToe.CROSS;
+			this.player1.symbol = TicTacToe.NOUGHT;
+			this.player2.symbol = TicTacToe.CROSS;
 		}
 		else
 		{
-			this.player1_symbol = TicTacToe.CROSS;
-			this.player2_symbol = TicTacToe.NOUGHT;
+			this.player1.symbol = TicTacToe.CROSS;
+			this.player2.symbol = TicTacToe.NOUGHT;
 		}
 	}
 
@@ -144,16 +132,16 @@ class TicTacToe
 	
 	resetMatch()
 	{
-		this.player1_score = 0;
-		this.player2_score = 0;
+		this.player1.score = 0;
+		this.player2.score = 0;
 		this.refreshScoreboard();
 		this.startRound();
 	}
 
 	refreshScoreboard()
 	{
-		document.getElementById('player1-score').textContent = this.player1_score;
-		document.getElementById('player2-score').textContent = this.player2_score;
+		document.getElementById('player1-score').textContent = this.player1.score;
+		document.getElementById('player2-score').textContent = this.player2.score;
 	}
 
 	terminateMatch()
@@ -172,8 +160,12 @@ class TicTacToe
 			user_quickest_win_as_moves : int
 			opponent_quickest_win_as_moves : int
 		*/
+		var gameButton = document.getElementById('game-button');
+		gameButton.setAttribute('class', 'btn btn-outline-primary');
+		gameButton.textContent = 'Play a new match';
+		gameButton.addEventListener('click', this.resetMatch);
 	}
-}
+
 	endGame(winner, result)
 	{
 		this.roundActive = false;
@@ -186,48 +178,44 @@ class TicTacToe
 		{
 			if (winner === this.player1.name)
 			{
-				this.player1_score += 1;
-				this.player1_consecutive_wins += 1;
-				this.player2_consecutive_wins = 0;
-				if (this.player1_consecutive_wins > this.player1_max_consecutive_wins)
-					this.player1_max_consecutive_wins = this.player1_consecutive_wins;
-				if (this.player1_symbol === TicTacToe.CROSS)
-					this.player1_wins_as_crosses += 1;
+				this.player1.score += 1;
+				this.player1.consecutive_wins += 1;
+				this.player2.consecutive_wins = 0;
+				if (this.player1.consecutive_wins > this.player1.max_consecutive_wins)
+					this.player1.max_consecutive_wins = this.player1.consecutive_wins;
+				if (this.player1.symbol === TicTacToe.CROSS)
+					this.player1.wins_as_crosses += 1;
 				else
-					this.player1_wins_as_noughts += 1;
-				if (this.moves_count < this.player1_quickest_win_moves)
-					this.player1_quickest_win_moves = this.moves_count;
+					this.player1.wins_as_noughts += 1;
+				if (this.moves_count < this.player1.quickest_win_moves)
+					this.player1.quickest_win_moves = this.moves_count;
 			}
 			else if (winner === this.player2.name)
 			{
-				this.player2_score += 1;
-				this.player2_consecutive_wins += 1;
-				this.player1_consecutive_wins = 0;
-				if (this.player2_consecutive_wins > this.player2_max_consecutive_wins)
-					this.player2_max_consecutive_wins = this.player2_consecutive_wins;
-				if (this.player2_symbol === TicTacToe.CROSS)
-					this.player2_wins_as_crosses += 1;
+				this.player2.score += 1;
+				this.player2.consecutive_wins += 1;
+				this.player1.consecutive_wins = 0;
+				if (this.player2.consecutive_wins > this.player2.max_consecutive_wins)
+					this.player2.max_consecutive_wins = this.player2.consecutive_wins;
+				if (this.player2.symbol === TicTacToe.CROSS)
+					this.player2.wins_as_crosses += 1;
 				else
-					this.player2_wins_as_noughts += 1;
-				if (this.moves_count < this.player2_quickest_win_moves)
-					this.player2_quickest_win_moves = this.moves_count;
+					this.player2.wins_as_noughts += 1;
+				if (this.moves_count < this.player2.quickest_win_moves)
+					this.player2.quickest_win_moves = this.moves_count;
 			}
 			this.refreshScoreboard();
 		}
 		else
 		{
-			this.player1_consecutive_wins = 0;
-			this.player2_consecutive_wins = 0;
+			this.player1.consecutive_wins = 0;
+			this.player2.consecutive_wins = 0;
 		}
 		this.moves_count = 0;
 
-		var gameButton = document.getElementById('game-button');
-		if (this.player1_score >= this.win_condition || this.player2_score >= this.win_condition)
-			{
+		if (this.player1.score >= this.win_condition || this.player2.score >= this.win_condition)
+		{
 			this.terminateMatch();
-			gameButton.setAttribute('class', 'btn btn-outline-primary');
-			gameButton.textContent = 'Play a new match';
-			gameButton.addEventListener('click', this.resetMatch);
 		}
 		else
 		{
@@ -236,3 +224,4 @@ class TicTacToe
 			}, 3000);
 		}
 	}
+}

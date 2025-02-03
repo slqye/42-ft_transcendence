@@ -54,35 +54,55 @@ async function load_home() {
 		document.getElementById("sign-in-button").classList.add("d-none");
 }
 
+async function load_create_game_pong() {
+	if (!await Api.is_login())
+		return (load_home());
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/create_game_pong.html").load();
+
+	if (template == null)
+		return (console.error(ERROR_TEMPLATE));
+	load_navbar();
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/create_game_pong")
+		history.pushState({ page: "create_game_pong" }, "Create a Pong game!", "/create_game_pong");
+	init_tooltips();
+	const opponent_authenticated = await Api.is_opponent_login();
+	if (opponent_authenticated)
+	{
+		const opponentData = await fetch_opponent();
+		if (opponentData)
+			set_connected_opponent_form(opponentData);
+	}
+}
+
 async function load_pong_match() {
 	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
-	let template = await new Template("frontend/html/pages/pong.html").load();
+	let template = await new Template("frontend/html/pages/match_pong.html").load();
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	if (isMobile())
-		template.edit.class.set.attributes("player-slider", "class", "player-slider col-12 d-flex m-1");
 	content.innerHTML = template.string;
-	if (window.location.pathname !== "/pong")
-		history.pushState({ page: "pong" }, "Pong", "/pong");
+	if (window.location.pathname !== "/match_pong")
+		history.pushState({ page: "match_pong" }, "Pong Match!", "/match_pong");
 	init_tooltips();
 }
 
-async function load_create_tictactoe_match() {
+async function load_create_game_tictactoe() {
 	if (!await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
-	let template = await new Template("frontend/html/pages/start_game_tictactoe.html").load();
+	let template = await new Template("frontend/html/pages/create_game_tictactoe.html").load();
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.string;
-	if (window.location.pathname !== "/start_game_tictactoe")
-		history.pushState({ page: "start_game_tictactoe" }, "Start Game TicTacToe", "/start_game_tictactoe");
+	if (window.location.pathname !== "/create_game_tictactoe")
+		history.pushState({ page: "create_game_tictactoe" }, "Create a TicTacToe game!", "/create_game_tictactoe");
 	init_tooltips();
 	const opponent_authenticated = await Api.is_opponent_login();
 	if (opponent_authenticated)
@@ -104,7 +124,7 @@ async function load_tictactoe_match() {
 	load_navbar();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/match_tictactoe")
-		history.pushState({ page: "match_tictactoe" }, "Match TicTacToe", "/match_tictactoe");
+		history.pushState({ page: "match_tictactoe" }, "TicTacToe Match!", "/match_tictactoe");
 	init_tooltips();
 }
 
@@ -221,10 +241,12 @@ window.onpopstate = async function (event) {
 		{
 			case "home":
 				await load_home(); break;
-			case "pong":
-				await load_pong(); break;
-			case "start_game_tictactoe":
-				await load_create_tictactoe_match(); break;
+			case "create_game_pong":
+				await load_create_game_pong(); break;
+			case "match_pong":
+				await load_pong_match(); break;
+			case "create_game_tictactoe":
+				await load_create_game_tictactoe(); break;
 			case "match_tictactoe":
 				await load_tictactoe_match(); break;
 			case "about":

@@ -10,23 +10,31 @@ class Pong
 	static PADDLE_OFFSET_RATIO = 1/25;
 	static BALL_RADIUS_RATIO = 1/100;
 	static BALL_SPEED_RATIO = 1/75;
-
-	constructor(canvas, score, player1, player2) {
+	
+	constructor(canvas, score, player1, player2, win_condition) {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext("2d");
 		this.sliders = document.getElementsByClassName("form-range");
 		this.score = score;
+		this.win_condition = win_condition;
+		this.roundActive = false;
+
 		this.player1 = player1;
 		this.player2 = player2;
+		this.game_longest_bounces_streak = 0;
+		this.game_timer_start = 0;
+		this.game_timer_end = 0;
+		
+		this.paddle_speed = 0;
 		this.paddles = {
-			[player1.name]: {
+			[this.player1.name]: {
 				x: 0,
 				y: 0,
 				width: 0,
 				height: 0,
 				dy: 0,
 			},
-			[player2.name]: {
+			[this.player2.name]: {
 				x: 0,
 				y: 0,
 				width: 0,
@@ -41,7 +49,7 @@ class Pong
 			dy: 1,
 			radius: 0,
 		}
-		this.paddle_speed = 0;
+		
 		this.p1_paddle = this.paddles[this.player1.name];
 		this.p2_paddle = this.paddles[this.player2.name];
 		this.keys = new Set();
@@ -49,6 +57,60 @@ class Pong
 		this.keyup_listener = this.keyup_listener.bind(this);
 		this.resize_handler = this.resize_handler.bind(this);
 		this.update = this.update.bind(this);
+		this.handleGame = this.handleGame.bind(this);
+		this.resetMovingObjectsPositions = this.resetMovingObjectsPositions.bind(this);
+		this.resetPlayerVariables = this.resetPlayerVariables.bind(this);
+		this.start = this.start.bind(this);
+		this.update = this.update.bind(this);
+		this.stop = this.stop.bind(this);
+		this.resize_handler = this.resize_handler.bind(this);
+		this.terminateMatch = this.terminateMatch.bind(this);
+		this.resetMovingObjectsPositions();
+
+	}
+	
+	resetMovingObjectsPositions()
+	{
+		this.p1_paddle.x = 0;
+		this.p1_paddle.y = 0;
+		this.p1_paddle.width = 0;
+		this.p1_paddle.height = 0;
+		this.p2_paddle.x = 0;
+		this.p2_paddle.y = 0;
+		this.p2_paddle.width = 0;
+		this.p2_paddle.height = 0;
+		this.ball.x = 0;
+		this.ball.y = 0;
+		this.ball.dx = 1;
+		this.ball.dy = 1;
+		this.ball.radius = 0;
+		this.ball.x = 0;
+		this.ball.y = 0;
+		this.ball.dx = 1;
+		this.ball.dy = 1;
+		this.ball.radius = 0;
+	}
+
+	init()
+	{
+		var gameButton = document.getElementById('game-button');
+		gameButton.addEventListener('click', this.handleGame);
+		document.getElementById('player1').textContent = this.player1.name;
+		document.getElementById('player2').textContent = this.player2.name;
+	}
+
+	handleGame()
+	{
+		if (!this.roundActive)
+		{
+			this.start();
+		}
+	}
+
+	refreshScoreboard()
+	{ 
+		document.getElementById('player1-score').textContent = this.player1.score;
+		document.getElementById('player2-score').textContent = this.player2.score;
 	}
 
 	resize_paddle()
@@ -115,11 +177,46 @@ class Pong
 			this.ball.dy = -this.ball.dy;
 		if (this.ball.x < 0 || this.ball.x > this.canvas.width)
 		{
-			this.ball.x < 0 ? this.player2.score += 1 : this.player1.score += 1;
+			this.game_timer_end = Date.now();
+			var diff = this.game_timer_end - this.game_timer_start;
+			if (this.ball.x < 0)
+			{
+				this.player2.score += 1;
+				this.player2.consecutive_goals += 1;
+				this.player1.consecutive_goals = 0;
+				if (this.player2.consecutive_goals > this.player2.max_consecutive_goals)
+					this.player2.max_consecutive_goals = this.player2.consecutive_goals;
+				if (diff < this.player2.fastest_time_to_score || this.player2.fastest_time_to_score == 0)
+					this.player2.fastest_time_to_score = diff;
+				this.player2.goals_times.push(diff);
+			}
+			else
+			{
+				this.player1.score += 1;
+				this.player1.consecutive_goals += 1;
+				this.player2.consecutive_goals = 0;
+				if (this.player1.consecutive_goals > this.player1.max_consecutive_goals)
+					this.player1.max_consecutive_goals = this.player1.consecutive_goals;
+				if (diff < this.player1.fastest_time_to_score || this.player1.fastest_time_to_score == 0)
+					this.player1.fastest_time_to_score = diff;
+				this.player1.goals_times.push(diff);
+			}
+			this.refreshScoreboard();
 			this.ball.x = this.canvas.width / 2;
 			this.ball.y = this.canvas.height / 2;
 			this.ball.dx = Math.random() < 0.5 ? 1 : -1;
 			this.ball.dy = Math.random() < 0.5 ? 1 : -1;
+			if (this.player1.score >= this.win_condition || this.player2.score >= this.win_condition)
+			{
+				this.stop();
+				var gameStatus = document.getElementById('game-status');
+				if (this.player1.score >= this.win_condition)
+					gameStatus.textContent = this.player1.name + ' wins!';
+				else
+					gameStatus.textContent = this.player2.name + ' wins!';
+				this.terminateMatch();
+			}
+			this.game_timer_start = Date.now();
 		}
 	}
 
@@ -136,31 +233,63 @@ class Pong
 		this.ctx.fill();
 	}
 
+	resetPlayerVariables()
+	{
+		this.player1.score = 0;
+		this.player1.fastest_time_to_score = 0;
+		this.player1.consecutive_goals = 0;
+		this.player1.max_consecutive_goals = 0;
+		this.player1.goals_times = [];
+		this.player1.average_time_to_score = 0;
+
+		this.player2.score = 0;
+		this.player2.fastest_time_to_score = 0;
+		this.player2.consecutive_goals = 0;
+		this.player2.max_consecutive_goals = 0;
+		this.player2.goals_times = [];
+		this.player2.average_time_to_score = 0;
+	}
+
 	start()
 	{
+		var gameButton = document.getElementById('game-button');
+		var gameStatus = document.getElementById('game-status');
+		this.roundActive = true;
+		gameButton.setAttribute('class', 'd-none');
+		gameButton.removeEventListener('click', this.handleGame);
+		gameStatus.textContent = '';
+		this.resetPlayerVariables();
+		this.resetMovingObjectsPositions();
+		this.refreshScoreboard();
 		window.addEventListener("resize", this.resize_handler);
 		document.addEventListener("keydown", this.key_listener);
 		document.addEventListener("keyup", this.keyup_listener);
 		this.resize_handler();
 		this.sliders[0].setAttribute("value", this.sliders[0].getAttribute("max") / 2);
 		this.sliders[1].setAttribute("value", this.sliders[1].getAttribute("min") / 2);
+		this.game_timer_start = Date.now();
 		this.update();
 	}
 
 	update()
 	{
-		this.paddle_movements();
-		this.ball_movements();
-		this.draw();
-		this.score.innerHTML = this.player1.score + " - " + this.player2.score;
-		requestAnimationFrame(this.update);
+		if (this.roundActive)
+		{
+			this.paddle_movements();
+			this.ball_movements();
+			this.draw();
+			requestAnimationFrame(this.update);
+		}
 	}
 
 	stop()
 	{
-		document.removeEventListener("resize", this.key_listener);
+		this.roundActive = false;
+		window.removeEventListener("resize", this.resize_handler);
 		document.removeEventListener("keydown", this.key_listener);
 		document.removeEventListener("keyup", this.keyup_listener);
+		this.resetMovingObjectsPositions();
+		this.draw();
 	}
 
 	resize_handler()
@@ -172,7 +301,28 @@ class Pong
 		this.sliders[0].setAttribute("max", 1 - this.p1_paddle.height / this.canvas.height);
 		this.sliders[1].setAttribute("min", -1 + this.p2_paddle.height / this.canvas.height);
 	}
-	
+
+	terminateMatch()
+	{
+		// TODO : send result to server
+		/*
+		data to send :
+			user_score : int
+			opponent_score : int
+			user_fastest_time_to_score : int
+			opponent_fastest_time_to_score : int
+			user_max_consecutive_goals : int
+			opponent_max_consecutive_goals : int
+			user_average_time_to_score : int
+			opponent_average_time_to_score : int
+			longest_bounces_streak : int
+		*/
+		var gameButton = document.getElementById('game-button');
+		gameButton.setAttribute('class', 'btn btn-outline-primary');
+		gameButton.textContent = 'Play a new match';
+		gameButton.addEventListener('click', this.start);
+	}
+
 	key_listener(event) { this.keys.add(event.key); }
 	keyup_listener(event) { this.keys.delete(event.key); }
 }
