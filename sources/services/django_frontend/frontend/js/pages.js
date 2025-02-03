@@ -198,6 +198,23 @@ async function load_profile() {
 	init_tooltips();
 }
 
+async function load_friends() {
+	if (!await Api.is_login())
+		return (load_home());
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/friends.html").load();
+
+	if (template == null)
+		return (console.error(ERROR_TEMPLATE));
+	load_navbar();
+	await set_profile(template);
+	await set_profile_history(template);
+	content.innerHTML = template.string;
+	if (window.location.pathname !== "/friends")
+		history.pushState({ page: "friends" }, "Friends", "/friends");
+	init_tooltips();
+}
+
 async function load_settings() {
 	if (!await Api.is_login())
 		return (load_home());
@@ -235,6 +252,8 @@ window.onpopstate = async function (event) {
 				await load_signup(); break;
 			case "profile":
 				await load_profile(); break;
+			case "friends":
+				await load_friends(); break;
 			case "settings":
 				await load_settings(); break;
 			default:
