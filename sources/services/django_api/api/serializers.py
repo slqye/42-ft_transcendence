@@ -1,11 +1,22 @@
 from rest_framework import serializers
-from .models import User, Friendship, Match, Tournament, TournamentParticipant, PongGameStats, TicTacToeGameStats
+from .models import User, Friendship, Match, Tournament, TournamentParticipant, PongGameStats, TicTacToeGameStats, Invitation
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+
+User = get_user_model()
+
 class UserSerializer(serializers.ModelSerializer):
-	password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+	password = serializers.CharField(
+		write_only=True,
+		required=True,
+		style={'input_type': 'password'},
+		validators=[validate_password]
+	)
 
 	class Meta:
 		model = User
@@ -15,12 +26,37 @@ class UserSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 		user = User(
 			username=validated_data['username'],
-			avatar_url=validated_data.get('avatar_url', ''),
+			display_name=validated_data['display_name'],
+			avatar_url=validated_data.get('avatar_url'),  # Let model handle default if not provided
 			language_code=validated_data.get('language_code', 'en')
 		)
 		user.set_password(validated_data['password'])
 		user.save()
 		return user
+
+	def update(self, instance, validated_data):
+		if 'username' in validated_data:
+			instance.username = validated_data['username']
+		
+		if 'display_name' in validated_data:
+			instance.display_name = validated_data['display_name']
+		
+		if 'avatar_url' in validated_data:
+			instance.avatar_url = validated_data['avatar_url']
+		
+		if 'language_code' in validated_data:
+			instance.language_code = validated_data['language_code']
+		
+		if 'password' in validated_data:
+			instance.set_password(validated_data['password'])
+		
+		instance.save()
+		return instance
+	
+	def to_representation(self, instance):
+		representation = super().to_representation(instance)
+		representation.pop('password', None)
+		return representation
 
 
 # Friendship Serializer
@@ -132,3 +168,33 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
 			'rank',
 		]
 		read_only_fields = ['id']
+
+class InvitationSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Invitation
+		fields = [
+			'id',
+			'from_user',
+			'to_user',
+			'status',
+			'is_pong',
+			'created_at',
+			'updated_at',
+			'tournament_id',
+		]
+		read_only_fields = [
+			'id',
+			'from_user',
+			'status',
+			'created_at',
+			'updated_at',
+		]
+
+	def create(self, validated_data):
+		request = self.context['request']
+		from_user = request.user  # The logged-in player_user
+		invitation = Invitation.objects.create(
+			from_user=from_user,
+			**validated_data
+		)
+		return invitation

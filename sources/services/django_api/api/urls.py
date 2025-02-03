@@ -21,6 +21,10 @@ urlpatterns = [
 	path("users/<str:pk>/tournaments/", views.UserTournaments.as_view(), name="user-tournaments"),
 	path("users/<str:pk>/stats/", views.UserStats.as_view(), name="user-stats"),
 
+	path('invitations/', views.InvitationCreateView.as_view(), name='invitation-create'),
+	path('invitations/<int:pk>/accept/', views.InvitationAcceptView.as_view(), name='invitation-accept'),
+	# path('invitations/<int:pk>/decline/', InvitationDeclineView.as_view(), name='invitation-decline'),
+
 	path("match/", views.MatchList.as_view(), name="match-list"),
 	path("match/<int:pk>/", views.MatchDetail.as_view(), name="match-detail"),
 	path('42oauth/callback/', views.OAuthCallbackView.as_view(), name='callback'),
