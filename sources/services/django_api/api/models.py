@@ -21,11 +21,26 @@ class Friendship(models.Model):
 	user_id_2 = models.ForeignKey(User, related_name='friendship_user_2', on_delete=models.CASCADE)
 	friendship_status = models.BigIntegerField()
 
+class Tournament(models.Model):
+	name = models.CharField(max_length=255)
+	created_at = models.DateTimeField(auto_now_add=True)
+
+class TournamentParticipant(models.Model):
+	tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	points = models.FloatField()
+	rank = models.IntegerField()
+
 class PongGameStats(models.Model):
-	pong_game_stats_id = models.AutoField(primary_key=True)
-	score_player = models.PositiveIntegerField(default=0)
-	score_opponent = models.PositiveIntegerField(default=0)
-	number_of_bounces = models.PositiveIntegerField(default=0) 
+	user_score = models.PositiveIntegerField(default=0)
+	opponent_score = models.PositiveIntegerField(default=0)
+	user_fastest_time_to_score = models.PositiveIntegerField(default=0)
+	opponent_fastest_time_to_score = models.PositiveIntegerField(default=0)
+	user_max_consecutive_goals = models.PositiveIntegerField(default=0)
+	opponent_max_consecutive_goals = models.PositiveIntegerField(default=0)
+	user_average_time_to_score = models.PositiveIntegerField(default=0)
+	opponent_average_time_to_score = models.PositiveIntegerField(default=0)
+	longest_bounce_streak = models.PositiveIntegerField(default=0)
 
 class TicTacToeGameStats(models.Model):
 	tictactoe_game_stats_id = models.AutoField(primary_key=True)
@@ -46,16 +61,6 @@ class Match(models.Model):
 	)
 	tournament_id = models.IntegerField(null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
-
-class Tournament(models.Model):
-	name = models.CharField(max_length=255)
-	created_at = models.DateTimeField(auto_now_add=True)
-
-class TournamentParticipant(models.Model):
-	tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	points = models.FloatField()
-	rank = models.IntegerField()
 
 class Invitation(models.Model):
 	STATUS_CHOICES = (
@@ -83,6 +88,15 @@ class Invitation(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 	tournament_id = models.IntegerField(null=True, blank=True)
-
-	def __str__(self):
-		return f"Invitation from {self.from_user} to {self.to_user} [{self.status}]"
+	
+	# New field for nested Pong game stats
+	pong_game_stats = models.OneToOneField(
+		PongGameStats, null=True, blank=True,
+		on_delete=models.SET_NULL,
+		related_name='invitation'
+	)
+	tictactoe_game_stats = models.OneToOneField(
+		TicTacToeGameStats, null=True, blank=True,
+		on_delete=models.SET_NULL,
+		related_name='invitation'
+	)

@@ -78,3 +78,81 @@ async function	fetch_opponent()
 		return null;
 	return request.response;
 }
+
+async function createInvitation(toUserId, tournamentId = null) {
+	const url = '/api/invitations/';
+	toUserId = 2
+	const pongGameStats = {
+		user_score: 0,
+		opponent_score: 0,
+		user_fastest_time_to_score: 0,
+		opponent_fastest_time_to_score: 0,
+		user_max_consecutive_goals: 0,
+		opponent_max_consecutive_goals: 0,
+		user_average_time_to_score: 0,
+		opponent_average_time_to_score: 0,
+		longest_bounce_streak: 0
+	  };
+	// Build the request payload.
+	const payload = {
+	  to_user: toUserId,
+	  is_pong: true, // set true if invitation is for a Pong game.
+	};
+  
+	// Include pong game stats if provided.
+	if (pongGameStats) {
+	  payload.pong_game_stats = pongGameStats;
+	}
+  
+	try {
+	  const response = await fetch(url, {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json',
+		  // Set the required header for creating an invitation.
+		  'X_User_Type': 'user',
+		  // Add other headers like Authorization if needed.
+		},
+		body: JSON.stringify(payload)
+	  });
+  
+	  if (!response.ok) {
+		const errorData = await response.json();
+		throw new Error(`Failed to create invitation: ${JSON.stringify(errorData)}`);
+	  }
+  
+	  const data = await response.json();
+	  console.log('Invitation created successfully:', data);
+	  return data;
+	} catch (error) {
+	  console.error('Error creating invitation:', error);
+	  throw error;
+	}
+  }
+
+  async function acceptInvitation() {
+	const url = `/api/invitations/2/accept/`;
+  
+	try {
+	  const response = await fetch(url, {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json',
+		  'X_User_Type': 'opponent',
+		},
+		// The accept endpoint does not require a body per your description.
+	  });
+  
+	  if (!response.ok) {
+		const errorData = await response.json();
+		throw new Error(`Failed to accept invitation: ${JSON.stringify(errorData)}`);
+	  }
+  
+	  const data = await response.json();
+	  console.log('Invitation accepted successfully:', data);
+	  return data;
+	} catch (error) {
+	  console.error('Error accepting invitation:', error);
+	  throw error;
+	}
+  }

@@ -81,12 +81,18 @@ class PongGameStatsSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = PongGameStats
 		fields = [
-			'pong_game_stats_id',
-			'score_player',
-			'score_opponent',
-			'number_of_bounces'
+			'id',
+			'user_score',
+			'opponent_score',
+			'user_fastest_time_to_score',
+			'opponent_fastest_time_to_score',
+			'user_max_consecutive_goals',
+			'opponent_max_consecutive_goals',
+			'user_average_time_to_score',
+			'opponent_average_time_to_score',
+			'longest_bounce_streak'
 		]
-		read_only_fields = ['pong_game_stats_id']
+		read_only_fields = ['id']
 
 
 class TicTacToeGameStatsSerializer(serializers.ModelSerializer):
@@ -170,6 +176,12 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
 		read_only_fields = ['id']
 
 class InvitationSerializer(serializers.ModelSerializer):
+	pong_game_stats = PongGameStatsSerializer(
+		required=False, allow_null=True
+	)
+	tictactoe_game_stats = TicTacToeGameStatsSerializer(
+		required=False, allow_null=True
+	)
 	class Meta:
 		model = Invitation
 		fields = [
@@ -178,23 +190,31 @@ class InvitationSerializer(serializers.ModelSerializer):
 			'to_user',
 			'status',
 			'is_pong',
-			'created_at',
-			'updated_at',
 			'tournament_id',
-		]
-		read_only_fields = [
-			'id',
-			'from_user',
-			'status',
+			'pong_game_stats',
+			'tictactoe_game_stats',
 			'created_at',
 			'updated_at',
 		]
-
+		read_only_fields = ['status', 'created_at', 'updated_at', 'from_user']
+		
 	def create(self, validated_data):
 		request = self.context['request']
-		from_user = request.user  # The logged-in player_user
-		invitation = Invitation.objects.create(
-			from_user=from_user,
-			**validated_data
-		)
+		user = request.user  # The logged-in user is set as from_user
+		pong_data = validated_data.pop('pong_game_stats', None)
+		ttt_data = validated_data.pop('tictactoe_game_stats', None)
+
+		# Create the Invitation instance, automatically setting from_user.
+		invitation = Invitation.objects.create(from_user=user, **validated_data)
+		
+		if pong_data:
+			pong_instance = PongGameStats.objects.create(**pong_data)
+			invitation.pong_game_stats = pong_instance
+			invitation.save()
+
+		if ttt_data:
+			ttt_instance = TicTacToeGameStats.objects.create(**ttt_data)
+			invitation.tictactoe_game_stats = ttt_instance
+			invitation.save()
+
 		return invitation
