@@ -30,12 +30,10 @@ async function	set_profile_history(template)
 			let template = await new Template("frontend/html/pages/history_item.html").load();
 			if (template == null)
 				return console.error(ERROR_TEMPLATE);
-			template.edit.id.set.attribute("match", "class", "list-group-item");
 			if (element.result == "WIN")
 				template.edit.id.add.attribute("match", "class", "bg-success");
 			else
 				template.edit.id.add.attribute("match", "class", "bg-danger");
-			template.edit.id.set.content("match", element.type);
 			history.appendChild(template.edit.id.get.element("match"));
 		}
 	}
