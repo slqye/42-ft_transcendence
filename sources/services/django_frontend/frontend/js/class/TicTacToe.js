@@ -144,26 +144,65 @@ class TicTacToe
 		document.getElementById('player2-score').textContent = this.player2.score;
 	}
 
-	terminateMatch()
+	setGameButtonToReplay()
 	{
-		// TODO : send result to server
-		/*
-		data to send :
-			user_score : int
-			opponent_score : int
-			user_max_consecutive_wins : int
-			opponent_max_consecutive_wins : int
-			user_wins_as_crosses : int
-			opponent_wins_as_crosses : int
-			user_wins_as_noughts : int
-			opponent_wins_as_noughts : int
-			user_quickest_win_as_moves : int
-			opponent_quickest_win_as_moves : int
-		*/
 		var gameButton = document.getElementById('game-button');
 		gameButton.setAttribute('class', 'btn btn-outline-primary');
 		gameButton.textContent = 'Play a new match';
 		gameButton.addEventListener('click', this.resetMatch);
+	}
+
+	async terminateMatch()
+	{
+		let opponent = null;
+		try
+		{
+			opponent = await fetch_opponent();
+			if (!opponent)
+				throw new Error();
+		}
+		catch (error)
+		{
+			this.setGameButtonToReplay();
+			return new Toast("An opponent must be logged in to play a game.");
+		}
+
+		const request_body = JSON.stringify({
+			"opponent_user_id": opponent.id,
+			"is_pong": false,
+			"tictactoe_game_stats": {
+				"user_score": this.player1.score,
+				"opponent_score": this.player2.score,
+				"user_max_consecutive_wins": this.player1.max_consecutive_wins,
+				"opponent_max_consecutive_wins": this.player2.max_consecutive_wins,
+				"user_wins_as_crosses": this.player1.wins_as_crosses,
+				"opponent_wins_as_crosses": this.player2.wins_as_crosses,
+				"user_wins_as_noughts": this.player1.wins_as_noughts,
+				"opponent_wins_as_noughts": this.player2.wins_as_noughts,
+				"user_quickest_win_as_moves": this.player1.quickest_win_moves,
+				"opponent_quickest_win_as_moves": this.player2.quickest_win_moves
+			}
+		});
+
+		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
+		if (request.status === Api.ERROR || request.code !== 201)
+		{
+			new Toast(Toast.ERROR, "An error occurred while attempting to create a match.");
+		}
+		else
+		{
+			let invitation_id = request.response.id;
+			const accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.OPPONENT).set_method("POST").request();
+			if (accept_request.status === Api.ERROR || accept_request.code !== 201)
+			{
+				new Toast(Toast.ERROR, "An error occurred while attempting to create a match.");
+			}
+			else
+			{
+				new Toast(Toast.SUCCESS, "Match has been successfully created.");
+			}
+		}
+		this.setGameButtonToReplay();
 	}
 
 	endGame(winner, result)
