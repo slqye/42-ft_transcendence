@@ -75,6 +75,34 @@ class FriendshipSerializer(serializers.ModelSerializer):
 		]
 		read_only_fields = ['id']
 
+# Tournament Serializer
+class TournamentSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Tournament
+		fields = [
+			'id',  # Default primary key from Django
+			'name',
+			'created_at',
+		]
+		read_only_fields = ['id', 'created_at']
+
+
+# Tournament Participant Serializer
+class TournamentParticipantSerializer(serializers.ModelSerializer):
+	tournament = TournamentSerializer(read_only=True)
+	user = UserSerializer(read_only=True)
+
+	class Meta:
+		model = TournamentParticipant
+		fields = [
+			'id',  # Default primary key from Django
+			'tournament',
+			'user',
+			'points',
+			'rank',
+		]
+		read_only_fields = ['id']
+
 
 
 class PongGameStatsSerializer(serializers.ModelSerializer):
@@ -114,7 +142,7 @@ class MatchSerializer(serializers.ModelSerializer):
 		model = Match
 		fields = [
 			'id',
-			'player_user',
+			'host_user',
 			'opponent_user',
 			'result',
 			'is_pong',
@@ -147,34 +175,6 @@ class MatchSerializer(serializers.ModelSerializer):
 		return match
 
 
-# Tournament Serializer
-class TournamentSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Tournament
-		fields = [
-			'id',  # Default primary key from Django
-			'name',
-			'created_at',
-		]
-		read_only_fields = ['id', 'created_at']
-
-
-# Tournament Participant Serializer
-class TournamentParticipantSerializer(serializers.ModelSerializer):
-	tournament = TournamentSerializer(read_only=True)
-	user = UserSerializer(read_only=True)
-
-	class Meta:
-		model = TournamentParticipant
-		fields = [
-			'id',  # Default primary key from Django
-			'tournament',
-			'user',
-			'points',
-			'rank',
-		]
-		read_only_fields = ['id']
-
 class InvitationSerializer(serializers.ModelSerializer):
 	pong_game_stats = PongGameStatsSerializer(
 		required=False, allow_null=True
@@ -186,8 +186,8 @@ class InvitationSerializer(serializers.ModelSerializer):
 		model = Invitation
 		fields = [
 			'id',
-			'from_user',
-			'to_user',
+			'host_user',
+			'opponent_user',
 			'status',
 			'is_pong',
 			'tournament_id',
@@ -196,16 +196,16 @@ class InvitationSerializer(serializers.ModelSerializer):
 			'created_at',
 			'updated_at',
 		]
-		read_only_fields = ['status', 'created_at', 'updated_at', 'from_user']
+		read_only_fields = ['status', 'created_at', 'updated_at', 'host_user']
 		
 	def create(self, validated_data):
 		request = self.context['request']
-		user = request.user  # The logged-in user is set as from_user
+		user = request.user  # The logged-in user is set as host_user
 		pong_data = validated_data.pop('pong_game_stats', None)
 		ttt_data = validated_data.pop('tictactoe_game_stats', None)
 
-		# Create the Invitation instance, automatically setting from_user.
-		invitation = Invitation.objects.create(from_user=user, **validated_data)
+		# Create the Invitation instance, automatically setting host_user.
+		invitation = Invitation.objects.create(host_user=user, **validated_data)
 		
 		if pong_data:
 			pong_instance = PongGameStats.objects.create(**pong_data)

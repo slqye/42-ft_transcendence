@@ -95,7 +95,7 @@ async function createInvitation(toUserId, tournamentId = null) {
 	  };
 	// Build the request payload.
 	const payload = {
-	  to_user: toUserId,
+	  opponent_user: toUserId,
 	  is_pong: true, // set true if invitation is for a Pong game.
 	};
   
@@ -131,7 +131,7 @@ async function createInvitation(toUserId, tournamentId = null) {
   }
 
   async function acceptInvitation() {
-	const url = `/api/invitations/2/accept/`;
+	const url = `/api/invitations/3/accept/`;
   
 	try {
 	  const response = await fetch(url, {

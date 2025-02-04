@@ -49,7 +49,7 @@ class TicTacToeGameStats(models.Model):
 	board_state = models.JSONField(default=dict)
 
 class Match(models.Model):
-	player_user = models.ForeignKey(User, related_name='player_user', on_delete=models.CASCADE)
+	host_user = models.ForeignKey(User, related_name='host_user', on_delete=models.CASCADE)
 	opponent_user = models.ForeignKey(User, related_name='opponent_user', on_delete=models.CASCADE)
 	result = models.CharField(max_length=4)
 	is_pong = models.BooleanField(blank=False, default=True)
@@ -69,12 +69,12 @@ class Invitation(models.Model):
 		('declined', 'Declined'),
 	)
 
-	from_user = models.ForeignKey(
+	host_user = models.ForeignKey(
 		User,
 		on_delete=models.CASCADE,
 		related_name='invitations_sent'
 	)
-	to_user = models.ForeignKey(
+	opponent_user = models.ForeignKey(
 		User,
 		on_delete=models.CASCADE,
 		related_name='invitations_received'

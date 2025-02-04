@@ -79,7 +79,7 @@ class UserLogoutView(APIView):
 
 	def post(self, request, *args, **kwargs):
 		response = Response({"detail": "Both users logged out"})
-		# Delete the player_user cookies
+		# Delete the host_user cookies
 		response.delete_cookie("user_access")
 		response.delete_cookie("user_refresh")
 		return response
@@ -283,7 +283,7 @@ class InvitationAcceptView(APIView):
 
 		invitation = get_object_or_404(Invitation, pk=pk)
 
-		if invitation.to_user != request.user:
+		if invitation.opponent_user != request.user:
 			return Response({"detail": "You are not the invited opponent_user."},
 							status=status.HTTP_403_FORBIDDEN)
 
@@ -295,8 +295,8 @@ class InvitationAcceptView(APIView):
 		invitation.save()
 
 		match = Match.objects.create(
-			player_user=invitation.from_user,
-			opponent_user=invitation.to_user,
+			host_user=invitation.host_user,
+			opponent_user=invitation.opponent_user,
 			is_pong=invitation.is_pong,
 			tournament_id=invitation.tournament_id,
 			pong_game_stats=invitation.pong_game_stats,
@@ -320,7 +320,7 @@ class UserMatches(APIView):
 			target_user = get_object_or_404(User, pk=pk)
 		
 		matches = Match.objects.filter(
-			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
+			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)
 		).order_by('-created_at')[:10]
 
 		serializer = MatchSerializer(matches, many=True)
@@ -328,12 +328,12 @@ class UserMatches(APIView):
 
 	def post(self, request, pk, *args, **kwargs):
 		if pk == "me":
-			player_user = request.user
+			host_user = request.user
 		else:
-			player_user = get_object_or_404(User, pk=pk)
+			host_user = get_object_or_404(User, pk=pk)
 		
 		data = request.data.copy()
-		data['player_user'] = player_user.id  # Ensure the player_user is set to the authenticated user
+		data['host_user'] = host_user.id  # Ensure the host_user is set to the authenticated user
 
 		serializer = MatchSerializer(data=data)
 		if serializer.is_valid():
@@ -351,7 +351,7 @@ class UserPongMatches(APIView):
 			target_user = get_object_or_404(User, pk=pk)
 
 		matches = Match.objects.filter(is_pong=True).filter(
-			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)).order_by('-created_at')
+			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)).order_by('-created_at')
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)
 
@@ -366,7 +366,7 @@ class UserTicTacToeMatches(APIView):
 		matches = Match.objects.filter(
 			is_pong=False
 		).filter(
-			models.Q(player_user=target_user) | models.Q(opponent_user=target_user)
+			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)
 		).order_by('-created_at')
 
 		serializer = MatchSerializer(matches, many=True)
