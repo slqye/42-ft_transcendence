@@ -212,6 +212,7 @@ async function load_profile() {
 	load_navbar();
 	await set_profile(template);
 	await set_profile_history(template);
+	template.update();
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/profile")
 		history.pushState({ page: "profile" }, "Profile", "/profile");
@@ -227,8 +228,6 @@ async function load_friends() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	await set_profile(template);
-	await set_profile_history(template);
 	content.innerHTML = template.string;
 	if (window.location.pathname !== "/friends")
 		history.pushState({ page: "friends" }, "Friends", "/friends");
