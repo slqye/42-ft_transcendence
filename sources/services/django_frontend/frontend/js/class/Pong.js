@@ -302,25 +302,63 @@ class Pong
 		this.sliders[1].setAttribute("min", -1 + this.p2_paddle.height / this.canvas.height);
 	}
 
-	terminateMatch()
+	setGameButtonToReplay()
 	{
-		// TODO : send result to server
-		/*
-		data to send :
-			user_score : int
-			opponent_score : int
-			user_fastest_time_to_score : int
-			opponent_fastest_time_to_score : int
-			user_max_consecutive_goals : int
-			opponent_max_consecutive_goals : int
-			user_average_time_to_score : int
-			opponent_average_time_to_score : int
-			longest_bounces_streak : int
-		*/
 		var gameButton = document.getElementById('game-button');
 		gameButton.setAttribute('class', 'btn btn-outline-primary');
 		gameButton.textContent = 'Play a new match';
 		gameButton.addEventListener('click', this.start);
+	}
+
+	async terminateMatch()
+	{
+		let opponent = null;
+		try
+		{
+			opponent = await fetch_opponent();
+			if (!opponent)
+				throw new Error();
+		}
+		catch (error)
+		{
+			this.setGameButtonToReplay();
+			return (new Toast("An opponent must be logged in to play a game."));
+		}
+		const request_body = JSON.stringify(
+		{
+			"opponent_user_id": opponent.id,
+			"is_pong": true,
+			"pong_game_stats": {
+				"user_score": this.player1.score,
+				"opponent_score": this.player2.score,
+				"user_fastest_time_to_score": this.player1.fastest_time_to_score,
+				"opponent_fastest_time_to_score": this.player2.fastest_time_to_score,
+				"user_max_consecutive_goals": this.player1.max_consecutive_goals,
+				"opponent_max_consecutive_goals": this.player2.max_consecutive_goals,
+				"user_average_time_to_score": this.player1.average_time_to_score,
+				"opponent_average_time_to_score": this.player2.average_time_to_score,
+				"longest_bounce_streak": this.game_longest_bounces_streak
+				}
+		});
+		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
+		if (request.status == Api.ERROR || request.code != 201)
+		{
+			new Toast(Toast.ERROR, "An error occured while attempting to create a match.");
+		}
+		else
+		{
+			let invitation_id = request.response.id;
+			const accept_request = await new Api("/api/invitations/" + invitation_id + "/accept/", Api.OPPONENT).set_method("POST").request();
+			if (accept_request.status == Api.ERROR || accept_request.code != 201)
+			{
+				new Toast(Toast.ERROR, "An error occured while attempting to create a match.");
+			}
+			else
+			{
+				new Toast(Toast.SUCCESS, "Match has been successfully created.");
+			}
+		}
+		this.setGameButtonToReplay();
 	}
 
 	key_listener(event) { this.keys.add(event.key); }

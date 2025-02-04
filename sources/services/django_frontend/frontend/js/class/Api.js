@@ -19,6 +19,7 @@ class	Api
 		this.credentials = Api.DEFAULT_CREDENTIALS;
 		this.body = Api.DEFAULT_BODY; 
 		this.status = Api.SUCCESS;
+		this.code = 0;
 		this.response = null;
 		this.log = null;
 
@@ -37,16 +38,23 @@ class	Api
 			if (this.body != Api.DEFAULT_BODY)
 				options.body = this.body;
 			const response = await fetch(this.endpoint, options);
+			this.code = response.status;
 			if (this.credentials == "include" && response.status == 401 && this.endpoint != "/api/refresh/")
 			{
-				const refresh_response = await new Api("/api/refresh/", this.type).set_credentials("include").request();
+				let endpoint = "/api/user/refresh/";
+				if (this.type == Api.OPPONENT)
+					endpoint = "/api/opponent/refresh/";
+				const refresh_response = await new Api(endpoint, this.type).set_credentials("include").set_method("POST").request();
 				if (refresh_response.status == Api.ERROR)
 				{
 					this.status = Api.ERROR;
 					this.log = "Token refreshing failed.";
 				}
 				else if (refresh_response.status == Api.SUCCESS)
+				{
+					console.log("Token for " + this.type + " refreshed.");
 					return (this.request());
+				}
 			}
 			else if (!response.ok)
 			{
