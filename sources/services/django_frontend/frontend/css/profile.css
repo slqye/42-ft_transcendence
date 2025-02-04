@@ -10,8 +10,14 @@
 	height: auto;
 }
 
-#opponent_icon_display {
-	width: 40px;
-	height: 40px;
-	border-radius: 50%;
+.match_game_icons {
+	width: 50%;
+	height: auto;
+	border-radius: 100%;
+}
+
+.match_users_icons {
+	width: 25%;
+	height: auto;
+	border-radius: 100%;
 }
