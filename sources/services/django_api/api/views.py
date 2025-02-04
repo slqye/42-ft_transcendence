@@ -78,7 +78,7 @@ class UserLogoutView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
 	def post(self, request, *args, **kwargs):
-		response = Response({"detail": "Both users logged out"})
+		response = Response({"detail": "User logged out"})
 		# Delete the host_user cookies
 		response.delete_cookie("user_access")
 		response.delete_cookie("user_refresh")
@@ -88,7 +88,7 @@ class OpponentLogoutView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
 	def post(self, request, *args, **kwargs):
-		response = Response({"detail": "Both users logged out"})
+		response = Response({"detail": "Opponent user logged out"})
 		response.delete_cookie("opponent_access")
 		response.delete_cookie("opponent_refresh")
 		return response
@@ -276,10 +276,10 @@ class InvitationAcceptView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
 	def post(self, request, pk, *args, **kwargs):
-		# user_type = request.headers.get('X_User_Type')
-		# if user_type != 'opponent':
-		# 	return Response({"detail": "You must be an 'opponent' to accept an invitation."},
-		# 					status=status.HTTP_403_FORBIDDEN)
+		user_type = request.headers.get('X_User_Type')
+		if user_type != 'opponent':
+			return Response({"detail": "You must be an 'opponent' to accept an invitation."},
+							status=status.HTTP_403_FORBIDDEN)
 
 		invitation = get_object_or_404(Invitation, pk=pk)
 
@@ -312,6 +312,7 @@ class InvitationAcceptView(APIView):
 
 class UserMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
+	http_method_names = ["get"]
 
 	def get(self, request, pk, *args, **kwargs):
 		if pk == "me":
@@ -325,21 +326,6 @@ class UserMatches(APIView):
 
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)
-
-	def post(self, request, pk, *args, **kwargs):
-		if pk == "me":
-			host_user = request.user
-		else:
-			host_user = get_object_or_404(User, pk=pk)
-		
-		data = request.data.copy()
-		data['host_user'] = host_user.id  # Ensure the host_user is set to the authenticated user
-
-		serializer = MatchSerializer(data=data)
-		if serializer.is_valid():
-			serializer.save()
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserPongMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -388,12 +374,12 @@ class UserTournaments(APIView):
 class MatchList(generics.ListCreateAPIView):
 	queryset = Match.objects.all()
 	serializer_class = MatchSerializer
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAdminUser]
 
 class MatchDetail(generics.RetrieveDestroyAPIView):
 	queryset = Match.objects.all()
 	serializer_class = MatchSerializer
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAdminUser]
 
 def index(request, path=None):
 	return HttpResponse("")
