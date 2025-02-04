@@ -166,10 +166,11 @@ class TicTacToe
 			this.setGameButtonToReplay();
 			return new Toast("An opponent must be logged in to play a game.");
 		}
-
+		let result = this.player1.score > this.player2.score ? "WIN" : "LOSE";
 		const request_body = JSON.stringify({
 			"opponent_user_id": opponent.id,
 			"is_pong": false,
+			"result": result,
 			"tictactoe_game_stats": {
 				"user_score": this.player1.score,
 				"opponent_score": this.player2.score,
