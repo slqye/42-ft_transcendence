@@ -95,7 +95,7 @@ async function createInvitation(toUserId, tournamentId = null) {
 	  };
 	// Build the request payload.
 	const payload = {
-	  opponent_user: toUserId,
+	  opponent_user_id: toUserId,
 	  is_pong: true, // set true if invitation is for a Pong game.
 	};
   

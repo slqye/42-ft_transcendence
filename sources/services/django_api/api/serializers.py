@@ -135,86 +135,105 @@ class TicTacToeGameStatsSerializer(serializers.ModelSerializer):
 		read_only_fields = ['tictactoe_game_stats_id']
 
 class MatchSerializer(serializers.ModelSerializer):
-	pong_game_stats = PongGameStatsSerializer(required=False, allow_null=True)
-	tictactoe_game_stats = TicTacToeGameStatsSerializer(required=False, allow_null=True)
+    # Nested representation for read
+    host_user = UserSerializer(read_only=True)
+    opponent_user = UserSerializer(read_only=True)
+    
+    # Write-only fields to accept IDs
+    host_user_id = serializers.PrimaryKeyRelatedField(
+        write_only=True, source='host_user', queryset=User.objects.all()
+    )
+    opponent_user_id = serializers.PrimaryKeyRelatedField(
+        write_only=True, source='opponent_user', queryset=User.objects.all()
+    )
+    
+    pong_game_stats = PongGameStatsSerializer(required=False, allow_null=True)
+    tictactoe_game_stats = TicTacToeGameStatsSerializer(required=False, allow_null=True)
 
-	class Meta:
-		model = Match
-		fields = [
-			'id',
-			'host_user',
-			'opponent_user',
-			'result',
-			'is_pong',
-			'pong_game_stats',
-			'tictactoe_game_stats',
-			'tournament_id',
-			'created_at'
-		]
-		read_only_fields = ['id', 'created_at']
+    class Meta:
+        model = Match
+        fields = [
+            'id',
+            'host_user',         # read-only nested
+            'opponent_user',       # read-only nested
+            'host_user_id',      # write-only id
+            'opponent_user_id',    # write-only id
+            'result',
+            'is_pong',
+            'pong_game_stats',
+            'tictactoe_game_stats',
+            'tournament_id',
+            'created_at'
+        ]
+        read_only_fields = ['id', 'created_at']
 
-	def create(self, validated_data):
-		pong_stats_data = validated_data.pop('pong_game_stats', None)
-		tictactoe_stats_data = validated_data.pop('tictactoe_game_stats', None)
+    def create(self, validated_data):
+        # Remove nested game stats data so we can create them manually
+        pong_stats_data = validated_data.pop('pong_game_stats', None)
+        tictactoe_stats_data = validated_data.pop('tictactoe_game_stats', None)
+        
+        match = Match.objects.create(**validated_data)
 
-		# Create the Match instance first
-		match = Match.objects.create(**validated_data)
-
-		# If it's a Pong match, create PongGameStats if provided
-		if match.is_pong and pong_stats_data is not None:
-			pong_stats = PongGameStats.objects.create(**pong_stats_data)
-			match.pong_game_stats = pong_stats
-			match.save()
-
-		# If it's NOT a Pong match, create TicTacToeGameStats if provided
-		elif not match.is_pong and tictactoe_stats_data is not None:
-			tictactoe_stats = TicTacToeGameStats.objects.create(**tictactoe_stats_data)
-			match.tictactoe_game_stats = tictactoe_stats
-			match.save()
-
-		return match
+        if match.is_pong and pong_stats_data is not None:
+            pong_stats = PongGameStats.objects.create(**pong_stats_data)
+            match.pong_game_stats = pong_stats
+            match.save()
+        elif not match.is_pong and tictactoe_stats_data is not None:
+            tictactoe_stats = TicTacToeGameStats.objects.create(**tictactoe_stats_data)
+            match.tictactoe_game_stats = tictactoe_stats
+            match.save()
+        return match
 
 
 class InvitationSerializer(serializers.ModelSerializer):
-	pong_game_stats = PongGameStatsSerializer(
-		required=False, allow_null=True
-	)
-	tictactoe_game_stats = TicTacToeGameStatsSerializer(
-		required=False, allow_null=True
-	)
-	class Meta:
-		model = Invitation
-		fields = [
-			'id',
-			'host_user',
-			'opponent_user',
-			'status',
-			'is_pong',
-			'tournament_id',
-			'pong_game_stats',
-			'tictactoe_game_stats',
-			'created_at',
-			'updated_at',
-		]
-		read_only_fields = ['status', 'created_at', 'updated_at', 'host_user']
-		
-	def create(self, validated_data):
-		request = self.context['request']
-		user = request.user  # The logged-in user is set as host_user
-		pong_data = validated_data.pop('pong_game_stats', None)
-		ttt_data = validated_data.pop('tictactoe_game_stats', None)
+    # Nested representation for read
+    host_user = UserSerializer(read_only=True)
+    opponent_user = UserSerializer(read_only=True)
+    
+    # Write-only field to accept the recipient’s user ID
+    opponent_user_id = serializers.PrimaryKeyRelatedField(
+        write_only=True, source="opponent_user", queryset=User.objects.all()
+    )
+    
+    pong_game_stats = PongGameStatsSerializer(required=False, allow_null=True)
+    tictactoe_game_stats = TicTacToeGameStatsSerializer(required=False, allow_null=True)
+    
+    class Meta:
+        model = Invitation
+        fields = [
+            'id',
+            'host_user',    # read-only nested (set automatically)
+            'opponent_user',      # read-only nested
+            'opponent_user_id',   # write-only id
+            'status',
+            'is_pong',
+            'tournament_id',
+            'pong_game_stats',
+            'tictactoe_game_stats',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['status', 'created_at', 'updated_at', 'host_user']
 
-		# Create the Invitation instance, automatically setting host_user.
-		invitation = Invitation.objects.create(host_user=user, **validated_data)
-		
-		if pong_data:
-			pong_instance = PongGameStats.objects.create(**pong_data)
-			invitation.pong_game_stats = pong_instance
-			invitation.save()
-
-		if ttt_data:
-			ttt_instance = TicTacToeGameStats.objects.create(**ttt_data)
-			invitation.tictactoe_game_stats = ttt_instance
-			invitation.save()
-
-		return invitation
+    def create(self, validated_data):
+        request = self.context['request']
+        user = request.user  # The logged-in user becomes host_user
+        
+        # Pop the nested game stats data if provided
+        pong_data = validated_data.pop('pong_game_stats', None)
+        ttt_data = validated_data.pop('tictactoe_game_stats', None)
+        
+        # Create the Invitation, setting host_user automatically
+        invitation = Invitation.objects.create(host_user=user, **validated_data)
+        
+        if pong_data:
+            pong_instance = PongGameStats.objects.create(**pong_data)
+            invitation.pong_game_stats = pong_instance
+            invitation.save()
+        
+        if ttt_data:
+            ttt_instance = TicTacToeGameStats.objects.create(**ttt_data)
+            invitation.tictactoe_game_stats = ttt_instance
+            invitation.save()
+        
+        return invitation
