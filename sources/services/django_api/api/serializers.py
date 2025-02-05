@@ -215,9 +215,6 @@ class InvitationSerializer(serializers.ModelSerializer):
 	pong_game_stats = PongGameStatsSerializer(required=False, allow_null=True)
 	tictactoe_game_stats = TicTacToeGameStatsSerializer(required=False, allow_null=True)
 	
-	# New field added: result (read-only)
-	result = serializers.BooleanField(read_only=True)
-	
 	class Meta:
 		model = Invitation
 		fields = [
