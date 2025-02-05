@@ -22,6 +22,8 @@ from django.shortcuts import redirect, get_object_or_404
 
 User = get_user_model()
 
+############################## USER AND TOKENS ##############################
+
 class UserTokenRefreshView(APIView):
 	permission_classes = [permissions.AllowAny]  # Allow access without authentication
 
@@ -162,17 +164,17 @@ class OpponentLoginView(APIView):
 class RegisterUser(generics.CreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.AllowAny]
+	permission_classes = [permissions.IsAdminUser]
 
 class UserList(generics.ListCreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAdminUser]
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAdminUser]
 
 class UpdateUserField(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -255,7 +257,9 @@ class UserStats(APIView):
 		}
 
 		return Response(response_data)
-	
+
+############################## MATCHES ##############################
+
 class InvitationCreateView(generics.CreateAPIView):
 	queryset = Invitation.objects.all()
 	serializer_class = InvitationSerializer
@@ -443,6 +447,8 @@ class UserTournaments(APIView):
 		serializer = TournamentParticipantSerializer(participants, many=True)
 		return Response(serializer.data)
 
+############################## FRIENDSHIP ##############################
+
 class FriendshipView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 	
@@ -497,19 +503,19 @@ class FriendshipView(APIView):
 		friendship.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
-# List all friendships for a given user.
 class UserFriendshipListView(generics.ListAPIView):
 	serializer_class = FriendshipSerializer
 	permission_classes = [permissions.IsAuthenticated]
 
 	def get_queryset(self):
-		# Expecting a URL parameter 'user_id' (or "me")
 		user_id = self.kwargs.get('user_id')
 		if user_id == "me":
 			target_user = self.request.user
 		else:
 			target_user = get_object_or_404(User, pk=user_id)
 		return Friendship.objects.filter(models.Q(user_id_1=target_user) | models.Q(user_id_2=target_user))
+
+############################## OAUTH et d'autres trucs ##############################
 
 def index(request, path=None):
 	return HttpResponse("")
