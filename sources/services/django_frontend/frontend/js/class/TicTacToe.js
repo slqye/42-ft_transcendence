@@ -130,10 +130,25 @@ class TicTacToe
 		return this.board.every(cell => cell !== null);
 	}
 	
-	resetMatch()
+	resetPlayerVariables()
 	{
 		this.player1.score = 0;
+		this.player1.consecutive_wins = 0;
+		this.player1.max_consecutive_wins = 0;
+		this.player1.wins_as_crosses = 0;
+		this.player1.wins_as_noughts = 0;
+		this.player1.quickest_win_moves = 0;
 		this.player2.score = 0;
+		this.player2.consecutive_wins = 0;
+		this.player2.max_consecutive_wins = 0;
+		this.player2.wins_as_crosses = 0;
+		this.player2.wins_as_noughts = 0;
+		this.player2.quickest_win_moves = 0;
+	}
+
+	resetMatch()
+	{
+		this.resetPlayerVariables();
 		this.refreshScoreboard();
 		this.startRound();
 	}
@@ -166,9 +181,9 @@ class TicTacToe
 			this.setGameButtonToReplay();
 			return new Toast("An opponent must be logged in to play a game.");
 		}
-		let result = this.player1.score > this.player2.score ? 1 : -1;
+		let result = this.player1.score > this.player2.score ? 0 : 1;
 		if (this.player1.score === this.player2.score)
-			result = 0;
+			result = 2;
 		const request_body = JSON.stringify({
 			"opponent_user_id": opponent.id,
 			"is_pong": false,
@@ -229,7 +244,7 @@ class TicTacToe
 					this.player1.wins_as_crosses += 1;
 				else
 					this.player1.wins_as_noughts += 1;
-				if (this.moves_count < this.player1.quickest_win_moves)
+				if (this.moves_count < this.player1.quickest_win_moves || this.player1.quickest_win_moves == 0)
 					this.player1.quickest_win_moves = this.moves_count;
 			}
 			else if (winner === this.player2.name)
@@ -243,7 +258,7 @@ class TicTacToe
 					this.player2.wins_as_crosses += 1;
 				else
 					this.player2.wins_as_noughts += 1;
-				if (this.moves_count < this.player2.quickest_win_moves)
+				if (this.moves_count < this.player2.quickest_win_moves || this.player2.quickest_win_moves == 0)
 					this.player2.quickest_win_moves = this.moves_count;
 			}
 			this.refreshScoreboard();

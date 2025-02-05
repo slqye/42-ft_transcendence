@@ -344,12 +344,12 @@ class Pong
 		this.player1.average_time_to_score = 0;
 		this.player2.average_time_to_score = 0;
 		if (this.player1.goals_times.length > 0)
-			this.player1.average_time_to_score = this.player1.goals_times.reduce((acc, time) => acc + time, 0) / this.player1.goals_times.length;
+			this.player1.average_time_to_score = parseInt(this.player1.goals_times.reduce((acc, time) => acc + time, 0) / this.player1.goals_times.length);
 		if (this.player2.goals_times.length > 0)
-			this.player2.average_time_to_score = this.player2.goals_times.reduce((acc, time) => acc + time, 0) / this.player2.goals_times.length;
-		let result = this.player1.score > this.player2.score ? 1 : -1;
+			this.player2.average_time_to_score = parseInt(this.player2.goals_times.reduce((acc, time) => acc + time, 0) / this.player2.goals_times.length);
+		let result = this.player1.score > this.player2.score ? 0 : 1;
 		if (this.player1.score === this.player2.score)
-			result = 0;
+			result = 2;
 		const request_body = JSON.stringify(
 		{
 			"opponent_user_id": opponent.id,
