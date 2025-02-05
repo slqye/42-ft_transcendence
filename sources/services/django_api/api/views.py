@@ -263,7 +263,8 @@ class InvitationCreateView(generics.CreateAPIView):
 
 	def create(self, request, *args, **kwargs):
 		user_type = request.headers.get('X_User_Type', 'user')
-		print(user_type)
+		if request.data['result'] < 0 or request.data['result'] > 2:
+			return Response({"detail": "Result must be either 0, 1 or 2"}, status=status.HTTP_400_BAD_REQUEST)
 		if user_type != 'user':
 			return Response({"detail": "You must be a 'user' to create an invitation."},
 							status=status.HTTP_403_FORBIDDEN)
@@ -273,42 +274,60 @@ class InvitationCreateView(generics.CreateAPIView):
 		serializer.save()
 
 class InvitationAcceptView(APIView):
-	permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
-	def post(self, request, pk, *args, **kwargs):
-		user_type = request.headers.get('X_User_Type')
-		if user_type != 'opponent':
-			return Response({"detail": "You must be an 'opponent' to accept an invitation."},
-							status=status.HTTP_403_FORBIDDEN)
+    def post(self, request, pk, *args, **kwargs):
+        user_type = request.headers.get('X_User_Type')
+        if user_type != 'opponent':
+            return Response({"detail": "You must be an 'opponent' to accept an invitation."},
+                            status=status.HTTP_403_FORBIDDEN)
 
-		invitation = get_object_or_404(Invitation, pk=pk)
+        invitation = get_object_or_404(Invitation, pk=pk)
 
-		if invitation.opponent_user != request.user:
-			return Response({"detail": "You are not the invited opponent_user."},
-							status=status.HTTP_403_FORBIDDEN)
+        if invitation.opponent_user != request.user:
+            return Response({"detail": "You are not the invited opponent_user."},
+                            status=status.HTTP_403_FORBIDDEN)
 
-		if invitation.status != 'pending':
-			return Response({"detail": f"Cannot accept an invitation with status '{invitation.status}'."},
-							status=status.HTTP_400_BAD_REQUEST)
+        # Check if invitation has already been accepted.
+        if invitation.status:
+            return Response({"detail": "Invitation has already been accepted."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-		invitation.status = 'accepted'
-		invitation.save()
+        try:
+            # Update the invitation: set status to True (accepted) and result to True.
+            invitation.status = True
+            invitation.result = True
+            invitation.save()
+        except Exception as e:
+            return Response({"detail": "Error updating invitation: " + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-		match = Match.objects.create(
-			host_user=invitation.host_user,
-			opponent_user=invitation.opponent_user,
-			is_pong=invitation.is_pong,
-			tournament_id=invitation.tournament_id,
-			pong_game_stats=invitation.pong_game_stats,
-			tictactoe_game_stats=invitation.tictactoe_game_stats,
-		)
+        try:
+            # Create the match with result set as an integer (1 for accepted).
+            match = Match.objects.create(
+                host_user=invitation.host_user,
+                opponent_user=invitation.opponent_user,
+                is_pong=invitation.is_pong,
+                tournament_id=invitation.tournament_id,
+                pong_game_stats=invitation.pong_game_stats,
+                tictactoe_game_stats=invitation.tictactoe_game_stats,
+                result = invitation.result
+            )
+        except Exception as e:
+            return Response({"detail": "Error creating match: " + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-		match_data = MatchSerializer(match).data
+        match_data = MatchSerializer(match).data
 
-		return Response({
-			"detail": "Invitation accepted. Match created.",
-			"match": match_data
-		}, status=status.HTTP_201_CREATED)
+        try:
+            invitation.delete()
+        except Exception as e:
+            pass
+
+        return Response({
+            "detail": "Invitation accepted. Match created.",
+            "match": match_data
+        }, status=status.HTTP_201_CREATED)
 
 class UserMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -370,16 +389,6 @@ class UserTournaments(APIView):
 		participants = TournamentParticipant.objects.filter(user=target_user)
 		serializer = TournamentParticipantSerializer(participants, many=True)
 		return Response(serializer.data)
-
-class MatchList(generics.ListCreateAPIView):
-	queryset = Match.objects.all()
-	serializer_class = MatchSerializer
-	permission_classes = [permissions.IsAdminUser]
-
-class MatchDetail(generics.RetrieveDestroyAPIView):
-	queryset = Match.objects.all()
-	serializer_class = MatchSerializer
-	permission_classes = [permissions.IsAdminUser]
 
 class FriendshipView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
