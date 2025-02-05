@@ -6,8 +6,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.db import models
 
-from .models import User, Match, TournamentParticipant, Invitation
-from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer, InvitationSerializer
+from .models import User, Match, TournamentParticipant, Invitation, Friendship
+from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer, InvitationSerializer, FriendshipSerializer
 
 from django.contrib.auth import get_user_model, login, authenticate
 
@@ -380,6 +380,74 @@ class MatchDetail(generics.RetrieveDestroyAPIView):
 	queryset = Match.objects.all()
 	serializer_class = MatchSerializer
 	permission_classes = [permissions.IsAdminUser]
+
+class FriendshipView(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+	
+	def get_object(self, pk):
+		return get_object_or_404(Friendship, pk=pk)
+	
+	def post(self, request, pk=None):
+		data = request.data.copy()
+		data['user_id_1'] = request.user.id
+		if 'user_id_2' not in data:
+			return Response({"error": "user_id_2 is required."}, status=status.HTTP_400_BAD_REQUEST)
+		if int(data['user_id_2']) == request.user.id:
+			return Response({"error": "Cannot create friendship with yourself."}, status=status.HTTP_400_BAD_REQUEST)
+		if Friendship.objects.filter(
+			models.Q(user_id_1=request.user, user_id_2=data['user_id_2']) |
+			models.Q(user_id_1=data['user_id_2'], user_id_2=request.user)
+		).exists():
+			return Response({"error": "A friendship between these users already exists."},
+							status=status.HTTP_400_BAD_REQUEST)
+		serializer = FriendshipSerializer(data=data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	
+	def put(self, request, pk=None):
+		if pk is None:
+			return Response({"error": "Friendship ID is required for update."},
+							status=status.HTTP_400_BAD_REQUEST)
+		
+		friendship = self.get_object(pk)
+		if friendship.user_id_2 != request.user:
+			return Response({"detail": "You are not the correct user to accept this friendship."},
+							status=status.HTTP_403_FORBIDDEN)
+		if friendship.friendship_status is True:
+			return Response({"detail": "Friendship has already been accepted."},
+							status=status.HTTP_400_BAD_REQUEST)
+
+		data = {'friendship_status': request.data.get('friendship_status', friendship.friendship_status)}
+		serializer = FriendshipSerializer(friendship, data=data, partial=True)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	
+	def delete(self, request, pk=None):
+		if pk is None:
+			return Response({"error": "Friendship ID is required for deletion."}, status=status.HTTP_400_BAD_REQUEST)
+		friendship = self.get_object(pk)
+		if request.user != friendship.user_id_1 and request.user != friendship.user_id_2:
+			return Response({"error": "Friendship deletion is forbidden."}, status=status.HTTP_403_FORBIDDEN)
+		friendship.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
+
+# List all friendships for a given user.
+class UserFriendshipListView(generics.ListAPIView):
+	serializer_class = FriendshipSerializer
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get_queryset(self):
+		# Expecting a URL parameter 'user_id' (or "me")
+		user_id = self.kwargs.get('user_id')
+		if user_id == "me":
+			target_user = self.request.user
+		else:
+			target_user = get_object_or_404(User, pk=user_id)
+		return Friendship.objects.filter(models.Q(user_id_1=target_user) | models.Q(user_id_2=target_user))
 
 def index(request, path=None):
 	return HttpResponse("")
