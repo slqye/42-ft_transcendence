@@ -277,46 +277,99 @@ class InvitationAcceptView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk, *args, **kwargs):
+        # Only an 'opponent' is allowed to accept an invitation.
         user_type = request.headers.get('X_User_Type')
         if user_type != 'opponent':
-            return Response({"detail": "You must be an 'opponent' to accept an invitation."},
-                            status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You must be an 'opponent' to accept an invitation."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
+        # Retrieve the invitation by its primary key.
         invitation = get_object_or_404(Invitation, pk=pk)
 
+        # Ensure the authenticated user is the invited opponent.
         if invitation.opponent_user != request.user:
-            return Response({"detail": "You are not the invited opponent_user."},
-                            status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You are not the invited opponent_user."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        # Check if invitation has already been accepted.
+        # Check if the invitation has already been accepted.
         if invitation.status:
-            return Response({"detail": "Invitation has already been accepted."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invitation has already been accepted."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        # Update the invitation: mark it as accepted.
         try:
-            # Update the invitation: set status to True (accepted) and result to True.
-            invitation.status = True
-            invitation.result = True
+            invitation.status = True  # accepted
             invitation.save()
         except Exception as e:
-            return Response({"detail": "Error updating invitation: " + str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"detail": "Error updating invitation: " + str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
+        # Use the invitation's host_user and opponent_user.
+        host_user = invitation.host_user
+        opponent_user = invitation.opponent_user
+
+        # Update users' stats based on the game type and invitation.result.
         try:
-            # Create the match with result set as an integer (1 for accepted).
+            if invitation.is_pong:
+                host_user.pong_matches_played += 1
+                opponent_user.pong_matches_played += 1
+                if invitation.result == 0:
+                    host_user.pong_wins += 1
+                    opponent_user.pong_losses += 1
+                elif invitation.result == 1:
+                    host_user.pong_losses += 1
+                    opponent_user.pong_wins += 1
+                else:
+                    host_user.pong_draws += 1
+                    opponent_user.pong_draws += 1
+            else:
+                host_user.tictactoe_matches_played += 1
+                opponent_user.tictactoe_matches_played += 1
+                if invitation.result == 0:
+                    host_user.tictactoe_wins += 1
+                    opponent_user.tictactoe_losses += 1
+                elif invitation.result == 1:
+                    host_user.tictactoe_losses += 1
+                    opponent_user.tictactoe_wins += 1
+                else:
+                    host_user.tictactoe_draws += 1
+                    opponent_user.tictactoe_draws += 1
+
+            # Save updated stats.
+            host_user.save()
+            opponent_user.save()
+        except Exception as e:
+            return Response(
+                {"detail": "Error updating user stats: " + str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Create the match using the invitation's game stats and result.
+        try:
             match = Match.objects.create(
-                host_user=invitation.host_user,
-                opponent_user=invitation.opponent_user,
+                host_user=host_user,
+                opponent_user=opponent_user,
                 is_pong=invitation.is_pong,
                 tournament_id=invitation.tournament_id,
                 pong_game_stats=invitation.pong_game_stats,
                 tictactoe_game_stats=invitation.tictactoe_game_stats,
-                result = invitation.result
+                result=invitation.result  # match result as integer
             )
         except Exception as e:
-            return Response({"detail": "Error creating match: " + str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"detail": "Error creating match: " + str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
+        # Serialize the created match.
         match_data = MatchSerializer(match).data
 
         try:
