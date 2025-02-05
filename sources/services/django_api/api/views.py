@@ -164,7 +164,7 @@ class OpponentLoginView(APIView):
 class RegisterUser(generics.CreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAdminUser]
+	permission_classes = [permissions.AllowAny]
 
 class UserList(generics.ListCreateAPIView):
 	queryset = User.objects.all()
@@ -175,6 +175,12 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
 	permission_classes = [permissions.IsAdminUser]
+
+class UserFetchUsername(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    lookup_field = 'username'
 
 class UpdateUserField(APIView):
 	permission_classes = [permissions.IsAuthenticated]

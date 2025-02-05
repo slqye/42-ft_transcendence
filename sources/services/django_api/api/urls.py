@@ -16,6 +16,7 @@ urlpatterns = [
 	path("users/me/", views.CurrentUser.as_view(), name="current-user"),
 	path("users/<int:pk>/", views.UserDetail.as_view(), name="user-detail"),
 	path("users/update/<str:field>/", views.UpdateUserField.as_view(), name="update-user-field"),
+	path('users/<str:username>/', views.UserFetchUsername.as_view(), name='user-detail-username'),
 
 	# Friendships
 	path('friendships/', views.FriendshipView.as_view(), name='friendship'),
