@@ -201,8 +201,9 @@ async function load_signup() {
 	init_tooltips();
 }
 
-async function load_profile() {
-	if (!await Api.is_login())
+async function load_profile(pk = "me") {
+	console.log("load_profile with pk = ", pk);
+	if (pk === "me" && !await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/profile.html").load();
@@ -210,12 +211,14 @@ async function load_profile() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	await set_profile(template);
-	await set_profile_history(template);
+	await set_profile(template, pk);
+	await set_profile_history(template, pk);
 	template.update();
 	content.innerHTML = template.string;
-	if (window.location.pathname !== "/profile")
+	if (pk === "me" && window.location.pathname !== "/profile")
 		history.pushState({ page: "profile" }, "Profile", "/profile");
+	else if (pk !== "me" && window.location.pathname !== "/profile/" + pk)
+		history.pushState({ page: "profile", pk: pk }, "Profile", "/profile/" + pk);
 	init_tooltips();
 }
 
@@ -253,6 +256,12 @@ window.onpopstate = async function (event) {
 	if (event.state)
 	{
 		const page = event.state.page;
+		if (page.startsWith("profile/"))
+		{
+			console.log("load_profile with pk = ", page.split("/")[1]);
+			await load_profile(page.split("/")[1]);
+			return ;
+		}
 		switch (page)
 		{
 			case "home":
