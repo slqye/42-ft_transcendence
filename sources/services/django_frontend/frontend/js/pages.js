@@ -46,7 +46,7 @@ async function load_home() {
 	if (window.location.pathname === "/home" && callback)
 		await signin_42_callback();
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/home")
 		history.pushState({ page: "home" }, "Home", "/home");
 	init_tooltips();
@@ -63,7 +63,7 @@ async function load_create_game_pong() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/create_game_pong")
 		history.pushState({ page: "create_game_pong" }, "Create a Pong game!", "/create_game_pong");
 	init_tooltips();
@@ -85,7 +85,7 @@ async function load_pong_match() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/match_pong")
 		history.pushState({ page: "match_pong" }, "Pong Match!", "/match_pong");
 	init_tooltips();
@@ -100,7 +100,7 @@ async function load_create_game_tictactoe() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/create_game_tictactoe")
 		history.pushState({ page: "create_game_tictactoe" }, "Create a TicTacToe game!", "/create_game_tictactoe");
 	init_tooltips();
@@ -122,7 +122,7 @@ async function load_tictactoe_match() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/match_tictactoe")
 		history.pushState({ page: "match_tictactoe" }, "TicTacToe Match!", "/match_tictactoe");
 	init_tooltips();
@@ -135,7 +135,7 @@ async function load_about() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/about")
 		history.pushState({ page: "about" }, "About", "/about");
 	init_tooltips();
@@ -154,7 +154,7 @@ async function load_signin() {
 		return (console.error(ERROR_TEMPLATE));
 	
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 
 	// Adapt the 42 logo based on the current theme
 	const theme = document.body.getAttribute("data-bs-theme");
@@ -195,7 +195,7 @@ async function load_signup() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/signup")
 		history.pushState({ page: "signup" }, "Signup", "/signup");
 	init_tooltips();
@@ -212,8 +212,7 @@ async function load_profile() {
 	load_navbar();
 	await set_profile(template);
 	await set_profile_history(template);
-	template.update();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/profile")
 		history.pushState({ page: "profile" }, "Profile", "/profile");
 	init_tooltips();
@@ -228,7 +227,8 @@ async function load_friends() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	await set_friend_list(template);
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/friends")
 		history.pushState({ page: "friends" }, "Friends", "/friends");
 	init_tooltips();
@@ -243,7 +243,7 @@ async function load_settings() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	content.innerHTML = template.string;
+	content.innerHTML = template.value;
 	if (window.location.pathname !== "/settings")
 		history.pushState({ page: "settings" }, "Settings", "/settings");
 	init_tooltips();
