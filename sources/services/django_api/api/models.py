@@ -19,7 +19,7 @@ class User(AbstractUser):
 class Friendship(models.Model):
 	user_id_1 = models.ForeignKey(User, related_name='friendship_user_1', on_delete=models.CASCADE)
 	user_id_2 = models.ForeignKey(User, related_name='friendship_user_2', on_delete=models.CASCADE)
-	friendship_status = models.BigIntegerField()
+	friendship_status = models.BooleanField(blank=False, default=False)
 
 class Tournament(models.Model):
 	name = models.CharField(max_length=255)

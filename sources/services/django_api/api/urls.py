@@ -15,6 +15,10 @@ urlpatterns = [
 	path("users/<int:pk>/", views.UserDetail.as_view(), name="user-detail"),
 	path("users/update/<str:field>/", views.UpdateUserField.as_view(), name="update-user-field"),
 
+	path('friendships/', views.FriendshipView.as_view(), name='friendship'),
+	path('friendships/<int:pk>/', views.FriendshipView.as_view(), name='friendship-detail'),
+	path('users/<int:pk>/friendships/', views.UserFriendshipListView.as_view(), name='user-friendship-list'),
+
 	path("users/<str:pk>/matches/", views.UserMatches.as_view(), name="user-matches"),
 	path("users/<str:pk>/matches/ttt/", views.UserTicTacToeMatches.as_view(), name="user-ttt-matches"),
 	path("users/<str:pk>/matches/pong/", views.UserPongMatches.as_view(), name="user-pong-matches"),
