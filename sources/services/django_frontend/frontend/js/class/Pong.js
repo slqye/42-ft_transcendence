@@ -324,7 +324,9 @@ class Pong
 			this.setGameButtonToReplay();
 			return (new Toast("An opponent must be logged in to play a game."));
 		}
-		let result = this.player1.score > this.player2.score ? "WIN" : "LOSE";
+		let result = this.player1.score > this.player2.score ? 1 : -1;
+		if (this.player1.score === this.player2.score)
+			result = 0;
 		const request_body = JSON.stringify(
 		{
 			"opponent_user_id": opponent.id,
