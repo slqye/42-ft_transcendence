@@ -18,9 +18,10 @@ class Pong
 		this.score = score;
 		this.win_condition = win_condition;
 		this.roundActive = false;
-
+		
 		this.player1 = player1;
 		this.player2 = player2;
+		this.current_bounce_streak = 0;
 		this.game_longest_bounces_streak = 0;
 		this.game_timer_start = 0;
 		this.game_timer_end = 0;
@@ -165,13 +166,23 @@ class Pong
 
 		if (ball_x_radius <= Pong.PADDLE_OFFSET_RATIO * this.canvas.width + this.p1_paddle.width && ball_x_radius >= Pong.PADDLE_OFFSET_RATIO * this.canvas.width)
 		{
-			if (ball_y_radius >= this.p1_paddle.y && ball_y_radius <= this.p1_paddle.y + this.p1_paddle.height)
+			if (ball_y_radius >= this.p1_paddle.y && ball_y_radius <= this.p1_paddle.y + this.p1_paddle.height) {
 				this.ball.dx = -this.ball.dx;
+				this.current_bounce_streak++;
+				if (this.current_bounce_streak > this.game_longest_bounces_streak) {
+					this.game_longest_bounces_streak = this.current_bounce_streak;
+				}
+			}
 		}
 		if (ball_x_radius >= this.canvas.width - Pong.PADDLE_OFFSET_RATIO * this.canvas.width - this.p2_paddle.width && ball_x_radius <= this.canvas.width - Pong.PADDLE_OFFSET_RATIO * this.canvas.width)
 		{
-			if (ball_y_radius >= this.p2_paddle.y && ball_y_radius <= this.p2_paddle.y + this.p2_paddle.height)
+			if (ball_y_radius >= this.p2_paddle.y && ball_y_radius <= this.p2_paddle.y + this.p2_paddle.height) {
 				this.ball.dx = -this.ball.dx;
+				this.current_bounce_streak++;
+				if (this.current_bounce_streak > this.game_longest_bounces_streak) {
+					this.game_longest_bounces_streak = this.current_bounce_streak;
+				}
+			}
 		}
 		if (ball_y_radius < 0 || ball_y_radius > this.canvas.height)
 			this.ball.dy = -this.ball.dy;
@@ -217,6 +228,7 @@ class Pong
 				this.terminateMatch();
 			}
 			this.game_timer_start = Date.now();
+			this.current_bounce_streak = 0;
 		}
 	}
 
@@ -235,6 +247,11 @@ class Pong
 
 	resetPlayerVariables()
 	{
+		this.current_bounce_streak = 0;
+		this.game_longest_bounces_streak = 0;
+		this.game_timer_start = 0;
+		this.game_timer_end = 0;
+
 		this.player1.score = 0;
 		this.player1.fastest_time_to_score = 0;
 		this.player1.consecutive_goals = 0;
@@ -324,6 +341,12 @@ class Pong
 			this.setGameButtonToReplay();
 			return (new Toast("An opponent must be logged in to play a game."));
 		}
+		this.player1.average_time_to_score = 0;
+		this.player2.average_time_to_score = 0;
+		if (this.player1.goals_times.length > 0)
+			this.player1.average_time_to_score = this.player1.goals_times.reduce((acc, time) => acc + time, 0) / this.player1.goals_times.length;
+		if (this.player2.goals_times.length > 0)
+			this.player2.average_time_to_score = this.player2.goals_times.reduce((acc, time) => acc + time, 0) / this.player2.goals_times.length;
 		let result = this.player1.score > this.player2.score ? 1 : -1;
 		if (this.player1.score === this.player2.score)
 			result = 0;
