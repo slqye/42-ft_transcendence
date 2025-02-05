@@ -38,6 +38,13 @@ class Editor
 					if (element)
 						element.setAttribute(key, value);
 					this.template.update();
+				},
+				style: (_id, key, value) =>
+				{
+					const element = this.template.html.getElementById(_id);
+					if (element)
+						element.style[key] = value;
+					this.template.update();
 				}
 			},
 			add: {
