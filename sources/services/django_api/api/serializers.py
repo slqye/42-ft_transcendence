@@ -127,12 +127,19 @@ class TicTacToeGameStatsSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TicTacToeGameStats
 		fields = [
-			'tictactoe_game_stats_id',
-			'total_moves',
-			'winning_move_number',
-			'board_state'
+			'id',
+			'user_score',
+			'opponent_score',
+			'user_max_consecutive_wins',
+			'opponent_max_consecutive_wins',
+			'user_wins_as_crosses',
+			'opponent_wins_as_crosses',
+			'user_wins_as_noughts',
+			'opponent_wins_as_noughts',
+			'user_quickest_win_as_moves',
+			'opponent_quickest_win_as_moves'
 		]
-		read_only_fields = ['tictactoe_game_stats_id']
+		read_only_fields = ['id']
 
 class MatchSerializer(serializers.ModelSerializer):
 	# Nested representation for read
@@ -155,10 +162,10 @@ class MatchSerializer(serializers.ModelSerializer):
 		fields = [
 			'id',
 			'host_user',		 # read-only nested
-			'opponent_user',	   # read-only nested
+			'opponent_user',	 # read-only nested
 			'host_user_id',	  # write-only id
-			'opponent_user_id',	# write-only id
-			'result',
+			'opponent_user_id',  # write-only id
+			'result',			# now an integer field
 			'is_pong',
 			'pong_game_stats',
 			'tictactoe_game_stats',
@@ -168,20 +175,30 @@ class MatchSerializer(serializers.ModelSerializer):
 		read_only_fields = ['id', 'created_at']
 
 	def create(self, validated_data):
-		# Remove nested game stats data so we can create them manually
 		pong_stats_data = validated_data.pop('pong_game_stats', None)
 		tictactoe_stats_data = validated_data.pop('tictactoe_game_stats', None)
 		
-		match = Match.objects.create(**validated_data)
-
-		if match.is_pong and pong_stats_data is not None:
-			pong_stats = PongGameStats.objects.create(**pong_stats_data)
-			match.pong_game_stats = pong_stats
-			match.save()
-		elif not match.is_pong and tictactoe_stats_data is not None:
-			tictactoe_stats = TicTacToeGameStats.objects.create(**tictactoe_stats_data)
-			match.tictactoe_game_stats = tictactoe_stats
-			match.save()
+		try:
+			match = Match.objects.create(**validated_data)
+		except Exception as e:
+			raise serializers.ValidationError({"detail": "Error creating match: " + str(e)})
+		
+		if match.is_pong:
+			if pong_stats_data is not None:
+				try:
+					pong_stats = PongGameStats.objects.create(**pong_stats_data)
+					match.pong_game_stats = pong_stats
+					match.save()
+				except Exception as e:
+					raise serializers.ValidationError({"detail": "Error creating Pong game stats: " + str(e)})
+		else:
+			if tictactoe_stats_data is not None:
+				try:
+					tictactoe_stats = TicTacToeGameStats.objects.create(**tictactoe_stats_data)
+					match.tictactoe_game_stats = tictactoe_stats
+					match.save()
+				except Exception as e:
+					raise serializers.ValidationError({"detail": "Error creating Tic Tac Toe game stats: " + str(e)})
 		return match
 
 
@@ -198,14 +215,18 @@ class InvitationSerializer(serializers.ModelSerializer):
 	pong_game_stats = PongGameStatsSerializer(required=False, allow_null=True)
 	tictactoe_game_stats = TicTacToeGameStatsSerializer(required=False, allow_null=True)
 	
+	# New field added: result (read-only)
+	result = serializers.BooleanField(read_only=True)
+	
 	class Meta:
 		model = Invitation
 		fields = [
 			'id',
-			'host_user',	# read-only nested (set automatically)
-			'opponent_user',	  # read-only nested
-			'opponent_user_id',   # write-only id
+			'host_user',			# read-only nested (set automatically)
+			'opponent_user',		# read-only nested
+			'opponent_user_id',	 # write-only id
 			'status',
+			'result',
 			'is_pong',
 			'tournament_id',
 			'pong_game_stats',
@@ -213,53 +234,57 @@ class InvitationSerializer(serializers.ModelSerializer):
 			'created_at',
 			'updated_at',
 		]
-		read_only_fields = ['status', 'created_at', 'updated_at', 'host_user']
+		read_only_fields = ['status', 'created_at', 'updated_at', 'host_user', 'result']
 
 	def create(self, validated_data):
 		request = self.context['request']
-		user = request.user  # The logged-in user becomes host_user
+		user = request.user
 		
-		# Pop the nested game stats data if provided
 		pong_data = validated_data.pop('pong_game_stats', None)
 		ttt_data = validated_data.pop('tictactoe_game_stats', None)
 		
-		# Create the Invitation, setting host_user automatically
 		invitation = Invitation.objects.create(host_user=user, **validated_data)
 		
 		if pong_data:
-			pong_instance = PongGameStats.objects.create(**pong_data)
-			invitation.pong_game_stats = pong_instance
-			invitation.save()
+			try:
+				pong_instance = PongGameStats.objects.create(**pong_data)
+				invitation.pong_game_stats = pong_instance
+				invitation.save()
+			except Exception as e:
+				raise serializers.ValidationError({"detail": "Error creating Pong game stats: " + str(e)})
 		
 		if ttt_data:
-			ttt_instance = TicTacToeGameStats.objects.create(**ttt_data)
-			invitation.tictactoe_game_stats = ttt_instance
-			invitation.save()
+			try:
+				ttt_instance = TicTacToeGameStats.objects.create(**ttt_data)
+				invitation.tictactoe_game_stats = ttt_instance
+				invitation.save()
+			except Exception as e:
+				raise serializers.ValidationError({"detail": "Error creating Tic Tac Toe game stats: " + str(e)})
 		
 		return invitation
 
 class FriendshipSerializer(serializers.ModelSerializer):
-    # For read operations: show nested user details.
-    user_1 = UserSerializer(read_only=True, source='user_id_1')
-    user_2 = UserSerializer(read_only=True, source='user_id_2')
-    
-    # For write operations: accept user IDs.
-    user_id_1 = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
-    user_id_2 = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
-    
-    class Meta:
-        model = Friendship
-        fields = ['id', 'user_id_1', 'user_id_2', 'friendship_status', 'user_1', 'user_2']
-        extra_kwargs = {
-            'friendship_status': {'required': False},
-        }
-    
-    def create(self, validated_data):
-        validated_data['friendship_status'] = False
-        return super().create(validated_data)
-    
-    def update(self, instance, validated_data):
-        # Enforce that only the friendship_status is updated.
-        validated_data.pop('user_id_1', None)
-        validated_data.pop('user_id_2', None)
-        return super().update(instance, validated_data)
+	# For read operations: show nested user details.
+	user_1 = UserSerializer(read_only=True, source='user_id_1')
+	user_2 = UserSerializer(read_only=True, source='user_id_2')
+	
+	# For write operations: accept user IDs.
+	user_id_1 = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
+	user_id_2 = serializers.PrimaryKeyRelatedField(write_only=True, queryset=User.objects.all())
+	
+	class Meta:
+		model = Friendship
+		fields = ['id', 'user_id_1', 'user_id_2', 'friendship_status', 'user_1', 'user_2']
+		extra_kwargs = {
+			'friendship_status': {'required': False},
+		}
+	
+	def create(self, validated_data):
+		validated_data['friendship_status'] = False
+		return super().create(validated_data)
+	
+	def update(self, instance, validated_data):
+		# Enforce that only the friendship_status is updated.
+		validated_data.pop('user_id_1', None)
+		validated_data.pop('user_id_2', None)
+		return super().update(instance, validated_data)

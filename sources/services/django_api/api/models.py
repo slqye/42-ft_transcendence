@@ -43,15 +43,22 @@ class PongGameStats(models.Model):
 	longest_bounce_streak = models.PositiveIntegerField(default=0)
 
 class TicTacToeGameStats(models.Model):
-	tictactoe_game_stats_id = models.AutoField(primary_key=True)
-	total_moves = models.PositiveIntegerField(default=0)
-	winning_move_number = models.PositiveIntegerField(null=True, blank=True)
-	board_state = models.JSONField(default=dict)
+	user_score = models.PositiveIntegerField(default=0)
+	opponent_score = models.PositiveIntegerField(default=0)
+	user_max_consecutive_wins = models.PositiveIntegerField(default=0)
+	opponent_max_consecutive_wins = models.PositiveIntegerField(default=0)
+	user_wins_as_crosses = models.PositiveIntegerField(default=0)
+	opponent_wins_as_crosses = models.PositiveIntegerField(default=0)
+	user_wins_as_noughts = models.PositiveIntegerField(default=0)
+	opponent_wins_as_noughts = models.PositiveIntegerField(default=0)
+	user_quickest_win_as_moves = models.PositiveIntegerField(default=0)
+	opponent_quickest_win_as_moves = models.PositiveIntegerField(default=0)
 
 class Match(models.Model):
 	host_user = models.ForeignKey(User, related_name='host_user', on_delete=models.CASCADE)
 	opponent_user = models.ForeignKey(User, related_name='opponent_user', on_delete=models.CASCADE)
-	result = models.CharField(max_length=4)
+	# Now an integer field. For example: 0 = pending/draw, 1 = win, etc.
+	result = models.IntegerField(default=0)
 	is_pong = models.BooleanField(blank=False, default=True)
 	pong_game_stats = models.OneToOneField(
 		PongGameStats, null=True, blank=True, on_delete=models.SET_NULL, related_name='match'
@@ -62,13 +69,11 @@ class Match(models.Model):
 	tournament_id = models.IntegerField(null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 
-class Invitation(models.Model):
-	STATUS_CHOICES = (
-		('pending', 'Pending'),
-		('accepted', 'Accepted'),
-		('declined', 'Declined'),
-	)
 
+class Invitation(models.Model):
+	status = models.BooleanField(default=False)
+	result = models.IntegerField(default=0)
+	
 	host_user = models.ForeignKey(
 		User,
 		on_delete=models.CASCADE,
@@ -79,17 +84,11 @@ class Invitation(models.Model):
 		on_delete=models.CASCADE,
 		related_name='invitations_received'
 	)
-	status = models.CharField(
-		max_length=10,
-		choices=STATUS_CHOICES,
-		default='pending'
-	)
 	is_pong = models.BooleanField(blank=False, default=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 	tournament_id = models.IntegerField(null=True, blank=True)
 	
-	# New field for nested Pong game stats
 	pong_game_stats = models.OneToOneField(
 		PongGameStats, null=True, blank=True,
 		on_delete=models.SET_NULL,
