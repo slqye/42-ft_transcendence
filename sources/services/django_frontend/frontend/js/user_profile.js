@@ -15,6 +15,13 @@ async function	set_profile(template)
 	}
 }
 
+function	format_time(time)
+{
+	if (time == 0)
+		return ("N/A");
+	return (time + " ms");
+}
+
 async function	set_profile_history(template)
 {
 	try
@@ -45,44 +52,35 @@ async function	set_profile_history(template)
 			if (element.is_pong)
 			{
 				template_history_item.edit.id.set.attribute("pong_game_stats", "class", "d-block");
+				template_history_item.edit.id.set.attribute("game_icon", "src", "/frontend/assets/pong_icon.webp");
 				template_history_item.edit.id.set.content("user_score", element.pong_game_stats.user_score);
 				template_history_item.edit.id.set.content("opponent_score", element.pong_game_stats.opponent_score);
-				/*
-				"pong_game_stats": {
-					"longest_bounce_streak",
-
-					"user_fastest_time_to_score",
-					"opponent_fastest_time_to_score",
-
-					"user_max_consecutive_goals",
-					"opponent_max_consecutive_goals",
-
-					"user_average_time_to_score",
-					"opponent_average_time_to_score",
-				}
-				*/
-				template_history_item.edit.id.set.attribute("game_icon", "src", "/frontend/assets/pong_icon.webp");
+				template_history_item.edit.id.set.content("table_user_display_name", element.host_user.display_name);
+				template_history_item.edit.id.set.content("table_opponent_display_name", element.opponent_user.display_name);
+				template_history_item.edit.id.set.content("pong_longest_bounce_streak", element.pong_game_stats.longest_bounce_streak);
+				template_history_item.edit.id.set.content("pong_user_max_consecutive_goals", format_time(element.pong_game_stats.user_max_consecutive_goals));
+				template_history_item.edit.id.set.content("pong_opponent_max_consecutive_goals", format_time(element.pong_game_stats.opponent_max_consecutive_goals));
+				template_history_item.edit.id.set.content("pong_user_average_time_to_score", format_time(element.pong_game_stats.user_average_time_to_score));
+				template_history_item.edit.id.set.content("pong_opponent_average_time_to_score", format_time(element.pong_game_stats.opponent_average_time_to_score));
+				template_history_item.edit.id.set.content("pong_user_fastest_time_to_score", format_time(element.pong_game_stats.user_fastest_time_to_score));
+				template_history_item.edit.id.set.content("pong_opponent_fastest_time_to_score", format_time(element.pong_game_stats.opponent_fastest_time_to_score));
 			}
 			else
 			{	
 				template_history_item.edit.id.set.attribute("tictactoe_game_stats", "class", "d-block");
-				/*
-				TODO: stats are missing from API response
-				"tictactoe_game_stats": {
-					"user_max_consecutive_wins",
-					"opponent_max_consecutive_wins",
-
-					"user_wins_as_crosses",
-					"opponent_wins_as_crosses",
-
-					"user_wins_as_noughts",
-					"opponent_wins_as_noughts",
-
-					"user_quickest_win_as_moves",
-					"opponent_quickest_win_as_moves"
-				}
-				*/
 				template_history_item.edit.id.set.attribute("game_icon", "src", "/frontend/assets/tictactoe_icon.png");
+				template_history_item.edit.id.set.content("user_score", element.tictactoe_game_stats.user_score);
+				template_history_item.edit.id.set.content("opponent_score", element.tictactoe_game_stats.opponent_score);
+				template_history_item.edit.id.set.content("table_user_display_name", element.host_user.display_name);
+				template_history_item.edit.id.set.content("table_opponent_display_name", element.opponent_user.display_name);
+				template_history_item.edit.id.set.content("tictactoe_user_max_consecutive_wins", element.tictactoe_game_stats.user_max_consecutive_wins);
+				template_history_item.edit.id.set.content("tictactoe_opponent_max_consecutive_wins", element.tictactoe_game_stats.opponent_max_consecutive_wins);
+				template_history_item.edit.id.set.content("tictactoe_user_wins_as_crosses", element.tictactoe_game_stats.user_wins_as_crosses);
+				template_history_item.edit.id.set.content("tictactoe_opponent_wins_as_crosses", element.tictactoe_game_stats.opponent_wins_as_crosses);
+				template_history_item.edit.id.set.content("tictactoe_user_wins_as_noughts", element.tictactoe_game_stats.user_wins_as_noughts);
+				template_history_item.edit.id.set.content("tictactoe_opponent_wins_as_noughts", element.tictactoe_game_stats.opponent_wins_as_noughts);
+				template_history_item.edit.id.set.content("tictactoe_user_quickest_win_as_moves", element.tictactoe_game_stats.user_quickest_win_as_moves);
+				template_history_item.edit.id.set.content("tictactoe_opponent_quickest_win_as_moves", element.tictactoe_game_stats.opponent_quickest_win_as_moves);
 			}
 			history.appendChild(template_history_item.edit.id.get.element("match"));
 		}
