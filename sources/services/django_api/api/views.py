@@ -277,7 +277,6 @@ class InvitationAcceptView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk, *args, **kwargs):
-        # Only an 'opponent' is allowed to accept an invitation.
         user_type = request.headers.get('X_User_Type')
         if user_type != 'opponent':
             return Response(
@@ -285,26 +284,22 @@ class InvitationAcceptView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Retrieve the invitation by its primary key.
         invitation = get_object_or_404(Invitation, pk=pk)
 
-        # Ensure the authenticated user is the invited opponent.
         if invitation.opponent_user != request.user:
             return Response(
                 {"detail": "You are not the invited opponent_user."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Check if the invitation has already been accepted.
         if invitation.status:
             return Response(
                 {"detail": "Invitation has already been accepted."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Update the invitation: mark it as accepted.
         try:
-            invitation.status = True  # accepted
+            invitation.status = True
             invitation.save()
         except Exception as e:
             return Response(
@@ -312,11 +307,9 @@ class InvitationAcceptView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        # Use the invitation's host_user and opponent_user.
         host_user = invitation.host_user
         opponent_user = invitation.opponent_user
-
-        # Update users' stats based on the game type and invitation.result.
+		# 0 User_1 wins / 1 User_2 wins / 2 draw
         try:
             if invitation.is_pong:
                 host_user.pong_matches_played += 1
