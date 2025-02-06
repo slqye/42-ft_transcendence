@@ -20,8 +20,8 @@ urlpatterns = [
 
 	# Friendships
 	path('friendships/', views.FriendshipView.as_view(), name='friendship'),
-	path('friendships/<int:pk>/', views.FriendshipView.as_view(), name='friendship-detail'),
-	path('users/<int:pk>/friendships/', views.UserFriendshipListView.as_view(), name='user-friendship-list'),
+	path('friendships/<str:pk>/', views.FriendshipView.as_view(), name='friendship-detail'),
+	path('users/<str:pk>/friendships/', views.FriendListView.as_view(), name='user-friendship-list'),
 
 	# Matches information
 	path("users/<str:pk>/matches/", views.UserMatches.as_view(), name="user-matches"),
