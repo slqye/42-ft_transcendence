@@ -1,56 +1,29 @@
-async function	set_friend_request_list(template)
+async function	set_friend_list(template)
 {
-	const data_holder = {
-		"id": 5,
-		"friendship_status": false,
-		"friends": [
-			{
-				"id": 1,
-				"username": "user1",
-				"display_name": "User One",
-				"avatar_url": "https://cdn-icons-png.flaticon.com/512/6915/6915987.png",
-				"language_code": "en",
-				"connected": "true",
-				"created_at": "2025-02-04T12:34:56Z"
-			},
-			{
-				"id": 2,
-				"username": "user2",
-				"display_name": "User Two",
-				"avatar_url": "https://img.freepik.com/vecteurs-libre/cercle-bleu-utilisateur-blanc_78370-4707.jpg",
-				"language_code": "en",
-				"connected": "false",
-				"created_at": "2025-02-04T12:35:56Z"
-			}
-		]
-	}
-
 	try
 	{
-		// const request = await new Api("/api/users/me/friendships/", Api.USER).request();
-		// if (request.status == Api.ERROR)
-		// 	return (console.error(request.log));
-		const data = data_holder["friends"];
+		const request = await new Api("/api/users/me/friendships/", Api.USER).request();
+		if (request.status == Api.ERROR)
+			return (console.error(request.log));
+		const data = request.response["friends"];
+		const friends_requests_container = template.edit.id.get.element("requests_container");
 		const friends_container = template.edit.id.get.element("friends_container");
-		for (let index = 0; index < data.length; index++) {
-			const element = data[index];
-			let friend_item = await new Template("frontend/html/pages/friend_item.html").load();
-			if (friend_item == null)
-				return (console.error(ERROR_TEMPLATE));
-			friend_item.edit.id.set.attribute("friend_icon", "src", element["avatar_url"]);
-			friend_item.edit.id.set.content("friend_display_name", element["display_name"]);
-			friend_item.edit.id.set.content("friend_user_name", "@" + element["username"]);
-			if (element["connected"] == "true")
+		for (let key in data) {
+			const element = data[key];
+			if (element["friendship_status"] == false)
 			{
-				friend_item.edit.id.add.attribute("friend_online_status", "class", "bg-success");
-				friend_item.edit.id.set.attribute("friend_online_status", "data-bs-title", "online");
+				let friend_request_template = await new Template("frontend/html/pages/friend_request_item.html").load();
+				if (friend_request_template == null)
+					return (console.error(ERROR_TEMPLATE));
+				set_friend_request_data(element, friend_request_template, friends_requests_container);
 			}
 			else
 			{
-				friend_item.edit.id.add.attribute("friend_online_status", "class", "bg-danger");
-				friend_item.edit.id.set.attribute("friend_online_status", "data-bs-title", "offline");
+				let friend_template = await new Template("frontend/html/pages/friend_item.html").load();
+				if (friend_template == null)
+					return (console.error(ERROR_TEMPLATE));
+				set_friend_data(element, friend_template, friends_container);
 			}
-			friends_container.appendChild(friend_item.edit.id.get.element("friend"));
 		}
 	}
 	catch (error)
@@ -59,64 +32,64 @@ async function	set_friend_request_list(template)
 	}
 }
 
-
-async function	set_friend_list(template)
+async function	set_friend_request_data(data, template, container)
 {
-	const data_holder = {
-		"id": 5,
-		"friendship_status": false,
-		"friends": [
-			{
-				"id": 1,
-				"username": "user1",
-				"display_name": "User One",
-				"avatar_url": "https://cdn-icons-png.flaticon.com/512/6915/6915987.png",
-				"language_code": "en",
-				"connected": "true",
-				"created_at": "2025-02-04T12:34:56Z"
-			},
-			{
-				"id": 2,
-				"username": "user2",
-				"display_name": "User Two",
-				"avatar_url": "https://img.freepik.com/vecteurs-libre/cercle-bleu-utilisateur-blanc_78370-4707.jpg",
-				"language_code": "en",
-				"connected": "false",
-				"created_at": "2025-02-04T12:35:56Z"
-			}
-		]
-	}
+	template.edit.id.set.attribute("profile_icon", "src", data["avatar_url"]);
+	template.edit.id.set.attribute("accept_request_btn", "data-request-id", data["id"]);
+	template.edit.id.set.attribute("refuse_request_btn", "data-request-id", data["id"]);
+	template.edit.id.set.content("user_name", "@" + data["username"]);
+	container.appendChild(template.edit.id.get.element("friend_request"));
+}
 
-	try
+async function	set_friend_data(data, template, container)
+{
+	template.edit.id.set.attribute("friend_icon", "src", data["avatar_url"]);
+	template.edit.id.set.content("friend_display_name", data["display_name"]);
+	template.edit.id.set.content("friend_user_name", "@" + data["username"]);
+	if (data["connected"] == "true")
 	{
-		// const request = await new Api("/api/users/me/friendships/", Api.USER).request();
-		// if (request.status == Api.ERROR)
-		// 	return (console.error(request.log));
-		const data = data_holder["friends"];
-		const friends_container = template.edit.id.get.element("friends_container");
-		for (let index = 0; index < data.length; index++) {
-			const element = data[index];
-			let friend_item = await new Template("frontend/html/pages/friend_item.html").load();
-			if (friend_item == null)
-				return (console.error(ERROR_TEMPLATE));
-			friend_item.edit.id.set.attribute("friend_icon", "src", element["avatar_url"]);
-			friend_item.edit.id.set.content("friend_display_name", element["display_name"]);
-			friend_item.edit.id.set.content("friend_user_name", "@" + element["username"]);
-			if (element["connected"] == "true")
-			{
-				friend_item.edit.id.add.attribute("friend_online_status", "class", "bg-success");
-				friend_item.edit.id.set.attribute("friend_online_status", "data-bs-title", "online");
-			}
-			else
-			{
-				friend_item.edit.id.add.attribute("friend_online_status", "class", "bg-danger");
-				friend_item.edit.id.set.attribute("friend_online_status", "data-bs-title", "offline");
-			}
-			friends_container.appendChild(friend_item.edit.id.get.element("friend"));
-		}
+		template.edit.id.add.attribute("friend_online_status", "class", "bg-success");
+		template.edit.id.set.attribute("friend_online_status", "data-bs-title", "online");
 	}
-	catch (error)
+	else
 	{
-		return (console.error(error));
+		template.edit.id.add.attribute("friend_online_status", "class", "bg-danger");
+		template.edit.id.set.attribute("friend_online_status", "data-bs-title", "offline");
 	}
+	container.appendChild(template.edit.id.get.element("friend"));
+}
+
+async function	add_friend(username)
+{
+	const request = await new Api(`/api/friendships/${username}/`, Api.USER).set_method("POST").request();
+	if (request.status == Api.ERROR)
+	{
+		new Toast(Toast.ERROR, request.log);
+		return (console.error(request.log));
+	}
+	return (new Toast(Toast.SUCCESS, "Friend request sent."));
+}
+
+async function	accept_friend_request(current_html)
+{
+	const user_id = current_html.getAttribute("data-request-id");
+	const request = await new Api(`/api/friendships/${user_id}/`, Api.USER).set_method("PUT").request();
+	if (request.status == Api.ERROR)
+	{
+		new Toast(Toast.ERROR, request.log);
+		return (console.error(request.log));
+	}
+	return (new Toast(Toast.SUCCESS, "Friend request accepted."), load_friends());
+}
+
+async function	refuse_friend_request(current_html)
+{
+	const user_id = current_html.getAttribute("data-request-id");
+	const request = await new Api(`/api/friendships/${user_id}/`, Api.USER).set_method("DELETE").request();
+	if (request.status == Api.ERROR)
+	{
+		new Toast(Toast.ERROR, request.log);
+		return (console.error(request.log));
+	}
+	return (new Toast(Toast.SUCCESS, "Friend request accepted."), load_friends());
 }

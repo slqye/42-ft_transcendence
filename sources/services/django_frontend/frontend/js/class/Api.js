@@ -17,7 +17,7 @@ class	Api
 		this.method = Api.DEFAULT_METHOD;
 		this.headers = Api.DEFAULT_HEADERS;
 		this.credentials = Api.DEFAULT_CREDENTIALS;
-		this.body = Api.DEFAULT_BODY; 
+		this.body = Api.DEFAULT_BODY;
 		this.status = Api.SUCCESS;
 		this.omit_refresh = false;
 		this.code = 0;
