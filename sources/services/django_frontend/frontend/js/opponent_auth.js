@@ -38,7 +38,7 @@ async function opponent_signin(event) {
 			"username": username,
 			"password": password
 		});
-	const request = await new Api("/api/opponent/login/", Api.USER).set_method("POST").set_body(request_body).request();
+	const request = await new Api("/api/opponent/login/", Api.USER).set_method("POST").set_body(request_body).set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 		new Toast(Toast.ERROR, request.log);
 	else
@@ -57,7 +57,7 @@ async function opponent_signin(event) {
 }
 
 async function opponent_signout() {
-	const request = await new Api("/api/opponent/logout/", Api.USER).set_method("POST").request();
+	const request = await new Api("/api/opponent/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 		new Toast(Toast.ERROR, request.log);
 	else

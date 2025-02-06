@@ -21,7 +21,7 @@ async function	signup()
 	if (request.status == Api.ERROR)
 	{
 		new Toast(Toast.ERROR, request.log);
-		throw new Error(request.log);
+		return ;
 	}
 	new Toast(Toast.SUCCESS, "Account has been created.");
 	load_signin();
@@ -37,11 +37,11 @@ async function	signin()
 		"username": username,
 		"password": password
 	});
-	const request = await new Api("/api/user/login/", Api.USER).set_method("POST").set_body(request_body).request();
+	const request = await new Api("/api/user/login/", Api.USER).set_method("POST").set_body(request_body).set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 	{
 		new Toast(Toast.ERROR, request.log);
-		throw new Error(request.log);
+		return ;
 	}
 	new Toast(Toast.SUCCESS, "Logged-in.");
 	localStorage.setItem("user_authenticated", "true");
@@ -50,11 +50,11 @@ async function	signin()
 
 async function	signout()
 {
-	const request = await new Api("/api/user/logout/", Api.USER).set_method("POST").request();
+	const request = await new Api("/api/user/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 	{
 		new Toast(Toast.ERROR, request.log);
-		throw new Error(request.log);
+		return ;
 	}
 	else
 	{
@@ -68,11 +68,11 @@ async function	signin_42()
 {
 	let config = {};
 
-	const request = await new Api("/api/config/", Api.USER).set_credentials("omit").request();
+	const request = await new Api("/api/config/", Api.USER).set_credentials("omit").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 	{
 		new Toast(Toast.ERROR, request.log);
-		throw new Error(request.log);
+		return ;
 	}
 	else
 	{
@@ -80,7 +80,7 @@ async function	signin_42()
 		if (!config.API_42_UID || !config.API_42_REDIRECT_URI)
 		{
 			new Toast(Toast.ERROR, "OAuth configuration is missing.");
-			throw new Error("OAuth configuration is missing.");
+			return ;
 		}
 		else
 		{

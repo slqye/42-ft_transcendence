@@ -202,7 +202,6 @@ async function load_signup() {
 }
 
 async function load_profile(pk = "me") {
-	console.log("load_profile with pk = ", pk);
 	if (pk === "me" && !await Api.is_login())
 		return (load_home());
 	const content = document.getElementById("content");
@@ -259,7 +258,6 @@ window.onpopstate = async function (event) {
 		const page = event.state.page;
 		if (page.startsWith("profile/"))
 		{
-			console.log("load_profile with pk = ", page.split("/")[1]);
 			await load_profile(page.split("/")[1]);
 			return ;
 		}
