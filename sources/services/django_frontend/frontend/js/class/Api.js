@@ -57,7 +57,7 @@ class	Api
 				if (refresh_response.status == Api.ERROR)
 				{
 					this.status = Api.ERROR;
-					this.log = "Token refreshing failed.";
+					this.log = (await response.json()).detail;
 				}
 				else if (refresh_response.status == Api.SUCCESS)
 				{
@@ -67,7 +67,7 @@ class	Api
 			else if (!response.ok)
 			{
 				this.status = Api.ERROR;
-				this.log = response.status + " network error.";
+				this.log = (await response.json()).detail;
 			}
 			else
 			{
