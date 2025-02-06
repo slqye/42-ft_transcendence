@@ -12,17 +12,19 @@ async function	set_profile(template, pk = "me")
 		template.edit.id.set.content("profile_display_name", data.display_name);
 		template.edit.id.set.content("profile_user_name", "@" + data.username);
 		let pong_winrate = request_stats.response.pong_winrate;
+		if (request_stats.response.pong_matches_played == 0)
+			pong_winrate = 50;
 		let pong_lose_rate = 100 - pong_winrate;
 		let tictactoe_winrate = request_stats.response.tictactoe_winrate;
+		if (request_stats.response.tictactoe_matches_played == 0)
+			tictactoe_winrate = 50;
 		let tictactoe_lose_rate = 100 - tictactoe_winrate;
 		template.edit.id.set.style("pong_winrate", "width", pong_winrate + "%");
 		template.edit.id.set.style("pong_lose_rate", "width", pong_lose_rate + "%");
 		template.edit.id.set.style("tictactoe_winrate", "width", tictactoe_winrate + "%");
 		template.edit.id.set.style("tictactoe_lose_rate", "width", tictactoe_lose_rate + "%");
 		template.edit.id.set.content("pong_winrate_value", pong_winrate + "%");
-		template.edit.id.set.content("pong_lose_rate_value", pong_lose_rate + "%");
 		template.edit.id.set.content("tictactoe_winrate_value", tictactoe_winrate + "%");
-		template.edit.id.set.content("tictactoe_lose_rate_value", tictactoe_lose_rate + "%");
 	}
 	catch (error)
 	{

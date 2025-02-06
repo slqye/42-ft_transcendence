@@ -5,6 +5,12 @@
 	border-radius: 100%;
 }
 
+.winrate_value {
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+}
+
 .game_icon {
 	width: 5%;
 	height: auto;
