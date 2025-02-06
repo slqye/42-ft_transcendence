@@ -1,3 +1,10 @@
+function	format_winrate_value(rate)
+{
+	if (rate == 0)
+		return ("N/A");
+	return (rate.toFixed(0) + "%");
+}
+
 async function	set_profile(template, pk = "me")
 {
 	try
@@ -23,8 +30,8 @@ async function	set_profile(template, pk = "me")
 		template.edit.id.set.style("pong_lose_rate", "width", pong_lose_rate + "%");
 		template.edit.id.set.style("tictactoe_winrate", "width", tictactoe_winrate + "%");
 		template.edit.id.set.style("tictactoe_lose_rate", "width", tictactoe_lose_rate + "%");
-		template.edit.id.set.content("pong_winrate_value", pong_winrate + "%");
-		template.edit.id.set.content("tictactoe_winrate_value", tictactoe_winrate + "%");
+		template.edit.id.set.content("pong_winrate_value", format_winrate_value(pong_winrate));
+		template.edit.id.set.content("tictactoe_winrate_value", format_winrate_value(tictactoe_winrate));
 	}
 	catch (error)
 	{
@@ -36,7 +43,7 @@ function	format_time(time)
 {
 	if (time == 0)
 		return ("N/A");
-	return (time + " ms");
+	return ((time / 1000).toFixed(2) + " s");
 }
 
 function	format_number(number)
