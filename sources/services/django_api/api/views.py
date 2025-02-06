@@ -608,6 +608,7 @@ class OAuthCallbackView(APIView):
 		if created:
 			user.email = user_data.get('email')
 			user.avatar_url = user_data.get('image', {}).get('link')
+			user.display_name = user_data.get('login')
 			user.save()
 
 		refresh = RefreshToken.for_user(user)
