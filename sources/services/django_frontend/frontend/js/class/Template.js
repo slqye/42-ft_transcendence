@@ -38,4 +38,10 @@ class	Template
 	{
 		return (this.editor);
 	}
+
+	get value()
+	{
+		this.update();
+		return (this.string);
+	}
 }

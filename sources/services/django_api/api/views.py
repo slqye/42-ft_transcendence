@@ -22,6 +22,8 @@ from django.shortcuts import redirect, get_object_or_404
 
 User = get_user_model()
 
+############################## USER AND TOKENS ##############################
+
 class UserTokenRefreshView(APIView):
 	permission_classes = [permissions.AllowAny]  # Allow access without authentication
 
@@ -167,12 +169,18 @@ class RegisterUser(generics.CreateAPIView):
 class UserList(generics.ListCreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAdminUser]
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
+	permission_classes = [permissions.IsAdminUser]
+
+class UserFetchUsername(generics.RetrieveAPIView):
 	permission_classes = [permissions.IsAuthenticated]
+	serializer_class = UserSerializer
+	queryset = User.objects.all()
+	lookup_field = 'username'
 
 class UpdateUserField(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -255,7 +263,9 @@ class UserStats(APIView):
 		}
 
 		return Response(response_data)
-	
+
+############################## MATCHES ##############################
+
 class InvitationCreateView(generics.CreateAPIView):
 	queryset = Invitation.objects.all()
 	serializer_class = InvitationSerializer
@@ -274,113 +284,106 @@ class InvitationCreateView(generics.CreateAPIView):
 		serializer.save()
 
 class InvitationAcceptView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, pk, *args, **kwargs):
-        # Only an 'opponent' is allowed to accept an invitation.
-        user_type = request.headers.get('X_User_Type')
-        if user_type != 'opponent':
-            return Response(
-                {"detail": "You must be an 'opponent' to accept an invitation."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+	def post(self, request, pk, *args, **kwargs):
+		user_type = request.headers.get('X_User_Type')
+		if user_type != 'opponent':
+			return Response(
+				{"detail": "You must be an 'opponent' to accept an invitation."},
+				status=status.HTTP_403_FORBIDDEN
+			)
 
-        # Retrieve the invitation by its primary key.
-        invitation = get_object_or_404(Invitation, pk=pk)
+		invitation = get_object_or_404(Invitation, pk=pk)
 
-        # Ensure the authenticated user is the invited opponent.
-        if invitation.opponent_user != request.user:
-            return Response(
-                {"detail": "You are not the invited opponent_user."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+		if invitation.opponent_user != request.user:
+			return Response(
+				{"detail": "You are not the invited opponent_user."},
+				status=status.HTTP_403_FORBIDDEN
+			)
 
-        # Check if the invitation has already been accepted.
-        if invitation.status:
-            return Response(
-                {"detail": "Invitation has already been accepted."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+		if invitation.status:
+			return Response(
+				{"detail": "Invitation has already been accepted."},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 
-        # Update the invitation: mark it as accepted.
-        try:
-            invitation.status = True  # accepted
-            invitation.save()
-        except Exception as e:
-            return Response(
-                {"detail": "Error updating invitation: " + str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+		try:
+			invitation.status = True
+			invitation.save()
+		except Exception as e:
+			return Response(
+				{"detail": "Error updating invitation: " + str(e)},
+				status=status.HTTP_500_INTERNAL_SERVER_ERROR
+			)
 
-        # Use the invitation's host_user and opponent_user.
-        host_user = invitation.host_user
-        opponent_user = invitation.opponent_user
+		host_user = invitation.host_user
+		opponent_user = invitation.opponent_user
+		# 0 User_1 wins / 1 User_2 wins / 2 draw
+		try:
+			if invitation.is_pong:
+				host_user.pong_matches_played += 1
+				opponent_user.pong_matches_played += 1
+				if invitation.result == 0:
+					host_user.pong_wins += 1
+					opponent_user.pong_losses += 1
+				elif invitation.result == 1:
+					host_user.pong_losses += 1
+					opponent_user.pong_wins += 1
+				else:
+					host_user.pong_draws += 1
+					opponent_user.pong_draws += 1
+			else:
+				host_user.tictactoe_matches_played += 1
+				opponent_user.tictactoe_matches_played += 1
+				if invitation.result == 0:
+					host_user.tictactoe_wins += 1
+					opponent_user.tictactoe_losses += 1
+				elif invitation.result == 1:
+					host_user.tictactoe_losses += 1
+					opponent_user.tictactoe_wins += 1
+				else:
+					host_user.tictactoe_draws += 1
+					opponent_user.tictactoe_draws += 1
 
-        # Update users' stats based on the game type and invitation.result.
-        try:
-            if invitation.is_pong:
-                host_user.pong_matches_played += 1
-                opponent_user.pong_matches_played += 1
-                if invitation.result == 0:
-                    host_user.pong_wins += 1
-                    opponent_user.pong_losses += 1
-                elif invitation.result == 1:
-                    host_user.pong_losses += 1
-                    opponent_user.pong_wins += 1
-                else:
-                    host_user.pong_draws += 1
-                    opponent_user.pong_draws += 1
-            else:
-                host_user.tictactoe_matches_played += 1
-                opponent_user.tictactoe_matches_played += 1
-                if invitation.result == 0:
-                    host_user.tictactoe_wins += 1
-                    opponent_user.tictactoe_losses += 1
-                elif invitation.result == 1:
-                    host_user.tictactoe_losses += 1
-                    opponent_user.tictactoe_wins += 1
-                else:
-                    host_user.tictactoe_draws += 1
-                    opponent_user.tictactoe_draws += 1
+			# Save updated stats.
+			host_user.save()
+			opponent_user.save()
+		except Exception as e:
+			return Response(
+				{"detail": "Error updating user stats: " + str(e)},
+				status=status.HTTP_500_INTERNAL_SERVER_ERROR
+			)
 
-            # Save updated stats.
-            host_user.save()
-            opponent_user.save()
-        except Exception as e:
-            return Response(
-                {"detail": "Error updating user stats: " + str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+		# Create the match using the invitation's game stats and result.
+		try:
+			match = Match.objects.create(
+				host_user=host_user,
+				opponent_user=opponent_user,
+				is_pong=invitation.is_pong,
+				tournament_id=invitation.tournament_id,
+				pong_game_stats=invitation.pong_game_stats,
+				tictactoe_game_stats=invitation.tictactoe_game_stats,
+				result=invitation.result  # match result as integer
+			)
+		except Exception as e:
+			return Response(
+				{"detail": "Error creating match: " + str(e)},
+				status=status.HTTP_500_INTERNAL_SERVER_ERROR
+			)
 
-        # Create the match using the invitation's game stats and result.
-        try:
-            match = Match.objects.create(
-                host_user=host_user,
-                opponent_user=opponent_user,
-                is_pong=invitation.is_pong,
-                tournament_id=invitation.tournament_id,
-                pong_game_stats=invitation.pong_game_stats,
-                tictactoe_game_stats=invitation.tictactoe_game_stats,
-                result=invitation.result  # match result as integer
-            )
-        except Exception as e:
-            return Response(
-                {"detail": "Error creating match: " + str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+		# Serialize the created match.
+		match_data = MatchSerializer(match).data
 
-        # Serialize the created match.
-        match_data = MatchSerializer(match).data
+		try:
+			invitation.delete()
+		except Exception as e:
+			pass
 
-        try:
-            invitation.delete()
-        except Exception as e:
-            pass
-
-        return Response({
-            "detail": "Invitation accepted. Match created.",
-            "match": match_data
-        }, status=status.HTTP_201_CREATED)
+		return Response({
+			"detail": "Invitation accepted. Match created.",
+			"match": match_data
+		}, status=status.HTTP_201_CREATED)
 
 class UserMatches(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -443,6 +446,8 @@ class UserTournaments(APIView):
 		serializer = TournamentParticipantSerializer(participants, many=True)
 		return Response(serializer.data)
 
+############################## FRIENDSHIP ##############################
+
 class FriendshipView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 	
@@ -450,22 +455,34 @@ class FriendshipView(APIView):
 		return get_object_or_404(Friendship, pk=pk)
 	
 	def post(self, request, pk=None):
+		# Look up the target user by username
+		friend_user = get_object_or_404(User, username=pk)
+		
+		# Prevent a user from creating a friendship with themselves.
+		if friend_user.id == request.user.id:
+			return Response(
+				{"error": "Cannot create friendship with yourself."},
+				status=status.HTTP_400_BAD_REQUEST
+			)
+		
 		data = request.data.copy()
 		data['user_id_1'] = request.user.id
-		if 'user_id_2' not in data:
-			return Response({"error": "user_id_2 is required."}, status=status.HTTP_400_BAD_REQUEST)
-		if int(data['user_id_2']) == request.user.id:
-			return Response({"error": "Cannot create friendship with yourself."}, status=status.HTTP_400_BAD_REQUEST)
+		data['user_id_2'] = friend_user.id
+		
 		if Friendship.objects.filter(
-			models.Q(user_id_1=request.user, user_id_2=data['user_id_2']) |
-			models.Q(user_id_1=data['user_id_2'], user_id_2=request.user)
+			models.Q(user_id_1=request.user, user_id_2=friend_user.id) |
+			models.Q(user_id_1=friend_user.id, user_id_2=request.user)
 		).exists():
-			return Response({"error": "A friendship between these users already exists."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"error": "A friendship between these users already exists."},
+				status=status.HTTP_400_BAD_REQUEST
+			)
+		
 		serializer = FriendshipSerializer(data=data)
 		if serializer.is_valid():
 			serializer.save()
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 	
 	def put(self, request, pk=None):
@@ -497,19 +514,33 @@ class FriendshipView(APIView):
 		friendship.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
-# List all friendships for a given user.
-class UserFriendshipListView(generics.ListAPIView):
-	serializer_class = FriendshipSerializer
+class FriendListView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
-	def get_queryset(self):
-		# Expecting a URL parameter 'user_id' (or "me")
-		user_id = self.kwargs.get('user_id')
-		if user_id == "me":
-			target_user = self.request.user
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
 		else:
-			target_user = get_object_or_404(User, pk=user_id)
-		return Friendship.objects.filter(models.Q(user_id_1=target_user) | models.Q(user_id_2=target_user))
+			target_user = get_object_or_404(User, pk=pk)
+		
+		friendships = Friendship.objects.filter(
+			models.Q(user_id_1=target_user) | models.Q(user_id_2=target_user)
+		)
+
+		friend_users = {}
+		for friendship in friendships:
+			if friendship.user_id_1 == target_user:
+				friend = friendship.user_id_2
+			else:
+				friend = friendship.user_id_1
+			serializer = UserSerializer(friend)
+			friend_data = serializer.data
+			friend_data['friendship_status'] = friendship.friendship_status
+			friend_users[friendship.id] = friend_data
+		
+		return Response({"friends": friend_users})
+
+############################## OAUTH et d'autres trucs ##############################
 
 def index(request, path=None):
 	return HttpResponse("")

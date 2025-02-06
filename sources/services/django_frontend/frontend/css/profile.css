@@ -17,13 +17,15 @@
 }
 
 .match_game_icons {
-	width: 50%;
-	height: auto;
+	height: 64%;
+	max-height: 80px;
+	width: auto;
 	border-radius: 100%;
 }
 
 .match_users_icons {
-	width: 25%;
-	height: auto;
+	height: 50%;
+	max-height: 28px;
+	width: auto;
 	border-radius: 100%;
 }

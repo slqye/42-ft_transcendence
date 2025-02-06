@@ -58,7 +58,7 @@ class Editor
 				{
 					const element = this.template.html.getElementById(_id);
 					if (element)
-						element.setAttribute(key, element.getAttribute(key) + value);
+						element.setAttribute(key, element.getAttribute(key) + " " + value);
 					this.template.update();
 				}
 			}
