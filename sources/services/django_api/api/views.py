@@ -35,6 +35,13 @@ class UserTokenRefreshView(APIView):
 
 		try:
 			refresh = RefreshToken(refresh_token)
+			user_id = refresh.payload.get('user_id')
+			if not User.objects.filter(id=user_id).exists():
+				response = Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+				response.delete_cookie("user_access")
+				response.delete_cookie("user_refresh")
+				return response
+
 			new_access_token = str(refresh.access_token)
 
 			response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)
@@ -61,6 +68,12 @@ class OpponentTokenRefreshView(APIView):
 
 		try:
 			refresh = RefreshToken(refresh_token)
+			opponent_id = refresh.payload.get('user_id')
+			if not User.objects.filter(id=opponent_id).exists():
+				response = Response({"detail": "Opponent not found"}, status=status.HTTP_404_NOT_FOUND)
+				response.delete_cookie("opponent_access")
+				response.delete_cookie("opponent_refresh")
+				return response
 			new_access_token = str(refresh.access_token)
 
 			response = Response({"detail": "Access token refreshed successfully"}, status=status.HTTP_200_OK)

@@ -19,15 +19,24 @@ class	Api
 		this.credentials = Api.DEFAULT_CREDENTIALS;
 		this.body = Api.DEFAULT_BODY; 
 		this.status = Api.SUCCESS;
+		this.omit_refresh = false;
 		this.code = 0;
 		this.response = null;
 		this.log = null;
+		this.depth = 0;
 
 		this.add_header("X-User-Type", this.type)
 	}
 
 	async request()
 	{
+		this.depth++;
+		if (this.depth > 2)
+		{
+			this.status = Api.ERROR;
+			this.log = "Network error.";
+			return (this);
+		}
 		try
 		{
 			const options = {
@@ -39,7 +48,7 @@ class	Api
 				options.body = this.body;
 			const response = await fetch(this.endpoint, options);
 			this.code = response.status;
-			if (this.credentials == "include" && response.status == 401 && this.endpoint != "/api/refresh/")
+			if (this.credentials == "include" && response.status == 401 && this.endpoint != "/api/refresh/" && !this.omit_refresh)
 			{
 				let endpoint = "/api/user/refresh/";
 				if (this.type == Api.OPPONENT)
@@ -52,7 +61,6 @@ class	Api
 				}
 				else if (refresh_response.status == Api.SUCCESS)
 				{
-					console.log("Token for " + this.type + " refreshed.");
 					return (this.request());
 				}
 			}
@@ -104,6 +112,7 @@ class	Api
 	set_headers(headers) { this.header = headers; return (this); }
 	set_credentials(credentials) { this.credentials = credentials; return (this); }
 	set_body(body) { this.body = body; return (this); }
+	set_omit_refresh(omit_refresh) { this.omit_refresh = omit_refresh; return (this); }
 
 	// Adders
 	add_header(key, value) { this.headers[key] = value; return (this); }
