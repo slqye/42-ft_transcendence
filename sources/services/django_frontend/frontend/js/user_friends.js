@@ -65,6 +65,7 @@ async function	set_friend_data(data, template, container)
 async function	add_friend(username)
 {
 	const request = await new Api(`/api/friendships/${username}/`, Api.USER).set_method("POST").request();
+	document.getElementById('username_request_input').value = "";
 	if (request.status == Api.ERROR)
 	{
 		new Toast(Toast.ERROR, request.log);

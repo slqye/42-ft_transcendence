@@ -46,12 +46,12 @@ async function load_home() {
 	if (window.location.pathname === "/home" && callback)
 		await signin_42_callback();
 	load_navbar();
+	if (await Api.is_login())
+		template.edit.id.add.attribute("sign-in-button", "class", "d-none");
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/home")
 		history.pushState({ page: "home" }, "Home", "/home");
 	init_tooltips();
-	if (await Api.is_login())
-		document.getElementById("sign-in-button").classList.add("d-none");
 }
 
 async function load_create_game_pong() {
@@ -126,6 +126,22 @@ async function load_tictactoe_match() {
 	if (window.location.pathname !== "/match_tictactoe")
 		history.pushState({ page: "match_tictactoe" }, "TicTacToe Match!", "/match_tictactoe");
 	init_tooltips();
+}
+
+async function load_tournament() {
+	if (!await Api.is_login())
+		return (load_home());
+	const content = document.getElementById("content");
+	let template = await new Template("frontend/html/pages/tournament.html").load();
+
+	if (template == null)
+		return (console.error(ERROR_TEMPLATE));
+	load_navbar();
+	content.innerHTML = template.value;
+	if (window.location.pathname !== "/tournament")
+		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
+	init_tooltips();
+	update_player_number();
 }
 
 async function load_about() {
@@ -285,6 +301,8 @@ window.onpopstate = async function (event) {
 				await load_friends(); break;
 			case "settings":
 				await load_settings(); break;
+			case "tournament":
+				await load_tournament(); break;
 			default:
 				console.error("Page not found:", page); break;
 		}
