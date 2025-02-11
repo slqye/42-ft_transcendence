@@ -1,13 +1,14 @@
 import os
 import requests
+import math
 
 from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.db import models
 
-from .models import User, Match, TournamentParticipant, Invitation, Friendship
-from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer, InvitationSerializer, FriendshipSerializer
+from .models import User, Match, Tournament, Pair, Invitation, Friendship
+from .serializers import UserSerializer, MatchSerializer, TournamentSerializer, PairSerializer, TournamentListSerializer, InvitationSerializer, FriendshipSerializer
 
 from django.contrib.auth import get_user_model, login, authenticate
 
@@ -433,19 +434,6 @@ class UserTicTacToeMatches(APIView):
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)
 
-class UserTournaments(APIView):
-	permission_classes = [permissions.IsAuthenticated]
-
-	def get(self, request, pk, *args, **kwargs):
-		if pk == "me":
-			target_user = request.user
-		else:
-			target_user = get_object_or_404(User, pk=pk)
-
-		participants = TournamentParticipant.objects.filter(user=target_user)
-		serializer = TournamentParticipantSerializer(participants, many=True)
-		return Response(serializer.data)
-
 ############################## FRIENDSHIP ##############################
 
 class FriendshipView(APIView):
@@ -539,6 +527,149 @@ class FriendListView(APIView):
 			friend_users[friendship.id] = friend_data
 		
 		return Response({"friends": friend_users})
+
+############################## TOURNAMENTS ##############################
+
+class TournamentView(generics.GenericAPIView):
+	"""
+	Handles:
+	- POST to create a new tournament (and generate first-round pairs).
+	- GET to list all tournaments (show status active/done).
+	"""
+	queryset = Tournament.objects.all()
+	permission_classes = [permissions.AllowAny]
+
+	def get_serializer_class(self):
+		if self.request.method == 'GET':
+			return TournamentListSerializer
+		return TournamentSerializer
+
+	def get(self, request, *args, **kwargs):
+		tournaments = self.get_queryset().order_by('-created_at')
+		serializer = self.get_serializer(tournaments, many=True)
+		return Response(serializer.data, status=status.HTTP_200_OK)
+
+	def post(self, request, *args, **kwargs):
+		serializer = self.get_serializer(data=request.data, context={'request': request})
+		serializer.is_valid(raise_exception=True)
+		tournament = serializer.save()
+		return Response(TournamentSerializer(tournament).data, status=status.HTTP_201_CREATED)
+
+class TournamentUpdateView(APIView):
+	"""
+	Handles:
+	- PUT: Update the current tournament by uploading a match for a given pair.
+	- DELETE: Delete a tournament.
+	"""
+	permission_classes = [permissions.AllowAny]
+
+	def put(self, request, pk):
+		"""
+		Expects a body like:
+		{
+		  "pair_id": <id>,
+		  "match": {
+			 "result": 1,
+			 "host_user": ...,
+			 "opponent_user": ...,
+			 ...
+		  }
+		}
+		The 'result' will tell us who the winner is.
+		1 => host_user wins, 2 => opponent_user wins, etc. (Adjust to your logic).
+		Once we have a winner, we check if there's an incomplete pair in the next round
+		lacking an 'opponent'. If not, create a new pair with that winner as 'user'.
+		"""
+		tournament = get_object_or_404(Tournament, pk=pk)
+		if tournament.is_done:
+			return Response({"detail": "This tournament is already done."}, status=status.HTTP_400_BAD_REQUEST)
+
+		pair_id = request.data.get("pair_id")
+		if not pair_id:
+			return Response({"detail": "Missing pair_id."}, status=status.HTTP_400_BAD_REQUEST)
+
+		pair = get_object_or_404(Pair, pk=pair_id, tournament=tournament)
+		if pair.match_played:
+			return Response({"detail": "This pair already has a completed match."}, status=status.HTTP_400_BAD_REQUEST)
+
+		# Read the nested match data
+		match_data = request.data.get("match", {})
+		match_serializer = MatchSerializer(data=match_data)
+		match_serializer.is_valid(raise_exception=True)
+		match_instance = match_serializer.save()
+
+		# Link the match to the pair, mark match_played
+		pair.match = match_instance
+		pair.match_played = True
+		pair.save()
+
+		# Determine the winner from match.result
+		# Let's assume result = 1 => host_user wins, result = 2 => opponent_user wins
+		match_result = match_instance.result
+		if match_result == 1:
+			winner = pair.user  # or match_instance.host_user if you prefer
+		elif match_result == 2:
+			winner = pair.opponent  # or match_instance.opponent_user
+		else:
+			# e.g. 0 or 3 might represent a draw. You must decide how to handle a tie.
+			return Response({"detail": "Cannot advance if the match is a draw."}, status=status.HTTP_400_BAD_REQUEST)
+
+		# Try to place the winner in the next round
+		next_round = pair.round_number + 1
+
+		# Check if this finalizes the tournament
+		# For example, if next_round would exceed log2(#participants), the tournament might be finished.
+		# Or you can count how many pairs exist in next_round. If none, or if we've reached a single winner, etc.
+		# We'll do a simple example: if we are at the last round, mark tournament done.
+		# A more robust approach would check if there are any other pairs in the current round still not played, etc.
+
+		# For a power-of-2 tournament with N participants, the number of rounds = log2(N).
+		total_rounds = int(math.log2(tournament.participants.count()))
+		if next_round > total_rounds:
+			# We have a champion
+			tournament.is_done = True
+			tournament.save()
+			return Response({
+				"detail": f"The tournament has ended. {winner} is the champion!",
+				"tournament": TournamentSerializer(tournament).data
+			}, status=status.HTTP_200_OK)
+
+		# If not final, place winner in next_round
+		# Find an existing Pair in next_round that has no opponent assigned
+		# or create a new Pair.
+		incomplete_pair = Pair.objects.filter(
+			tournament=tournament,
+			round_number=next_round,
+			match_played=False
+		).filter(opponent__isnull=True)  # or some logic indicating an open slot
+
+		if incomplete_pair.exists():
+			# Put the winner as the 'opponent'
+			open_slot = incomplete_pair.first()
+			open_slot.opponent = winner
+			open_slot.save()
+		else:
+			# Create a new pair in next_round, winner is 'user', no opponent yet
+			Pair.objects.create(
+				tournament=tournament,
+				round_number=next_round,
+				user=winner,
+				opponent=None,  # You may allow null/blank in your model if you want partial pairs
+				match_played=False
+			)
+
+		return Response({
+			"detail": "Match has been successfully uploaded. Winner advanced.",
+			"tournament": TournamentSerializer(tournament).data
+		}, status=status.HTTP_200_OK)
+
+	def delete(self, request, pk):
+		"""
+		Allow removing a tournament entirely (optional).
+		"""
+		tournament = get_object_or_404(Tournament, pk=pk)
+		tournament.delete()
+		return Response({"detail": "Tournament deleted."}, status=status.HTTP_204_NO_CONTENT)
 
 ############################## OAUTH et d'autres trucs ##############################
 
