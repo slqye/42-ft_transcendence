@@ -14,3 +14,8 @@ async function	update_player_number()
 		container.innerHTML += template.value;
 	}
 }
+
+async function	create_tournament()
+{
+	console.log("creating tournament...");
+}
