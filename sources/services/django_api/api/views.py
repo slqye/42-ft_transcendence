@@ -362,7 +362,7 @@ class InvitationAcceptView(APIView):
 				host_user=host_user,
 				opponent_user=opponent_user,
 				is_pong=invitation.is_pong,
-				tournament_id=invitation.tournament_id,
+				tournament=invitation.tournament,
 				pong_game_stats=invitation.pong_game_stats,
 				tictactoe_game_stats=invitation.tictactoe_game_stats,
 				result=invitation.result  # match result as integer
@@ -478,7 +478,7 @@ class FriendshipView(APIView):
 			return Response({"error": "Friendship ID is required for update."},
 							status=status.HTTP_400_BAD_REQUEST)
 		
-		friendship = self.get_object(pk)
+		friendship = self.get_object(pk) 
 		if friendship.user_id_2 != request.user:
 			return Response({"detail": "You are not the correct user to accept this friendship."},
 							status=status.HTTP_403_FORBIDDEN)
@@ -556,30 +556,9 @@ class TournamentView(generics.GenericAPIView):
 		return Response(TournamentSerializer(tournament).data, status=status.HTTP_201_CREATED)
 
 class TournamentUpdateView(APIView):
-	"""
-	Handles:
-	- PUT: Update the current tournament by uploading a match for a given pair.
-	- DELETE: Delete a tournament.
-	"""
 	permission_classes = [permissions.AllowAny]
 
 	def put(self, request, pk):
-		"""
-		Expects a body like:
-		{
-		  "pair_id": <id>,
-		  "match": {
-			 "result": 1,
-			 "host_user": ...,
-			 "opponent_user": ...,
-			 ...
-		  }
-		}
-		The 'result' will tell us who the winner is.
-		1 => host_user wins, 2 => opponent_user wins, etc. (Adjust to your logic).
-		Once we have a winner, we check if there's an incomplete pair in the next round
-		lacking an 'opponent'. If not, create a new pair with that winner as 'user'.
-		"""
 		tournament = get_object_or_404(Tournament, pk=pk)
 		if tournament.is_done:
 			return Response({"detail": "This tournament is already done."}, status=status.HTTP_400_BAD_REQUEST)
@@ -592,41 +571,31 @@ class TournamentUpdateView(APIView):
 		if pair.match_played:
 			return Response({"detail": "This pair already has a completed match."}, status=status.HTTP_400_BAD_REQUEST)
 
-		# Read the nested match data
-		match_data = request.data.get("match", {})
-		match_serializer = MatchSerializer(data=match_data)
-		match_serializer.is_valid(raise_exception=True)
-		match_instance = match_serializer.save()
-
-		# Link the match to the pair, mark match_played
+		match_id = request.data.get("match_id")
+		if not match_id:
+			return Response({"detail": "Missing match_id."}, status=status.HTTP_400_BAD_REQUEST)
+		match_instance = get_object_or_404(Match, pk=match_id)
+		
+		if pair.user != match_instance.host_user or pair.opponent != match_instance.opponent_user or match_instance.tournament != pair.tournament:
+			return Response({"detail": "Match instance does not match the pair instance"}, status=status.HTTP_400_BAD_REQUEST)
+		match_instance.tournament = pair.tournament
+		match_instance.save()
 		pair.match = match_instance
 		pair.match_played = True
 		pair.save()
 
-		# Determine the winner from match.result
-		# Let's assume result = 1 => host_user wins, result = 2 => opponent_user wins
 		match_result = match_instance.result
-		if match_result == 1:
-			winner = pair.user  # or match_instance.host_user if you prefer
-		elif match_result == 2:
-			winner = pair.opponent  # or match_instance.opponent_user
+		if match_result == 0:
+			winner = pair.user
+		elif match_result == 1:
+			winner = pair.opponent
 		else:
-			# e.g. 0 or 3 might represent a draw. You must decide how to handle a tie.
+			# e.g. 0 => draw
 			return Response({"detail": "Cannot advance if the match is a draw."}, status=status.HTTP_400_BAD_REQUEST)
 
-		# Try to place the winner in the next round
-		next_round = pair.round_number + 1
-
-		# Check if this finalizes the tournament
-		# For example, if next_round would exceed log2(#participants), the tournament might be finished.
-		# Or you can count how many pairs exist in next_round. If none, or if we've reached a single winner, etc.
-		# We'll do a simple example: if we are at the last round, mark tournament done.
-		# A more robust approach would check if there are any other pairs in the current round still not played, etc.
-
-		# For a power-of-2 tournament with N participants, the number of rounds = log2(N).
 		total_rounds = int(math.log2(tournament.participants.count()))
+		next_round = pair.round_number + 1
 		if next_round > total_rounds:
-			# We have a champion
 			tournament.is_done = True
 			tournament.save()
 			return Response({
@@ -634,39 +603,33 @@ class TournamentUpdateView(APIView):
 				"tournament": TournamentSerializer(tournament).data
 			}, status=status.HTTP_200_OK)
 
-		# If not final, place winner in next_round
-		# Find an existing Pair in next_round that has no opponent assigned
-		# or create a new Pair.
 		incomplete_pair = Pair.objects.filter(
 			tournament=tournament,
 			round_number=next_round,
 			match_played=False
-		).filter(opponent__isnull=True)  # or some logic indicating an open slot
+		).filter(opponent__isnull=True)
 
 		if incomplete_pair.exists():
-			# Put the winner as the 'opponent'
+			# Put the winner as the 'opponent' in that open slot
 			open_slot = incomplete_pair.first()
 			open_slot.opponent = winner
 			open_slot.save()
 		else:
-			# Create a new pair in next_round, winner is 'user', no opponent yet
+			# Create a new pair in next_round with no opponent yet
 			Pair.objects.create(
 				tournament=tournament,
 				round_number=next_round,
 				user=winner,
-				opponent=None,  # You may allow null/blank in your model if you want partial pairs
+				opponent=None,
 				match_played=False
 			)
 
 		return Response({
-			"detail": "Match has been successfully uploaded. Winner advanced.",
+			"detail": "Match has been successfully linked. Winner advanced.",
 			"tournament": TournamentSerializer(tournament).data
 		}, status=status.HTTP_200_OK)
 
 	def delete(self, request, pk):
-		"""
-		Allow removing a tournament entirely (optional).
-		"""
 		tournament = get_object_or_404(Tournament, pk=pk)
 		tournament.delete()
 		return Response({"detail": "Tournament deleted."}, status=status.HTTP_204_NO_CONTENT)
