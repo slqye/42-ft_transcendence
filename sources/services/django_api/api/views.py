@@ -185,13 +185,13 @@ class UserList(generics.ListCreateAPIView):
 	serializer_class = UserSerializer
 	permission_classes = [permissions.IsAdminUser]
 
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+class UserDetail(generics.RetrieveAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
 	permission_classes = [permissions.AllowAny]
 
 class UserFetchUsername(generics.RetrieveAPIView):
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.AllowAny]
 	serializer_class = UserSerializer
 	queryset = User.objects.all()
 	lookup_field = 'username'
