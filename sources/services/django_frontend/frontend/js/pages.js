@@ -129,17 +129,15 @@ async function load_tictactoe_match() {
 }
 
 async function load_tournament() {
-	if (!await Api.is_login())
-		return (load_home());
 	const content = document.getElementById("content");
-	let template = await new Template("frontend/html/pages/tournament.html").load();
+	let template = await new Template("frontend/html/pages/create_tournament.html").load();
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.value;
-	if (window.location.pathname !== "/tournament")
-		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
+	if (window.location.pathname !== "/create_tournament")
+		history.pushState({ page: "create_tournament" }, "Create a Tournament", "/create_tournament");
 	init_tooltips();
 	update_player_number();
 }

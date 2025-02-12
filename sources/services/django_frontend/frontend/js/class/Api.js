@@ -67,10 +67,12 @@ class	Api
 			else if (!response.ok)
 			{
 				this.status = Api.ERROR;
-				this.log = (await response.json()).detail;
+				this.response = await response.json();
+				this.log = this.response.detail;
 			}
 			else
 			{
+				console.log("success");
 				this.status = Api.SUCCESS;
 				this.response = await response.json();
 			}
