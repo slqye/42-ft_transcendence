@@ -196,6 +196,38 @@ class UserFetchUsername(generics.RetrieveAPIView):
 	queryset = User.objects.all()
 	lookup_field = 'username'
 
+class UserFetchIdViaUsernames(generics.RetrieveAPIView):
+	permission_classes = [permissions.AllowAny]
+	serializer_class = UserSerializer
+
+	def post(self, request, *args, **kwargs):
+			usernames = request.data.get('usernames')
+			if not usernames or not isinstance(usernames, list):
+				return Response(
+					{"error": "A list of usernames must be provided in the request body."},
+					status=status.HTTP_400_BAD_REQUEST
+				)
+			
+			users = User.objects.filter(username__in=usernames)
+			found_usernames = set(user.username for user in users)
+			not_found = []
+			for username in usernames:
+				if username not in found_usernames:
+					not_found.append(username)
+
+			if not_found:
+				return Response({"detail": "One or more users not found",
+						"usernames": not_found}, status=status.HTTP_404_NOT_FOUND)
+
+			user_ids = [user.id for user in users]
+			response_data = {
+				"user_ids": user_ids,
+			}
+			
+			return Response(response_data, status=status.HTTP_200_OK)
+			
+
+
 class UpdateUserField(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
