@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Friendship, Match, Tournament, TournamentParticipant, PongGameStats, TicTacToeGameStats, Invitation
+from .models import User, Friendship, Match, Tournament, Pair, PongGameStats, TicTacToeGameStats, Invitation
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -75,36 +75,6 @@ class FriendshipSerializer(serializers.ModelSerializer):
 		]
 		read_only_fields = ['id']
 
-# Tournament Serializer
-class TournamentSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Tournament
-		fields = [
-			'id',  # Default primary key from Django
-			'name',
-			'created_at',
-		]
-		read_only_fields = ['id', 'created_at']
-
-
-# Tournament Participant Serializer
-class TournamentParticipantSerializer(serializers.ModelSerializer):
-	tournament = TournamentSerializer(read_only=True)
-	user = UserSerializer(read_only=True)
-
-	class Meta:
-		model = TournamentParticipant
-		fields = [
-			'id',  # Default primary key from Django
-			'tournament',
-			'user',
-			'points',
-			'rank',
-		]
-		read_only_fields = ['id']
-
-
-
 class PongGameStatsSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = PongGameStats
@@ -169,10 +139,10 @@ class MatchSerializer(serializers.ModelSerializer):
 			'is_pong',
 			'pong_game_stats',
 			'tictactoe_game_stats',
-			'tournament_id',
+			'tournament',
 			'created_at'
 		]
-		read_only_fields = ['id', 'created_at']
+		read_only_fields = ['id', 'created_at', 'tournament', 'host_user', 'opponent_user', 'result', 'is_pong', 'pong_game_stats', 'tictactoe_game_stats']
 
 	def create(self, validated_data):
 		pong_stats_data = validated_data.pop('pong_game_stats', None)
@@ -225,7 +195,7 @@ class InvitationSerializer(serializers.ModelSerializer):
 			'status',
 			'result',
 			'is_pong',
-			'tournament_id',
+			'tournament',
 			'pong_game_stats',
 			'tictactoe_game_stats',
 			'created_at',
@@ -285,3 +255,87 @@ class FriendshipSerializer(serializers.ModelSerializer):
 		validated_data.pop('user_id_1', None)
 		validated_data.pop('user_id_2', None)
 		return super().update(instance, validated_data)
+	
+class PairSerializer(serializers.ModelSerializer):
+	# Nested match
+	match = MatchSerializer(read_only=True)
+
+	user_id = serializers.PrimaryKeyRelatedField(
+		source='user', queryset=User.objects.all(), write_only=True, required=False
+	)
+	opponent_id = serializers.PrimaryKeyRelatedField(
+		source='opponent', queryset=User.objects.all(), write_only=True, required=False
+	)
+
+	class Meta:
+		model = Pair
+		fields = [
+			'id',
+			'tournament',
+			'round_number',
+			'user',
+			'opponent',
+			'user_id',
+			'opponent_id',
+			'match_played',
+			'match',
+		]
+		read_only_fields = ['id', 'tournament', 'round_number', 'user', 'opponent', 'match_played', 'match']
+
+
+class TournamentSerializer(serializers.ModelSerializer):
+	# Nested pairs
+	pairs = PairSerializer(many=True, read_only=True)
+
+	# For creation, accept a list of participant IDs
+	participant_ids = serializers.PrimaryKeyRelatedField(
+		many=True,
+		queryset=User.objects.all(),
+		write_only=True,
+		required=True
+	)
+
+	class Meta:
+		model = Tournament
+		fields = [
+			'id',
+			'name',
+			'participants',   # read-only
+			'participant_ids', # write-only
+			'next_pair',
+			'is_done',
+			'pairs',		  # nested pairs
+			'created_at',
+		]
+		read_only_fields = ['id', 'participants', 'is_done', 'pairs', 'created_at', 'next_pair']
+
+	def create(self, validated_data):
+		participant_ids = validated_data.pop('participant_ids', [])
+		# Create the tournament
+		tournament = Tournament.objects.create(**validated_data)
+		# Ensure no duplicates
+		if len(participant_ids) != len(set(participant_ids)):
+			raise serializers.ValidationError("Duplicate participants are not allowed.")
+
+		# Add participants
+		for user_obj in participant_ids:
+			tournament.participants.add(user_obj)
+
+		# Validate number of participants is a power of two
+		if not tournament.participants.count() or not self._is_power_of_two(tournament.participants.count()):
+			raise serializers.ValidationError("Number of participants must be a power of 2.")
+
+		# Now create first round pairs
+		tournament.create_first_round_pairs()
+
+		return tournament
+
+	def _is_power_of_two(self, n):
+		return (n & (n - 1) == 0) and n != 0
+
+
+class TournamentListSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Tournament
+		fields = ['id', 'name', 'status', 'is_done', 'created_at']
+		read_only_fields = fields

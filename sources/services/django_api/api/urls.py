@@ -27,12 +27,17 @@ urlpatterns = [
 	path("users/<str:pk>/matches/", views.UserMatches.as_view(), name="user-matches"),
 	path("users/<str:pk>/matches/ttt/", views.UserTicTacToeMatches.as_view(), name="user-ttt-matches"),
 	path("users/<str:pk>/matches/pong/", views.UserPongMatches.as_view(), name="user-pong-matches"),
-	path("users/<str:pk>/tournaments/", views.UserTournaments.as_view(), name="user-tournaments"),
 	path("users/<str:pk>/stats/", views.UserStats.as_view(), name="user-stats"),
 
 	# Match creation
 	path('invitations/', views.InvitationCreateView.as_view(), name='invitation-create'),
 	path('invitations/<int:pk>/accept/', views.InvitationAcceptView.as_view(), name='invitation-accept'),
+
+	# Tournaments
+	path('tournaments/', views.TournamentView.as_view(), name='tournament'),
+	path('tournaments/<int:pk>/', views.TournamentUpdateView.as_view(), name='tournament-update'),
+	path('tournaments/<int:pk>/pairs/', views.TournamentFetchPairs.as_view(), name='tournament-pairs'),
+	path('tournaments/<int:pk>/pairs/next/', views.TournamentFetchNextPair.as_view(), name='tournament-next-pair'),
 
 	path('42oauth/callback/', views.OAuthCallbackView.as_view(), name='callback'),
 	path('config/', views.FrontendConfigView.as_view(), name="config"),

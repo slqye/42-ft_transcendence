@@ -1,13 +1,14 @@
 import os
 import requests
+import math
 
 from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.db import models
 
-from .models import User, Match, TournamentParticipant, Invitation, Friendship
-from .serializers import UserSerializer, MatchSerializer, TournamentParticipantSerializer, InvitationSerializer, FriendshipSerializer
+from .models import User, Match, Tournament, Pair, Invitation, Friendship
+from .serializers import UserSerializer, MatchSerializer, TournamentSerializer, PairSerializer, TournamentListSerializer, InvitationSerializer, FriendshipSerializer
 
 from django.contrib.auth import get_user_model, login, authenticate
 
@@ -374,7 +375,7 @@ class InvitationAcceptView(APIView):
 				host_user=host_user,
 				opponent_user=opponent_user,
 				is_pong=invitation.is_pong,
-				tournament_id=invitation.tournament_id,
+				tournament=invitation.tournament,
 				pong_game_stats=invitation.pong_game_stats,
 				tictactoe_game_stats=invitation.tictactoe_game_stats,
 				result=invitation.result  # match result as integer
@@ -446,19 +447,6 @@ class UserTicTacToeMatches(APIView):
 		serializer = MatchSerializer(matches, many=True)
 		return Response(serializer.data)
 
-class UserTournaments(APIView):
-	permission_classes = [permissions.IsAuthenticated]
-
-	def get(self, request, pk, *args, **kwargs):
-		if pk == "me":
-			target_user = request.user
-		else:
-			target_user = get_object_or_404(User, pk=pk)
-
-		participants = TournamentParticipant.objects.filter(user=target_user)
-		serializer = TournamentParticipantSerializer(participants, many=True)
-		return Response(serializer.data)
-
 ############################## FRIENDSHIP ##############################
 
 class FriendshipView(APIView):
@@ -503,7 +491,7 @@ class FriendshipView(APIView):
 			return Response({"error": "Friendship ID is required for update."},
 							status=status.HTTP_400_BAD_REQUEST)
 		
-		friendship = self.get_object(pk)
+		friendship = self.get_object(pk) 
 		if friendship.user_id_2 != request.user:
 			return Response({"detail": "You are not the correct user to accept this friendship."},
 							status=status.HTTP_403_FORBIDDEN)
@@ -552,6 +540,131 @@ class FriendListView(APIView):
 			friend_users[friendship.id] = friend_data
 		
 		return Response({"friends": friend_users})
+
+############################## TOURNAMENTS ##############################
+
+class TournamentView(generics.GenericAPIView):
+	"""
+	Handles:
+	- POST to create a new tournament (and generate first-round pairs).
+	- GET to list all tournaments (show status active/done).
+	"""
+	queryset = Tournament.objects.all()
+	permission_classes = [permissions.AllowAny]
+
+	def get_serializer_class(self):
+		if self.request.method == 'GET':
+			return TournamentListSerializer
+		return TournamentSerializer
+
+	def get(self, request, *args, **kwargs):
+		tournaments = self.get_queryset().order_by('-created_at')
+		serializer = self.get_serializer(tournaments, many=True)
+		return Response(serializer.data, status=status.HTTP_200_OK)
+
+	def post(self, request, *args, **kwargs):
+		serializer = self.get_serializer(data=request.data, context={'request': request})
+		serializer.is_valid(raise_exception=True)
+		tournament = serializer.save()
+		return Response(TournamentSerializer(tournament).data, status=status.HTTP_201_CREATED)
+
+class TournamentUpdateView(APIView):
+	permission_classes = [permissions.AllowAny]
+
+	def put(self, request, pk):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		if tournament.is_done:
+			return Response({"detail": "This tournament is already done."}, status=status.HTTP_400_BAD_REQUEST)
+
+		pair = tournament.next_pair
+		if pair.match_played:
+			return Response({"detail": "This pair already has a completed match."}, status=status.HTTP_400_BAD_REQUEST)
+
+		match_id = request.data.get("match_id")
+		if not match_id:
+			return Response({"detail": "Missing match_id."}, status=status.HTTP_400_BAD_REQUEST)
+		match_instance = get_object_or_404(Match, pk=match_id)
+		
+		if pair.user != match_instance.host_user or pair.opponent != match_instance.opponent_user or match_instance.tournament != pair.tournament:
+			return Response({"detail": "Match instance does not match the pair instance"}, status=status.HTTP_400_BAD_REQUEST)
+		match_instance.tournament = pair.tournament
+		match_instance.save()
+		pair.match = match_instance
+		pair.match_played = True
+		pair.save()
+		match_result = match_instance.result
+		if match_result == 0:
+			winner = pair.user
+		elif match_result == 1:
+			winner = pair.opponent
+		else:
+			# e.g. 0 => draw
+			return Response({"detail": "Cannot advance if the match is a draw."}, status=status.HTTP_400_BAD_REQUEST)
+
+		total_rounds = int(math.log2(tournament.participants.count()))
+		next_round = pair.round_number + 1
+		if next_round > total_rounds:
+			tournament.is_done = True
+			tournament.save()
+			return Response({
+				"detail": f"The tournament has ended. {winner} is the champion!",
+				"tournament": TournamentSerializer(tournament).data
+			}, status=status.HTTP_200_OK)
+
+		incomplete_pair = Pair.objects.filter(
+			tournament=tournament,
+			round_number=next_round,
+			match_played=False
+		).filter(opponent__isnull=True)
+
+		if incomplete_pair.exists():
+			# Put the winner as the 'opponent' in that open slot
+			open_slot = incomplete_pair.first()
+			open_slot.opponent = winner
+			open_slot.save()
+		else:
+			# Create a new pair in next_round with no opponent yet
+			Pair.objects.create(
+				tournament=tournament,
+				round_number=next_round,
+				user=winner,
+				opponent=None,
+				match_played=False
+			)
+		pairs_ = tournament.pairs.all()
+		for pair_ in pairs_:
+			if pair_.match_played == False:
+				tournament.next_pair = pair_
+				tournament.save()
+				break
+
+		return Response({
+			"detail": "Match has been successfully linked. Winner advanced.",
+			"tournament": TournamentSerializer(tournament).data
+		}, status=status.HTTP_200_OK)
+
+	def delete(self, request, pk):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		tournament.delete()
+		return Response({"detail": "Tournament deleted."}, status=status.HTTP_204_NO_CONTENT)
+	
+class TournamentFetchPairs(generics.RetrieveAPIView):
+	permission_classes = [permissions.AllowAny]
+
+	def get(self, request, pk, format=None):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		pairs = tournament.pairs.all()
+		serializer = PairSerializer(pairs, many=True)
+		return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TournamentFetchNextPair(generics.RetrieveAPIView):
+	permission_classes = [permissions.AllowAny]
+
+	def get(self, request, pk, format=None):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		next_pair = tournament.next_pair
+		serializer = PairSerializer(next_pair)
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
 ############################## OAUTH et d'autres trucs ##############################
 
