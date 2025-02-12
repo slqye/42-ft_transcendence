@@ -66,6 +66,8 @@ class Pong
 		this.stop = this.stop.bind(this);
 		this.resize_handler = this.resize_handler.bind(this);
 		this.terminateMatch = this.terminateMatch.bind(this);
+		this.is_ia = false;
+		this.is_recieving = false;
 		this.resetMovingObjectsPositions();
 
 	}
@@ -92,12 +94,13 @@ class Pong
 		this.ball.radius = 0;
 	}
 
-	init()
+	async init()
 	{
 		var gameButton = document.getElementById('game-button');
 		gameButton.addEventListener('click', this.handleGame);
 		document.getElementById('player1').textContent = this.player1.name;
 		document.getElementById('player2').textContent = this.player2.name;
+		this.is_ia = !await Api.is_opponent_login();
 	}
 
 	handleGame()
@@ -150,10 +153,21 @@ class Pong
 				this.p1_paddle.y -= this.paddle_speed;
 			if (this.keys.has(Pong.P1_KEYS[Pong.DOWN]) && this.p1_paddle.y < this.canvas.height -this.p1_paddle.height)
 				this.p1_paddle.y += this.paddle_speed;
-			if (this.keys.has(Pong.P2_KEYS[Pong.UP]) && this.p2_paddle.y > 0)
-				this.p2_paddle.y -= this.paddle_speed;
-			if (this.keys.has(Pong.P2_KEYS[Pong.DOWN]) && this.p2_paddle.y < this.canvas.height - this.p2_paddle.height)
-				this.p2_paddle.y += this.paddle_speed;
+			if (!this.is_ia)
+			{
+				if (this.keys.has(Pong.P2_KEYS[Pong.UP]) && this.p2_paddle.y > 0)
+					this.p2_paddle.y -= this.paddle_speed;
+				if (this.keys.has(Pong.P2_KEYS[Pong.DOWN]) && this.p2_paddle.y < this.canvas.height - this.p2_paddle.height)
+					this.p2_paddle.y += this.paddle_speed;
+			}
+			else if (this.is_recieving)
+			{
+				if (this.p2_paddle.y + this.p2_paddle.height / 2 < this.ball.y)
+					this.p2_paddle.y += this.paddle_speed;
+				else
+					this.p2_paddle.y -= this.paddle_speed;
+				this.p2_paddle.y = Math.max(0, Math.min(this.p2_paddle.y, this.canvas.height - this.p2_paddle.height));
+			}
 		}
 	}
 
@@ -164,6 +178,10 @@ class Pong
 		let ball_x_radius = this.ball.dx == 1 ? this.ball.x + this.ball.radius : this.ball.x - this.ball.radius;
 		let ball_y_radius = this.ball.dy == 1 ? this.ball.y + this.ball.radius : this.ball.y - this.ball.radius;
 
+		if (this.ball.dx == 1)
+			this.is_recieving = true;
+		else
+			this.is_recieving = false;
 		if (ball_x_radius <= Pong.PADDLE_OFFSET_RATIO * this.canvas.width + this.p1_paddle.width && ball_x_radius >= Pong.PADDLE_OFFSET_RATIO * this.canvas.width)
 		{
 			if (ball_y_radius >= this.p1_paddle.y && ball_y_radius <= this.p1_paddle.y + this.p1_paddle.height) {

@@ -1,6 +1,5 @@
 function	set_connected_opponent_form(opponentData)
 {
-	document.getElementById("opponent_icon_display").src = opponentData.avatar_url;
 
 	document.getElementById("opponent_signin_username").value = opponentData.username;
 
@@ -20,7 +19,6 @@ function	reset_opponent_form()
 
 	document.getElementById("sign_in_as_opponent_button").classList.remove('d-none');
 	document.getElementById("opponent_info").classList.add('d-none');
-	document.getElementById("opponent_icon_display").src = "/frontend/assets/default_profile_icon.webp";
 
 	document.getElementById("opponent_signin_username").value = "";
 	document.getElementById("opponent_signin_password").value = "";
@@ -28,16 +26,15 @@ function	reset_opponent_form()
 	document.getElementById("start-game-button").classList.add('d-none');
 }
 
-async function opponent_signin(event) {
-	event.preventDefault();
+async function opponent_signin() {
 	const username = document.getElementById("opponent_signin_username").value;
 	const password = document.getElementById("opponent_signin_password").value;
 
 	const request_body = JSON.stringify(
-		{
-			"username": username,
-			"password": password
-		});
+	{
+		"username": username,
+		"password": password
+	});
 	const request = await new Api("/api/opponent/login/", Api.USER).set_method("POST").set_body(request_body).set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 		new Toast(Toast.ERROR, request.log);
