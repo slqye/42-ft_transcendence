@@ -563,11 +563,7 @@ class TournamentUpdateView(APIView):
 		if tournament.is_done:
 			return Response({"detail": "This tournament is already done."}, status=status.HTTP_400_BAD_REQUEST)
 
-		pair_id = request.data.get("pair_id")
-		if not pair_id:
-			return Response({"detail": "Missing pair_id."}, status=status.HTTP_400_BAD_REQUEST)
-
-		pair = get_object_or_404(Pair, pk=pair_id, tournament=tournament)
+		pair = tournament.next_pair
 		if pair.match_played:
 			return Response({"detail": "This pair already has a completed match."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -583,7 +579,6 @@ class TournamentUpdateView(APIView):
 		pair.match = match_instance
 		pair.match_played = True
 		pair.save()
-
 		match_result = match_instance.result
 		if match_result == 0:
 			winner = pair.user
@@ -623,6 +618,12 @@ class TournamentUpdateView(APIView):
 				opponent=None,
 				match_played=False
 			)
+		pairs_ = tournament.pairs.all()
+		for pair_ in pairs_:
+			if pair_.match_played == False:
+				tournament.next_pair = pair_
+				tournament.save()
+				break
 
 		return Response({
 			"detail": "Match has been successfully linked. Winner advanced.",
@@ -633,6 +634,24 @@ class TournamentUpdateView(APIView):
 		tournament = get_object_or_404(Tournament, pk=pk)
 		tournament.delete()
 		return Response({"detail": "Tournament deleted."}, status=status.HTTP_204_NO_CONTENT)
+	
+class TournamentFetchPairs(generics.RetrieveAPIView):
+	permission_classes = [permissions.AllowAny]
+
+	def get(self, request, pk, format=None):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		pairs = tournament.pairs.all()
+		serializer = PairSerializer(pairs, many=True)
+		return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TournamentFetchNextPair(generics.RetrieveAPIView):
+	permission_classes = [permissions.AllowAny]
+
+	def get(self, request, pk, format=None):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		next_pair = tournament.next_pair
+		serializer = PairSerializer(next_pair)
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
 ############################## OAUTH et d'autres trucs ##############################
 

@@ -26,15 +26,18 @@ class Friendship(models.Model):
 def is_power_of_two(n: int) -> bool:
 	return (n & (n - 1) == 0) and n != 0
 
-
 class Tournament(models.Model):
 	name = models.CharField(max_length=100)
 	participants = models.ManyToManyField(User, related_name='tournaments_joined', blank=False)
 	is_done = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
-	def __str__(self):
-		return f"Tournament {self.name} - Done? {self.is_done}"
-
+	next_pair = models.ForeignKey(
+		'Pair',
+		null=True,
+		blank=True,
+		on_delete=models.SET_NULL,
+		related_name='tournaments_next'
+	)
 	def clean(self):
 		count = self.participants.count()
 		if count < 4:
@@ -56,28 +59,8 @@ class Tournament(models.Model):
 				opponent=opponent_,
 				match_played=False
 			)
-	@property
-	def status(self):
-		return "done" if self.is_done else "active"
-
-class Pair(models.Model):
-	tournament = models.ForeignKey(Tournament, related_name='pairs', on_delete=models.CASCADE)
-	round_number = models.PositiveIntegerField(default=1)
-
-	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_user')
-	opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_opponent')
-
-	match = models.OneToOneField(
-		'Match',  # or import your Match model
-		on_delete=models.SET_NULL,
-		null=True, blank=True,
-		related_name='pair'
-	)
-
-	match_played = models.BooleanField(default=False)
-
-	def __str__(self):
-		return f"[Round {self.round_number}] {self.user} vs {self.opponent} (played={self.match_played})"
+		pairs_ = self.pairs.all()
+		next_pair = pairs_[0]
 
 class PongGameStats(models.Model):
 	user_score = models.PositiveIntegerField(default=0)
@@ -103,8 +86,8 @@ class TicTacToeGameStats(models.Model):
 	opponent_quickest_win_as_moves = models.PositiveIntegerField(default=0)
 
 class Match(models.Model):
-	host_user = models.ForeignKey(User, related_name='host_user', on_delete=models.CASCADE)
-	opponent_user = models.ForeignKey(User, related_name='opponent_user', on_delete=models.CASCADE)
+	host_user = models.ForeignKey(User, related_name='match_host_user', on_delete=models.CASCADE)
+	opponent_user = models.ForeignKey(User, related_name='match_opponent_user', on_delete=models.CASCADE)
 	# Now an integer field. For example: 0 = pending/draw, 1 = win, etc.
 	result = models.IntegerField(default=0)
 	is_pong = models.BooleanField(blank=False, default=True)
@@ -117,6 +100,24 @@ class Match(models.Model):
 	tournament = models.ForeignKey(Tournament, related_name='match', on_delete=models.CASCADE, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 
+class Pair(models.Model):
+	tournament = models.ForeignKey(Tournament, related_name='pairs', on_delete=models.CASCADE)
+	round_number = models.PositiveIntegerField(default=1)
+
+	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_user')
+	opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_opponent')
+
+	match = models.OneToOneField(
+		Match,  # or import your Match model
+		on_delete=models.SET_NULL,
+		null=True, blank=True,
+		related_name='pair'
+	)
+
+	match_played = models.BooleanField(default=False)
+
+	def __str__(self):
+		return f"[Round {self.round_number}] {self.user} vs {self.opponent} (played={self.match_played})"
 
 class Invitation(models.Model):
 	status = models.BooleanField(default=False)

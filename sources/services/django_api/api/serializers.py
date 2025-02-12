@@ -302,12 +302,12 @@ class TournamentSerializer(serializers.ModelSerializer):
 			'name',
 			'participants',   # read-only
 			'participant_ids', # write-only
+			'next_pair',
 			'is_done',
-			'status',		 # "active" or "done"
 			'pairs',		  # nested pairs
 			'created_at',
 		]
-		read_only_fields = ['id', 'participants', 'is_done', 'status', 'pairs', 'created_at']
+		read_only_fields = ['id', 'participants', 'is_done', 'pairs', 'created_at', 'next_pair']
 
 	def create(self, validated_data):
 		participant_ids = validated_data.pop('participant_ids', [])
@@ -335,7 +335,6 @@ class TournamentSerializer(serializers.ModelSerializer):
 
 
 class TournamentListSerializer(serializers.ModelSerializer):
-	"""Simpler serializer for listing all tournaments with their status."""
 	class Meta:
 		model = Tournament
 		fields = ['id', 'name', 'status', 'is_done', 'created_at']
