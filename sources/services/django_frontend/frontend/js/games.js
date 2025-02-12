@@ -29,10 +29,6 @@ async function	launch_pong_match()
 		if (user.username === opponent.username)
 			return (new Toast("You cannot play against yourself!"));
 	}
-	else
-	{
-
-	}
 	if (win_condition < 3)
 		return (new Toast("The win condition must be at least 3!"));
 	else if (win_condition > 10)
@@ -43,7 +39,7 @@ async function	launch_pong_match()
 	if (selected_opponent.id == "user-outlined")
 		var pong = new Pong(game, score, new Player(user.display_name), new Player(opponent.display_name), win_condition);
 	else
-		var pong = new Pong(game, score, new Player(user.display_name), new Player("ai"), win_condition);
+		var pong = new Pong(game, score, new Player(user.display_name), new Player("AI"), win_condition);
 	pong.init();
 }
 
@@ -61,25 +57,32 @@ async function	launch_tictactoe_match()
 	{
 		return (new Toast("A host player must be logged in to play a game."));
 	}
-	let opponent = null;
-	try
+	let selected_opponent = document.querySelector("input[name='options-outlined']:checked");
+	if (selected_opponent.id == "user-outlined")
 	{
-		opponent = await fetch_opponent();
-		if (!opponent)
-			throw new Error();
+		let opponent = null;
+		try
+		{
+			opponent = await fetch_opponent();
+			if (!opponent)
+				throw new Error();
+		}
+		catch (error)
+		{
+			return (new Toast("An opponent must be logged in to play a game."));
+		}
+		if (user.username === opponent.username)
+			return (new Toast("You cannot play against yourself!"));
 	}
-	catch (error)
-	{
-		return (new Toast("An opponent must be logged in to play a game."));
-	}
-	if (user.username === opponent.username)
-		return (new Toast("You cannot play against yourself!"));
 	if (win_condition < 3)
 		return (new Toast("The win condition must be at least 3!"));
 	else if (win_condition > 10)
 		return (new Toast("The win condition must be at most 10!"));
 	await load_tictactoe_match();
-	var game = new TicTacToe(new Player(user.display_name), new Player(opponent.display_name), win_condition);
+	if (selected_opponent.id == "user-outlined")
+		var game = new TicTacToe(new Player(user.display_name), new Player(opponent.display_name), win_condition);
+	else
+		var game = new TicTacToe(new Player(user.display_name), new Player("AI"), win_condition);
 	game.init();
 }
 
