@@ -103,6 +103,7 @@ class Match(models.Model):
 class Pair(models.Model):
 	tournament = models.ForeignKey(Tournament, related_name='pairs', on_delete=models.CASCADE)
 	round_number = models.PositiveIntegerField(default=1)
+	round_progression = models.BooleanField(default=False)
 
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_user')
 	opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_opponent')

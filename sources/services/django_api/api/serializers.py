@@ -274,13 +274,14 @@ class PairSerializer(serializers.ModelSerializer):
 			'tournament',
 			'round_number',
 			'user',
+			'round_progression',
 			'opponent',
 			'user_id',
 			'opponent_id',
 			'match_played',
 			'match',
 		]
-		read_only_fields = ['id', 'tournament', 'round_number', 'user', 'opponent', 'match_played', 'match']
+		read_only_fields = ['id', 'tournament', 'round_number', 'user', 'opponent', 'match_played', 'match', 'round_progression']
 
 
 class TournamentSerializer(serializers.ModelSerializer):

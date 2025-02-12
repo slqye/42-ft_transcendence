@@ -633,12 +633,17 @@ class TournamentUpdateView(APIView):
 				opponent=None,
 				match_played=False
 			)
-		pairs_ = tournament.pairs.all()
-		for pair_ in pairs_:
-			if pair_.match_played == False:
-				tournament.next_pair = pair_
-				tournament.save()
-				break
+
+		pairs_ = tournament.pairs.filter(match_played=False)
+		if pairs_.exists():
+			pair_ = pairs_.first()
+			if pair_.round_number > tournament.next_pair.round_number:
+				pair_.round_progression = True
+				pair_.save()
+			tournament.next_pair = pair_
+		else:
+			tournament.next_pair = None
+		tournament.save()
 
 		return Response({
 			"detail": "Match has been successfully linked. Winner advanced.",
@@ -665,8 +670,18 @@ class TournamentFetchNextPair(generics.RetrieveAPIView):
 	def get(self, request, pk, format=None):
 		tournament = get_object_or_404(Tournament, pk=pk)
 		next_pair = tournament.next_pair
-		serializer = PairSerializer(next_pair)
-		return Response(serializer.data, status=status.HTTP_200_OK)
+		if tournament.next_pair is None:
+			return Response({
+				"detail": "Tournament completed.",
+				"current_round": "completed",
+				"next_pair": None
+			}, status=status.HTTP_200_OK)
+
+		serializer = PairSerializer(tournament.next_pair)
+		return Response({
+			"next_pair": serializer.data,
+			"current_round": tournament.next_pair.round_number
+		}, status=status.HTTP_200_OK)
 
 ############################## OAUTH et d'autres trucs ##############################
 
