@@ -17,7 +17,7 @@ class	Api
 		this.method = Api.DEFAULT_METHOD;
 		this.headers = Api.DEFAULT_HEADERS;
 		this.credentials = Api.DEFAULT_CREDENTIALS;
-		this.body = Api.DEFAULT_BODY; 
+		this.body = Api.DEFAULT_BODY;
 		this.status = Api.SUCCESS;
 		this.omit_refresh = false;
 		this.code = 0;
@@ -57,7 +57,7 @@ class	Api
 				if (refresh_response.status == Api.ERROR)
 				{
 					this.status = Api.ERROR;
-					this.log = "Token refreshing failed.";
+					this.log = (await response.json()).detail;
 				}
 				else if (refresh_response.status == Api.SUCCESS)
 				{
@@ -67,7 +67,7 @@ class	Api
 			else if (!response.ok)
 			{
 				this.status = Api.ERROR;
-				this.log = response.status + " network error.";
+				this.log = (await response.json()).detail;
 			}
 			else
 			{
