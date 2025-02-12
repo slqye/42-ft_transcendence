@@ -628,6 +628,7 @@ class TournamentUpdateView(APIView):
 			# Create a new pair in next_round with no opponent yet
 			Pair.objects.create(
 				tournament=tournament,
+				is_pong=tournament.is_pong,
 				round_number=next_round,
 				user=winner,
 				opponent=None,

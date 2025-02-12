@@ -272,6 +272,7 @@ class PairSerializer(serializers.ModelSerializer):
 		fields = [
 			'id',
 			'tournament',
+			'is_pong',
 			'round_number',
 			'user',
 			'round_progression',
@@ -281,7 +282,7 @@ class PairSerializer(serializers.ModelSerializer):
 			'match_played',
 			'match',
 		]
-		read_only_fields = ['id', 'tournament', 'round_number', 'user', 'opponent', 'match_played', 'match', 'round_progression']
+		read_only_fields = ['id', 'is_pong', 'tournament', 'round_number', 'user', 'opponent', 'match_played', 'match', 'round_progression']
 
 
 class TournamentSerializer(serializers.ModelSerializer):
@@ -301,6 +302,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 		fields = [
 			'id',
 			'name',
+			'is_pong',
 			'participants',   # read-only
 			'participant_ids', # write-only
 			'next_pair',
