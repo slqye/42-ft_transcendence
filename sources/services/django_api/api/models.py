@@ -30,6 +30,7 @@ class Tournament(models.Model):
 	name = models.CharField(max_length=100)
 	participants = models.ManyToManyField(User, related_name='tournaments_joined', blank=False)
 	is_done = models.BooleanField(default=False)
+	is_pong = models.BooleanField()
 	created_at = models.DateTimeField(auto_now_add=True)
 	next_pair = models.ForeignKey(
 		'Pair',
@@ -54,6 +55,7 @@ class Tournament(models.Model):
 			opponent_ = all_participants[i+1]  # i+1 is safe because we have a power-of-2 number of participants
 			Pair.objects.create(
 				tournament=self,
+				is_pong=self.is_pong,
 				round_number=round_number,
 				user=user_,
 				opponent=opponent_,
@@ -102,7 +104,9 @@ class Match(models.Model):
 
 class Pair(models.Model):
 	tournament = models.ForeignKey(Tournament, related_name='pairs', on_delete=models.CASCADE)
+	is_pong = models.BooleanField()
 	round_number = models.PositiveIntegerField(default=1)
+	round_progression = models.BooleanField(default=False)
 
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_user')
 	opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_opponent')

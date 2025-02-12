@@ -185,16 +185,48 @@ class UserList(generics.ListCreateAPIView):
 	serializer_class = UserSerializer
 	permission_classes = [permissions.IsAdminUser]
 
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+class UserDetail(generics.RetrieveAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
 	permission_classes = [permissions.AllowAny]
 
 class UserFetchUsername(generics.RetrieveAPIView):
-	permission_classes = [permissions.IsAuthenticated]
+	permission_classes = [permissions.AllowAny]
 	serializer_class = UserSerializer
 	queryset = User.objects.all()
 	lookup_field = 'username'
+
+class UserFetchIdViaUsernames(generics.RetrieveAPIView):
+	permission_classes = [permissions.AllowAny]
+	serializer_class = UserSerializer
+
+	def post(self, request, *args, **kwargs):
+			usernames = request.data.get('usernames')
+			if not usernames or not isinstance(usernames, list):
+				return Response(
+					{"error": "A list of usernames must be provided in the request body."},
+					status=status.HTTP_400_BAD_REQUEST
+				)
+			
+			users = User.objects.filter(username__in=usernames)
+			found_usernames = set(user.username for user in users)
+			not_found = []
+			for username in usernames:
+				if username not in found_usernames:
+					not_found.append(username)
+
+			if not_found:
+				return Response({"detail": "One or more users not found",
+						"usernames": not_found}, status=status.HTTP_404_NOT_FOUND)
+
+			user_ids = [user.id for user in users]
+			response_data = {
+				"user_ids": user_ids,
+			}
+			
+			return Response(response_data, status=status.HTTP_200_OK)
+			
+
 
 class UpdateUserField(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -628,17 +660,23 @@ class TournamentUpdateView(APIView):
 			# Create a new pair in next_round with no opponent yet
 			Pair.objects.create(
 				tournament=tournament,
+				is_pong=tournament.is_pong,
 				round_number=next_round,
 				user=winner,
 				opponent=None,
 				match_played=False
 			)
-		pairs_ = tournament.pairs.all()
-		for pair_ in pairs_:
-			if pair_.match_played == False:
-				tournament.next_pair = pair_
-				tournament.save()
-				break
+
+		pairs_ = tournament.pairs.filter(match_played=False)
+		if pairs_.exists():
+			pair_ = pairs_.first()
+			if pair_.round_number > tournament.next_pair.round_number:
+				pair_.round_progression = True
+				pair_.save()
+			tournament.next_pair = pair_
+		else:
+			tournament.next_pair = None
+		tournament.save()
 
 		return Response({
 			"detail": "Match has been successfully linked. Winner advanced.",
@@ -665,8 +703,18 @@ class TournamentFetchNextPair(generics.RetrieveAPIView):
 	def get(self, request, pk, format=None):
 		tournament = get_object_or_404(Tournament, pk=pk)
 		next_pair = tournament.next_pair
-		serializer = PairSerializer(next_pair)
-		return Response(serializer.data, status=status.HTTP_200_OK)
+		if tournament.next_pair is None:
+			return Response({
+				"detail": "Tournament completed.",
+				"current_round": "completed",
+				"next_pair": None
+			}, status=status.HTTP_200_OK)
+
+		serializer = PairSerializer(tournament.next_pair)
+		return Response({
+			"next_pair": serializer.data,
+			"current_round": tournament.next_pair.round_number
+		}, status=status.HTTP_200_OK)
 
 ############################## OAUTH et d'autres trucs ##############################
 
