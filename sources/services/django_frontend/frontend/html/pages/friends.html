@@ -3,12 +3,12 @@
 		<div class="border rounded">
 			<div class="row mx-0 my-2 align-items-center">
 				<div class="col-6 col-lg-8 m-0 p-0 d-flex align-items-center">
-					<h2 class="ms-3 my-0">Friends</h2>
+					<h2 class="ms-3 my-0">Your friends</h2>
 				</div>
 				<div class="col-6 col-lg-4 m-0 p-0 d-flex align-items-center">
-					<form class="d-flex justify-content-center" onsubmit="event.preventDefault(); add_friend(document.getElementById('username_request_input').value)">
-						<input id="username_request_input" class="form-control mx-2" placeholder="Username" type="text" minlength="1" maxlength="10" required></input>
-						<button class="btn btn-primary mx-2" type="submit"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg></button>
+					<form class="d-flex justify-content-center">
+						<input class="form-control mx-2" placeholder="Friend name" type="text"></input>
+						<button class="btn btn-primary mx-2" onclick=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg></button>
 					</form>
 				</div>
 			</div>
@@ -18,7 +18,7 @@
 					<div id="requests_container">
 
 					</div>
-					<hr id="horizontal_friends_rule" class="d-none">
+					<hr>
 					<div id="friends_container">
 						
 					</div>
