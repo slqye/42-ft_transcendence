@@ -188,7 +188,7 @@ class UserList(generics.ListCreateAPIView):
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAdminUser]
+	permission_classes = [permissions.AllowAny]
 
 class UserFetchUsername(generics.RetrieveAPIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -462,7 +462,7 @@ class FriendshipView(APIView):
 		# Prevent a user from creating a friendship with themselves.
 		if friend_user.id == request.user.id:
 			return Response(
-				{"error": "Cannot create friendship with yourself."},
+				{"detail": "Cannot create friendship with yourself."},
 				status=status.HTTP_400_BAD_REQUEST
 			)
 		
@@ -475,7 +475,7 @@ class FriendshipView(APIView):
 			models.Q(user_id_1=friend_user.id, user_id_2=request.user)
 		).exists():
 			return Response(
-				{"error": "A friendship between these users already exists."},
+				{"detail": "A friendship between these users already exists."},
 				status=status.HTTP_400_BAD_REQUEST
 			)
 		
@@ -488,7 +488,7 @@ class FriendshipView(APIView):
 	
 	def put(self, request, pk=None):
 		if pk is None:
-			return Response({"error": "Friendship ID is required for update."},
+			return Response({"detail": "Friendship ID is required for update."},
 							status=status.HTTP_400_BAD_REQUEST)
 		
 		friendship = self.get_object(pk) 
@@ -499,7 +499,7 @@ class FriendshipView(APIView):
 			return Response({"detail": "Friendship has already been accepted."},
 							status=status.HTTP_400_BAD_REQUEST)
 
-		data = {'friendship_status': request.data.get('friendship_status', friendship.friendship_status)}
+		data = {'friendship_status': True}
 		serializer = FriendshipSerializer(friendship, data=data, partial=True)
 		if serializer.is_valid():
 			serializer.save()
@@ -508,10 +508,10 @@ class FriendshipView(APIView):
 	
 	def delete(self, request, pk=None):
 		if pk is None:
-			return Response({"error": "Friendship ID is required for deletion."}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({"detail": "Friendship ID is required for deletion."}, status=status.HTTP_400_BAD_REQUEST)
 		friendship = self.get_object(pk)
 		if request.user != friendship.user_id_1 and request.user != friendship.user_id_2:
-			return Response({"error": "Friendship deletion is forbidden."}, status=status.HTTP_403_FORBIDDEN)
+			return Response({"detail": "Friendship deletion is forbidden."}, status=status.HTTP_403_FORBIDDEN)
 		friendship.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -531,6 +531,8 @@ class FriendListView(APIView):
 		friend_users = {}
 		for friendship in friendships:
 			if friendship.user_id_1 == target_user:
+				if (friendship.friendship_status == False):
+					continue
 				friend = friendship.user_id_2
 			else:
 				friend = friendship.user_id_1
