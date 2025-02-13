@@ -8,6 +8,7 @@ class User(AbstractUser):
 	display_name= models.CharField(max_length=30, blank=True, unique=True)
 	language_code = models.CharField(max_length=2, default='en')
 	created_at = models.DateTimeField(auto_now_add=True)
+	is_ai = models.BooleanField(default=False)
 	pong_matches_played = models.PositiveIntegerField(default=0)
 	pong_wins = models.PositiveIntegerField(default=0)
 	pong_draws = models.PositiveIntegerField(default=0)

@@ -20,8 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = User
-		fields = ['id', 'username', 'display_name', 'password', 'avatar_url', 'language_code', 'created_at']
-		read_only_fields = ['id', 'created_at']
+		fields = ['id', 'username', 'display_name', 'password', 'avatar_url', 'language_code', 'created_at', 'is_ai']
+		read_only_fields = ['id', 'created_at', 'is_ai']
 
 	def create(self, validated_data):
 		user = User(
