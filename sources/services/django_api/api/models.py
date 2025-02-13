@@ -62,7 +62,6 @@ class Tournament(models.Model):
 				match_played=False
 			)
 		pairs_ = self.pairs.all()
-		next_pair = pairs_[0]
 
 class PongGameStats(models.Model):
 	user_score = models.PositiveIntegerField(default=0)

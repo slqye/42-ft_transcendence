@@ -600,6 +600,9 @@ class TournamentView(generics.GenericAPIView):
 		serializer = self.get_serializer(data=request.data, context={'request': request})
 		serializer.is_valid(raise_exception=True)
 		tournament = serializer.save()
+		first_pair = tournament.pairs.first()
+		tournament.next_pair = first_pair
+		tournament.save()
 		return Response(TournamentSerializer(tournament).data, status=status.HTTP_201_CREATED)
 
 class TournamentDetailView(APIView):
