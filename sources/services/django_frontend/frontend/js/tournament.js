@@ -121,5 +121,5 @@ async function	create_tournament()
 	}
 	if (tournament_id == -1)
 		return ;
-	console.log("Tournament ID : " + tournament_id);
+	load_tournament(tournament_id);
 }

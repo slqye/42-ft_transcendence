@@ -266,6 +266,19 @@ async function load_settings() {
 	init_tooltips();
 }
 
+// async function load_tournament(tournament_id) {
+// 	const content = document.getElementById("content");
+// 	let template = await new Template("frontend/html/pages/tournament.html").load();
+	
+// 	if (template == null)
+// 		return (console.error(ERROR_TEMPLATE));
+// 	load_navbar();
+// 	content.innerHTML = template.value;
+// 	if (window.location.pathname !== "/tournament/" + tournament_id)
+// 		history.pushState({ page: "tournament", tournament_id: tournament_id }, "Tournament", "/tournament/" + tournament_id); //TODO: change the name to the tournament name
+// 	init_tooltips();
+// }
+
 window.onpopstate = async function (event) {
 	if (event.state)
 	{
