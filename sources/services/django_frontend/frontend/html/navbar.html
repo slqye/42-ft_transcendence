@@ -48,7 +48,7 @@
 							<p class="mb-0" id="theme">Profile</p>
 						</button>
 						<ul class="dropdown-menu">
-							<button class="dropdown-item" onclick="load_profile();">Profile</button>
+							<button class="dropdown-item" onclick="load_profile('me')">Profile</button>
 							<button class="dropdown-item" onclick="load_friends();">Friends</button>
 							<button class="dropdown-item" onclick="load_settings();">Settings</button>
 							<button class="dropdown-item" onclick="(async () => { await signout(); load_home(); })();">Sign out</button>

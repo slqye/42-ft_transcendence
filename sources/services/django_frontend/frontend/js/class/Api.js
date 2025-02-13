@@ -72,7 +72,6 @@ class	Api
 			}
 			else
 			{
-				console.log("success");
 				this.status = Api.SUCCESS;
 				this.response = await response.json();
 			}
