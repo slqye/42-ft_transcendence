@@ -280,7 +280,7 @@ async function load_tournament(pk)
 	{
 		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
 		const urlParams = new URLSearchParams(window.location.search);
-		tournament_id = urlParams.get('id');
+		pk = urlParams.get('id');
 	}
 	else
 	{
@@ -288,11 +288,12 @@ async function load_tournament(pk)
 			return (load_home());
 		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
 	}
-	//TODO: check if there are pairs left in the tournament
 	const request = await new Api("/api/tournaments/" + pk, Api.USER).set_method("GET").set_credentials("omit").request();
 	if (request.status != Api.SUCCESS)
 		return (new Toast(Toast.ERROR, "Failed to load tournament"));
 	const tournament = request.response;
+	console.log(tournament);
+	return ;
 	if (tournament.is_done)
 	{
 		//TODO: display the tournament results
@@ -300,11 +301,14 @@ async function load_tournament(pk)
 	}
 	else
 	{
+		const request = await new Api("/api/tournaments/" + pk + "/next_pair/", Api.USER).set_method("GET").set_credentials("omit").request();
+		if (request.status != Api.SUCCESS)
+			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+		const pair = request.response;
+		if (pair.next_pair == null)
+			return (new Toast(Toast.WARNING, "No more matches in this tournament"));
 		//TODO: load the next pair and the login page
 	}
-	// const request = await new Api("/api/tournaments/" + pk + "/next_pair/", Api.USER).set_method("GET").set_credentials("omit").request();
-	// if (request.status != Api.SUCCESS)
-	// 	return (new Toast(Toast.ERROR, "Failed to load tournament"));
 	// const content = document.getElementById("content");
 	// let template = await new Template("frontend/html/pages/tournament.html").load();
 	
