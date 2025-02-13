@@ -36,7 +36,7 @@ urlpatterns = [
 
 	# Tournaments
 	path('tournaments/', views.TournamentView.as_view(), name='tournament'),
-	path('tournaments/<int:pk>/', views.TournamentUpdateView.as_view(), name='tournament-update'),
+	path('tournaments/<int:pk>/', views.TournamentDetailView.as_view(), name='tournament-update'),
 	path('tournaments/<int:pk>/pairs/', views.TournamentFetchPairs.as_view(), name='tournament-pairs'),
 	path('tournaments/<int:pk>/pairs/next/', views.TournamentFetchNextPair.as_view(), name='tournament-next-pair'),
 

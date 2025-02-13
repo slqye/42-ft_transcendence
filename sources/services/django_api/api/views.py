@@ -602,8 +602,13 @@ class TournamentView(generics.GenericAPIView):
 		tournament = serializer.save()
 		return Response(TournamentSerializer(tournament).data, status=status.HTTP_201_CREATED)
 
-class TournamentUpdateView(APIView):
+class TournamentDetailView(APIView):
 	permission_classes = [permissions.AllowAny]
+
+	def get(self, request, pk):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		serializer = TournamentSerializer(tournament)
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def put(self, request, pk):
 		tournament = get_object_or_404(Tournament, pk=pk)
