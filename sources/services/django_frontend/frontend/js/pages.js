@@ -274,18 +274,46 @@ async function load_settings() {
 	init_tooltips();
 }
 
-// async function load_tournament(tournament_id) {
-// 	const content = document.getElementById("content");
-// 	let template = await new Template("frontend/html/pages/tournament.html").load();
+async function load_tournament(pk)
+{
+	if (pk != -1)
+	{
+		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
+		const urlParams = new URLSearchParams(window.location.search);
+		tournament_id = urlParams.get('id');
+	}
+	else
+	{
+		if (!await Api.is_login())
+			return (load_home());
+		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
+	}
+	//TODO: check if there are pairs left in the tournament
+	const request = await new Api("/api/tournaments/" + pk, Api.USER).set_method("GET").set_credentials("omit").request();
+	if (request.status != Api.SUCCESS)
+		return (new Toast(Toast.ERROR, "Failed to load tournament"));
+	const tournament = request.response;
+	if (tournament.is_done)
+	{
+		//TODO: display the tournament results
+		return ;
+	}
+	else
+	{
+		//TODO: load the next pair and the login page
+	}
+	// const request = await new Api("/api/tournaments/" + pk + "/next_pair/", Api.USER).set_method("GET").set_credentials("omit").request();
+	// if (request.status != Api.SUCCESS)
+	// 	return (new Toast(Toast.ERROR, "Failed to load tournament"));
+	// const content = document.getElementById("content");
+	// let template = await new Template("frontend/html/pages/tournament.html").load();
 	
-// 	if (template == null)
-// 		return (console.error(ERROR_TEMPLATE));
-// 	load_navbar();
-// 	content.innerHTML = template.value;
-// 	if (window.location.pathname !== "/tournament/" + tournament_id)
-// 		history.pushState({ page: "tournament", tournament_id: tournament_id }, "Tournament", "/tournament/" + tournament_id); //TODO: change the name to the tournament name
-// 	init_tooltips();
-// }
+	// if (template == null)
+	// 	return (console.error(ERROR_TEMPLATE));
+	// load_navbar();
+	// content.innerHTML = template.value;
+	// init_tooltips();
+}
 
 window.onpopstate = async function (event) {
 	if (event.state)
@@ -295,6 +323,12 @@ window.onpopstate = async function (event) {
 		{
 			const profileId = event.state.id || "me";
 			await load_profile(profileId);
+			return ;
+		}
+		if (page.startsWith("tournament"))
+		{
+			const tournamentId = event.state.tournament_id || -1;
+			await load_tournament(tournamentId);
 			return ;
 		}
 		switch (page)
