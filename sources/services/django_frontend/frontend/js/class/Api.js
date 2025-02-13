@@ -68,16 +68,12 @@ class	Api
 			{
 				this.status = Api.ERROR;
 				this.response = await response.json();
-				console.log("API CLASS ERROR");
-				console.log("this.response =", this.response);
 				this.log = this.response.detail;
 			}
 			else
 			{
 				this.status = Api.SUCCESS;
 				this.response = await response.json();
-				console.log("API CLASS SUCCESS");
-				console.log("this.response =", this.response);
 			}
 		}
 		catch (error)

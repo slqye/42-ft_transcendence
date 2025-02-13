@@ -276,7 +276,6 @@ async function load_settings() {
 
 async function load_tournament(pk)
 {
-	console.log("load_tournament function called with pk =", pk);
 	if (pk != -1)
 	{
 		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
@@ -289,14 +288,10 @@ async function load_tournament(pk)
 			return (load_home());
 		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
 	}
-	const request = await new Api("/api/tournaments/" + pk, Api.USER).set_method("GET").set_credentials("omit").request();
-	console.log("LOAD TOURNAMENT FUNCTION");
-	console.log("request.status =", request.status);
-	console.log("request.response =", request.response);
+	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
 	if (request.status != Api.SUCCESS)
 		return (new Toast(Toast.ERROR, "Failed to load tournament"));
 	const tournament = request.response;
-	console.log(tournament);
 	return ;
 	if (tournament.is_done)
 	{

@@ -606,9 +606,7 @@ class TournamentDetailView(APIView):
 	permission_classes = [permissions.AllowAny]
 
 	def get(self, request, pk):
-		print("GET TOURNAMENT DETAIL VIEW");
 		tournament = get_object_or_404(Tournament, pk=pk)
-		print("tournament =", tournament);
 		serializer = TournamentSerializer(tournament)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
