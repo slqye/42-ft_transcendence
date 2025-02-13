@@ -288,35 +288,51 @@ async function load_tournament(pk)
 			return (load_home());
 		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
 	}
+	const content = document.getElementById("content");
 	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
 	if (request.status != Api.SUCCESS)
 		return (new Toast(Toast.ERROR, "Failed to load tournament"));
 	const tournament = request.response;
-	console.log("tournament =", tournament);
+	let template = null;
 	if (tournament.is_done)
 	{
-		//TODO: display the tournament results
-		return (new Toast(Toast.WARNING, "Tournament is over"));
+		new Toast(Toast.ERROR, "Tournament already completed"); //TODO: remove later
+		template = await new Template("frontend/html/pages/tournament_completed.html").load();
+		//TODO: set the data
 	}
 	else
 	{
 		const request = await new Api("/api/tournaments/" + pk + "/pairs/next/", Api.USER).set_method("GET").set_credentials("omit").request();
 		if (request.status != Api.SUCCESS)
 			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
-		const pair = request.response;
-		if (pair.next_pair == null)
+		const next_pair = request.response.next_pair;
+		if (next_pair == null)
 			return (new Toast(Toast.WARNING, "No more matches in this tournament"));
-		console.log("pair =", pair);
-		//TODO: load the next pair and the login page
+		const user_id = next_pair.user;
+		const opponent_id = next_pair.opponent;
+		const user_data = await fetch_user(user_id);
+		const opponent_data = await fetch_user(opponent_id);
+		if (user_data == null || opponent_data == null)
+			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+		if (await Api.is_login())
+			await signout(true);
+		if (await Api.is_opponent_login())
+			await opponent_signout(true);
+		template = await new Template("frontend/html/pages/tournament_login.html").load();
+		if (template == null)
+			return (console.error(ERROR_TEMPLATE));
+		load_navbar();
+		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
+		content.innerHTML = template.value;
+		let tournament_name_title = null;
+		if (tournament.is_pong)
+			tournament_name_title = "Pong Tournament : " + tournament.name;
+		else
+			tournament_name_title = "TicTacToe Tournament : " + tournament.name;
+		document.getElementById("tournament_name").innerHTML = tournament_name_title;
+		set_tournament_forms(user_data, opponent_data);
 	}
-	// const content = document.getElementById("content");
-	// let template = await new Template("frontend/html/pages/tournament.html").load();
-	
-	// if (template == null)
-	// 	return (console.error(ERROR_TEMPLATE));
-	// load_navbar();
-	// content.innerHTML = template.value;
-	// init_tooltips();
+	init_tooltips();
 }
 
 window.onpopstate = async function (event) {

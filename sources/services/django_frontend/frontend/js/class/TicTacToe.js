@@ -3,7 +3,7 @@ class TicTacToe
 	static CROSS = "X";
 	static NOUGHT = "O";
 
-	constructor(player1, player2, win_condition)
+	constructor(player1, player2, win_condition, tournament_id = -1)
 	{
 		this.board = Array(9).fill(null);
 
@@ -16,6 +16,8 @@ class TicTacToe
 		this.roundActive = false;
 		this.currentPlayer = this.player2.name;
 		this.win_condition = win_condition;
+		this.tournament_id = tournament_id;
+		this.match_id = -1;
 		this.handleGame = this.handleGame.bind(this);
 	}
 
@@ -188,6 +190,7 @@ class TicTacToe
 			"opponent_user_id": opponent.id,
 			"is_pong": false,
 			"result": result,
+			"tournament_id": this.tournament_id !== -1 ? this.tournament_id : null,
 			"tictactoe_game_stats": {
 				"user_score": this.player1.score,
 				"opponent_score": this.player2.score,
@@ -201,8 +204,8 @@ class TicTacToe
 				"opponent_quickest_win_as_moves": this.player2.quickest_win_moves
 			}
 		});
-
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
+		let match_id = -1;
 		if (request.status === Api.ERROR || request.code !== 201)
 		{
 			new Toast(Toast.ERROR, "An error occurred while attempting to create a match.");
@@ -218,9 +221,33 @@ class TicTacToe
 			else
 			{
 				new Toast(Toast.SUCCESS, "Match has been successfully created.");
+				match_id = accept_request.response.match.id;
 			}
 		}
-		this.setGameButtonToReplay();
+		if (this.tournament_id !== -1)
+		{
+			const put_tournament_request_body = JSON.stringify({
+				"match_id": match_id
+			});
+			const put_tournament_request = await new Api(`/api/tournaments/${this.tournament_id}/`, Api.USER)
+				.set_credentials("omit")
+				.set_method("PUT")
+				.set_body(put_tournament_request_body)
+				.request();
+			if (put_tournament_request.status === Api.ERROR)
+			{
+				new Toast(Toast.ERROR, "An error occurred while attempting to update the tournament." + "<br/>" + put_tournament_request.log);
+			}
+			else
+			{
+				new Toast(Toast.SUCCESS, "Tournament has been successfully updated.");
+				await load_tournament(this.tournament_id);
+			}
+		}
+		else
+		{
+			this.setGameButtonToReplay();
+		}
 	}
 
 	endGame(winner, result)
