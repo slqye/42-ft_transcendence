@@ -137,12 +137,13 @@ class MatchSerializer(serializers.ModelSerializer):
 			'opponent_user_id',  # write-only id
 			'result',			# now an integer field
 			'is_pong',
+			'versus_ai',
 			'pong_game_stats',
 			'tictactoe_game_stats',
 			'tournament',
 			'created_at'
 		]
-		read_only_fields = ['id', 'created_at', 'tournament', 'host_user', 'opponent_user', 'result', 'is_pong', 'pong_game_stats', 'tictactoe_game_stats']
+		read_only_fields = ['id', 'created_at', 'tournament', 'host_user', 'opponent_user', 'result', 'is_pong', 'pong_game_stats', 'tictactoe_game_stats', 'versus_ai']
 
 	def create(self, validated_data):
 		pong_stats_data = validated_data.pop('pong_game_stats', None)
@@ -193,6 +194,7 @@ class InvitationSerializer(serializers.ModelSerializer):
 			'opponent_user',		# read-only nested
 			'opponent_user_id',	 # write-only id
 			'status',
+			'versus_ai',
 			'result',
 			'is_pong',
 			'tournament',
