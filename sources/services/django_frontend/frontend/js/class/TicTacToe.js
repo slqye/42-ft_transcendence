@@ -2,6 +2,9 @@ class TicTacToe
 {
 	static CROSS = "X";
 	static NOUGHT = "O";
+	static STATE_DONE_WIN = 2;
+	static STATE_DONE_DRAW = 1;
+	static STATE_NOT_DONE = 0;
 
 	constructor(player1, player2, win_condition)
 	{
@@ -17,14 +20,17 @@ class TicTacToe
 		this.currentPlayer = this.player2.name;
 		this.win_condition = win_condition;
 		this.handleGame = this.handleGame.bind(this);
+		this.cell_board = Array(9).fill(null);
+		this.is_ia = false;
 	}
 
-	init()
+	async init()
 	{
 		var gameButton = document.getElementById('game-button');
 		gameButton.addEventListener('click', this.handleGame);
 		document.getElementById('player1').textContent = this.player1.name;
 		document.getElementById('player2').textContent = this.player2.name;
+		this.is_ia = !await Api.is_opponent_login();
 	}
 
 	handleGame()
@@ -58,11 +64,14 @@ class TicTacToe
 
 	setupCells()
 	{
+		let index = 0;
 		document.querySelectorAll('.cell').forEach(cell => {
 			cell.addEventListener('click', (e) => this.handleCellClick(e));
 			cell.setAttribute('class', 'cell col cursor-pointer mb-2');
 			cell.textContent = '';
 			cell.style.color = 'white';
+			this.cell_board[index] = cell;
+			index += 1;
 		});
 	}
 
@@ -71,11 +80,95 @@ class TicTacToe
 		const clickedCell = clickedCellEvent.target;
 		const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
 
-		if (this.board[clickedCellIndex] !== null || !this.roundActive) {
-			return;
-		}
-
+		if (this.board[clickedCellIndex] !== null || !this.roundActive) return ;
 		this.makeMove(clickedCell, clickedCellIndex);
+	}
+
+	static get_terminate_state(board)
+	{
+		const wins = [
+			[0, 1, 2],
+			[3, 4, 5],
+			[6, 7, 8],
+			[0, 3, 6],
+			[1, 4, 7],
+			[2, 5, 8],
+			[0, 4, 8],
+			[2, 4, 6]
+		];
+		let win_status = false;
+		wins.forEach(condition => {
+			const [a, b, c] = condition;
+			if (board[a] !== null && board[a] === board[b] && board[b] === board[c])
+				return (win_status = true);
+		});
+		if (win_status == true)
+			return (TicTacToe.STATE_DONE_WIN);
+		if (board.every(cell => cell !== null))
+			return (TicTacToe.STATE_DONE_DRAW);
+		return (TicTacToe.STATE_NOT_DONE);
+	}
+
+	get_player_turn(board)
+	{
+		let player1_moves = 0;
+		let player2_moves = 0;
+
+		board.forEach(cell => {
+			if (cell == this.player1.name)
+				player1_moves += 1;
+			else if (cell == this.player2.name)
+				player2_moves += 1;
+		});
+		if (player1_moves == 0 && player2_moves == 0) return (this.player1);
+		else if (player1_moves > player2_moves) return (this.player2);
+		else return (this.player1)
+	}
+
+	play_ai()
+	{
+		let board_copy = this.board;
+		let moves_values = this.make_minimax_move(board_copy);
+		this.board[moves_values[0]] = this.player2;
+		this.cell_board[moves_values[0]].textContent = this.currentPlayer === this.player1.name ? 'X' : 'O';
+		this.cell_board[moves_values[0]].style.color = this.currentPlayer === this.player1.name ? 'red' : 'blue';
+	}
+
+	make_minimax_move(board)
+	{
+		const player = this.get_player_turn(board);
+		const state = TicTacToe.get_terminate_state(board);
+		let board_copy = null;
+		let index = 0;
+		let moves = [];
+
+		if (this.player1.name == player.name && state == TicTacToe.STATE_DONE_WIN) return ([null, -1]);
+		else if (this.player2.name == player.name && state == TicTacToe.STATE_DONE_WIN) return ([null, 1]);
+		else if (state == TicTacToe.STATE_DONE_DRAW) return ([null, 0]);
+		board.forEach(cell => {
+			if (cell == null)
+			{
+				board_copy = JSON.parse(JSON.stringify(board));
+				board_copy[index] = player.name;
+				moves.push([index, this.make_minimax_move(board_copy)]);
+			}
+			index += 1;
+		});
+		if (this.player1 == player.name)
+		{
+			let min = moves[0];
+			moves.forEach(element => {
+				if (element[1] < min[1])
+					min = element;
+			});
+			return (min);
+		}
+		let max = moves[0];
+		moves.forEach(element => {
+			if (element[1] > max[1])
+				max = element;
+		});
+		return (max);
 	}
 
 	makeMove(clickedCell, index)
@@ -92,6 +185,11 @@ class TicTacToe
 			return;
 		}
 		this.switchPlayer();
+		if (this.is_ia)
+		{
+			this.play_ai();
+			this.switchPlayer();
+		}
 	}
 
 	switchPlayer()
