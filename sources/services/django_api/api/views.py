@@ -180,10 +180,10 @@ class RegisterUser(generics.CreateAPIView):
 	serializer_class = UserSerializer
 	permission_classes = [permissions.AllowAny]
 
-class UserList(generics.ListCreateAPIView):
+class UserList(generics.ListAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAdminUser]
+	permission_classes = [permissions.AllowAny]
 
 class UserDetail(generics.RetrieveAPIView):
 	queryset = User.objects.all()
