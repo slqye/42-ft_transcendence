@@ -334,7 +334,10 @@ class InvitationAcceptView(APIView):
 
 	def post(self, request, pk, *args, **kwargs):
 		user_type = request.headers.get('X_User_Type')
-		if user_type != 'opponent':
+		versus_ai = request.data.get('versus_ai')
+		if versus_ai and user_type != 'user':
+			return Response({"detail": "User type must be 'user' to play against AI"}, status=status.HTTP_403_FORBIDDEN)
+		elif user_type != 'opponent':
 			return Response(
 				{"detail": "You must be an 'opponent' to accept an invitation."},
 				status=status.HTTP_403_FORBIDDEN
