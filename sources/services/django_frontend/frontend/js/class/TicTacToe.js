@@ -132,13 +132,6 @@ class TicTacToe
 		this.board[moves_values[0]] = this.player2.name;
 		this.cell_board[moves_values[0]].textContent = this.currentPlayer === this.player1.name ? 'X' : 'O';
 		this.cell_board[moves_values[0]].style.color = this.currentPlayer === this.player1.name ? 'red' : 'blue';
-		if (this.checkWin()) {
-			return;
-		}
-		if (this.checkDraw()) {
-			this.endGame(null, "It's a draw!");
-			return;
-		}
 	}
 
 	make_minimax_move(board)
@@ -201,6 +194,13 @@ class TicTacToe
 		if (this.is_ia && this.currentPlayer == this.player2.name)
 		{
 			this.play_ai();
+			if (this.checkWin()) {
+				return;
+			}
+			if (this.checkDraw()) {
+				this.endGame(null, "It's a draw!");
+				return;
+			}
 			this.switchPlayer();
 		}
 	}
