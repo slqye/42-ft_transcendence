@@ -8,8 +8,7 @@ from django.http import HttpResponse, Http404
 from django.db import models
 
 from .models import User, Match, Tournament, Pair, Invitation, Friendship
-from .serializers import UserSerializer, MatchSerializer, TournamentSerializer, PairSerializer, TournamentListSerializer, InvitationSerializer, FriendshipSerializer
-
+from .serializers import UserSerializer, MatchSerializer, TournamentSerializer, PairSerializer, TournamentListSerializer, InvitationSerializer, FriendshipSerializer, PictureSerializer
 from django.contrib.auth import get_user_model, login, authenticate
 
 from rest_framework import generics, permissions, status
@@ -17,6 +16,7 @@ from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import redirect, get_object_or_404
 
 # Create your views here.
@@ -804,3 +804,17 @@ class FrontendConfigView(APIView):
 			"API_42_REDIRECT_URI": settings.API_42_REDIRECT_URI,
 		}
 		return Response(config)
+
+class PictureUploadView(APIView):
+	parser_classes = [MultiPartParser, FormParser]
+	permission_classes = [permissions.IsAuthenticated]
+
+	def post(self, request, *args, **kwargs):
+		serializer = PictureSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			user = request.user
+			user.avatar_url = serializer.data.get('image')
+			user.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

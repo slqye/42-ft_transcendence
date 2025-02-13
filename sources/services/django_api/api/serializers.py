@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Friendship, Match, Tournament, Pair, PongGameStats, TicTacToeGameStats, Invitation
+from .models import User, Friendship, Match, Tournament, Pair, PongGameStats, TicTacToeGameStats, Invitation, Picture
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -336,9 +336,13 @@ class TournamentSerializer(serializers.ModelSerializer):
 	def _is_power_of_two(self, n):
 		return (n & (n - 1) == 0) and n != 0
 
-
 class TournamentListSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Tournament
 		fields = ['id', 'name', 'status', 'is_done', 'created_at']
 		read_only_fields = fields
+
+class PictureSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Picture
+		fields = ['id', 'image', 'uploaded_at']

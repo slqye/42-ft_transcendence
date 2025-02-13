@@ -42,4 +42,6 @@ urlpatterns = [
 
 	path('42oauth/callback/', views.OAuthCallbackView.as_view(), name='callback'),
 	path('config/', views.FrontendConfigView.as_view(), name="config"),
+
+	path('picture-upload/', views.PictureUploadView.as_view(), name="picture-upload")
 ]
