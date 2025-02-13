@@ -105,7 +105,9 @@ async function	create_tournament()
 	let tournament_id = -1;
 	try
 	{
+		console.log("CREATE TOURNAMENT FUNCTION");
 		const request = await new Api("/api/tournaments/", Api.USER).set_method("POST").set_credentials("omit").set_body(request_body_tournament).request();
+		console.log("END OF CREATE TOURNAMENT FUNCTION");
 		if (request.status == Api.ERROR)
 			throw (new Error(request.log));
 		else

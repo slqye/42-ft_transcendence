@@ -128,7 +128,7 @@ async function load_tictactoe_match() {
 	init_tooltips();
 }
 
-async function load_tournament() {
+async function load_create_tournament() {
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/create_tournament.html").load();
 
@@ -276,6 +276,7 @@ async function load_settings() {
 
 async function load_tournament(pk)
 {
+	console.log("load_tournament function called with pk =", pk);
 	if (pk != -1)
 	{
 		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
@@ -289,6 +290,9 @@ async function load_tournament(pk)
 		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
 	}
 	const request = await new Api("/api/tournaments/" + pk, Api.USER).set_method("GET").set_credentials("omit").request();
+	console.log("LOAD TOURNAMENT FUNCTION");
+	console.log("request.status =", request.status);
+	console.log("request.response =", request.response);
 	if (request.status != Api.SUCCESS)
 		return (new Toast(Toast.ERROR, "Failed to load tournament"));
 	const tournament = request.response;
@@ -361,6 +365,8 @@ window.onpopstate = async function (event) {
 				await load_settings(); break;
 			case "tournament":
 				await load_tournament(); break;
+			case "create_tournament":
+				await load_create_tournament(); break;
 			default:
 				console.error("Page not found:", page); break;
 		}
