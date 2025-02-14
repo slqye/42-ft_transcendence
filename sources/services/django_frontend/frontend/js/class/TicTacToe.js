@@ -127,14 +127,14 @@ class TicTacToe
 
 	play_ai()
 	{
-		let board_copy = this.board;
-		let moves_values = this.make_minimax_move(board_copy);
+		let moves_values = this.make_minimax_move(this.board, this.board);
+		console.log(moves_values);
 		this.board[moves_values[0]] = this.player2.name;
 		this.cell_board[moves_values[0]].textContent = this.currentPlayer === this.player1.name ? 'X' : 'O';
 		this.cell_board[moves_values[0]].style.color = this.currentPlayer === this.player1.name ? 'red' : 'blue';
 	}
 
-	make_minimax_move(board)
+	make_minimax_move(static_board, board)
 	{
 		const player = this.get_player_turn(board);
 		const state = TicTacToe.get_terminate_state(board);
@@ -142,33 +142,43 @@ class TicTacToe
 		let index = 0;
 		let moves = [];
 
-		if (this.player1.name == player.name && state == TicTacToe.STATE_DONE_WIN) return ([null, -1]);
-		else if (this.player2.name == player.name && state == TicTacToe.STATE_DONE_WIN) return ([null, 1]);
-		else if (state == TicTacToe.STATE_DONE_DRAW) return ([null, 0]);
+		if (this.player1.name == player.name && state == TicTacToe.STATE_DONE_WIN) return (1);
+		else if (this.player2.name == player.name && state == TicTacToe.STATE_DONE_WIN) return (-1);
+		else if (state == TicTacToe.STATE_DONE_DRAW) return (0);
 		board.forEach(cell => {
 			if (cell == null)
 			{
 				board_copy = JSON.parse(JSON.stringify(board));
 				board_copy[index] = player.name;
-				moves.push([index, this.make_minimax_move(board_copy)]);
+				moves.push([index, this.make_minimax_move(static_board, board_copy)]);
 			}
 			index += 1;
 		});
-		if (this.player1 == player.name)
+		if (board == static_board)
+		{
+			console.log(moves);
+			let max = moves[0];
+			moves.forEach(element => {
+				if (element[1] > max[1])
+					max = element;
+			});
+			return (max);
+		}
+		if (this.player1.name == player.name)
 		{
 			let min = moves[0];
 			moves.forEach(element => {
 				if (element[1] < min[1])
 					min = element;
 			});
-			return (min);
+			return (min[1]);
 		}
 		let max = moves[0];
 		moves.forEach(element => {
 			if (element[1] > max[1])
 				max = element;
 		});
-		return (max);
+		return (max[1]);
 	}
 
 	makeMove(clickedCell, index)
@@ -219,7 +229,6 @@ class TicTacToe
 		];
 
 		var win = false;
-		console.clear();
 		winningConditions.forEach(condition => {
 			const [a, b, c] = condition;
 			if (this.board[a] === this.currentPlayer && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
