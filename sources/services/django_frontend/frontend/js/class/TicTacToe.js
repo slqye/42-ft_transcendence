@@ -190,7 +190,7 @@ class TicTacToe
 			"opponent_user_id": opponent.id,
 			"is_pong": false,
 			"result": result,
-			"tournament_id": this.tournament_id !== -1 ? this.tournament_id : null,
+			"tournament": this.tournament_id !== -1 ? this.tournament_id : null,
 			"tictactoe_game_stats": {
 				"user_score": this.player1.score,
 				"opponent_score": this.player2.score,
