@@ -284,9 +284,8 @@ async function load_tournament(pk)
 	}
 	else
 	{
-		if (!await Api.is_login())
-			return (load_home());
-		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
+		load_home();
+		return ;
 	}
 	const content = document.getElementById("content");
 	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
@@ -315,9 +314,9 @@ async function load_tournament(pk)
 		if (user_data == null || opponent_data == null)
 			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
 		if (await Api.is_login())
-			await signout(true);
+			await tournament_user_signout(false, true);
 		if (await Api.is_opponent_login())
-			await opponent_signout(true);
+			await tournament_opponent_signout(false, true);
 		template = await new Template("frontend/html/pages/tournament_login.html").load();
 		if (template == null)
 			return (console.error(ERROR_TEMPLATE));
@@ -335,6 +334,34 @@ async function load_tournament(pk)
 	init_tooltips();
 }
 
+async function load_tournament_details(pk = -1)
+{
+	if (pk != -1)
+	{
+		history.pushState({ page: "tournament_details", id: pk }, "Tournament details", "/tournament_details?id=" + pk);
+		const urlParams = new URLSearchParams(window.location.search);
+		pk = urlParams.get('id');
+	}
+	else
+	{
+		load_home();
+		return ;
+	}
+	const content = document.getElementById("content");
+	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
+	if (request.status != Api.SUCCESS)
+		return (new Toast(Toast.ERROR, "Failed to load tournament details from the server."));
+	let template = await new Template("frontend/html/pages/tournament_details.html").load();
+	if (template == null)
+		return (console.error(ERROR_TEMPLATE));
+	history.pushState({ page: "tournament_details", id: pk }, "Tournament details", "/tournament_details?id=" + pk);
+	load_navbar();
+	await set_tournament_details(template, request.response);
+	template.update();
+	content.innerHTML = template.string;
+	init_tooltips();
+}
+
 window.onpopstate = async function (event) {
 	if (event.state)
 	{
@@ -343,6 +370,12 @@ window.onpopstate = async function (event) {
 		{
 			const profileId = event.state.id || "me";
 			await load_profile(profileId);
+			return ;
+		}
+		if (page.startsWith("tournament_details"))
+		{
+			const tournamentId = event.state.tournament_id || -1;
+			await load_tournament_details(tournamentId);
 			return ;
 		}
 		if (page.startsWith("tournament"))
@@ -377,6 +410,8 @@ window.onpopstate = async function (event) {
 				await load_settings(); break;
 			case "tournament":
 				await load_tournament(); break;
+			case "tournament_details":
+				await load_tournament_details(); break;
 			case "create_tournament":
 				await load_create_tournament(); break;
 			default:

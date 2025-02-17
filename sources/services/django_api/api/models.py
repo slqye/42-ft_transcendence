@@ -107,8 +107,8 @@ class Pair(models.Model):
 	round_number = models.PositiveIntegerField(default=1)
 	round_progression = models.BooleanField(default=False)
 
-	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_user')
-	opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_opponent')
+	user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='pair_as_user')
+	opponent = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='pair_as_opponent')
 
 	match = models.OneToOneField(
 		Match,  # or import your Match model

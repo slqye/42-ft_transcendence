@@ -121,7 +121,7 @@ async function	create_tournament()
 	}
 	if (tournament_id == -1)
 		return ;
-	load_tournament(tournament_id);
+	await load_tournament(tournament_id);
 }
 
 async function	start_game_tournament()
@@ -220,7 +220,7 @@ async function	tournament_user_signin()
 	}
 }
 
-async function	tournament_user_signout()
+async function	tournament_user_signout(reset_form = true, skip_toast = false)
 {
 	const request = await new Api("/api/user/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
@@ -228,8 +228,10 @@ async function	tournament_user_signout()
 	else
 	{
 		localStorage.removeItem("user_authenticated");
-		new Toast(Toast.SUCCESS, "Player 1 signed out!");
-		reset_tournament_user_form();
+		if (!skip_toast)
+			new Toast(Toast.SUCCESS, "Player 1 signed out!");
+		if (reset_form)
+			reset_tournament_user_form();
 	}
 }
 
@@ -283,7 +285,7 @@ async function	tournament_opponent_signin()
 	}
 }
 
-async function	tournament_opponent_signout()
+async function	tournament_opponent_signout(reset_form = true, skip_toast = false)
 {
 	const request = await new Api("/api/opponent/logout/", Api.OPPONENT).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
@@ -291,8 +293,10 @@ async function	tournament_opponent_signout()
 	else
 	{
 		localStorage.removeItem("opponent_authenticated");
-		new Toast(Toast.SUCCESS, "Player 2 signed out!");
-		reset_tournament_opponent_form();
+		if (!skip_toast)
+			new Toast(Toast.SUCCESS, "Player 2 signed out!");
+		if (reset_form)
+			reset_tournament_opponent_form();
 	}
 }
 
@@ -302,4 +306,54 @@ function	display_start_game_button_if_ready()
 	const opponent_authenticated = localStorage.getItem("opponent_authenticated");
 	if (user_authenticated && opponent_authenticated)
 		document.getElementById("start_game_button").classList.remove('d-none');
+}
+
+async function	set_tournament_details(template, tournament)
+{
+	let tournament_name_title = "Tournament";
+	if (tournament.is_pong)
+		tournament_name_title = "Pong Tournament : " + tournament.name;
+	else
+		tournament_name_title = "TicTacToe Tournament : " + tournament.name;
+
+	template.edit.id.set.content("tournament_name", tournament_name_title);
+
+	if (!tournament.is_done)
+	{
+		template.edit.id.set.content("tournament_status", "This tournament is still in progress.");
+		template.edit.id.get.element("tournament_status").classList.add("d-none");
+	}
+	else
+	{
+		template.edit.id.get.element("rankings").classList.remove("d-none");
+		//players = tournament.players; //TODO: make sure that the players are sorted by their ranking in the tournament
+		players = [
+			{
+				display_name: "Player 1",
+				username: "player1",
+				ranking: 1,
+				avatar_url: "/frontend/assets/default_profile_icon.webp"
+			},
+			{
+				display_name: "Player 2",
+				username: "player2",
+				ranking: 2,
+				avatar_url: "/frontend/assets/default_profile_icon.webp"
+			},
+		]
+		const rankings = template.edit.id.get.element("rankings");
+		for (let index = 0; index < players.length; index++)
+		{
+			const player = players[index];
+			let ranking_item_template = await new Template("frontend/html/pages/ranking_item.html").load();
+			if (ranking_item_template == null)
+				return (console.error(ERROR_TEMPLATE));
+			ranking_item_template.edit.id.set.content("ranking_position", index + 1);
+			ranking_item_template.edit.id.set.content("display_name", player.display_name);
+			ranking_item_template.edit.id.set.content("username", "@" + player.username);
+			ranking_item_template.edit.id.set.attribute("profile_icon", "src", player.avatar_url);
+			console.log("appending");
+			rankings.appendChild(ranking_item_template.edit.id.get.element("ranking_item"));
+		}
+	}
 }

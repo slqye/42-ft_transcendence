@@ -56,15 +56,14 @@ async function opponent_signin(event) {
 	}
 }
 
-async function opponent_signout(skip_toast = false) {
+async function opponent_signout() {
 	const request = await new Api("/api/opponent/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 		new Toast(Toast.ERROR, request.log);
 	else
 	{
 		localStorage.removeItem("opponent_authenticated");
-		if (!skip_toast)
-			new Toast(Toast.SUCCESS, "Opponent signed out!");
+		new Toast(Toast.SUCCESS, "Opponent signed out!");
 		if (window.location.pathname === "/create_game_pong" || window.location.pathname === "/create_game_tictactoe")
 			reset_opponent_form();
 	}

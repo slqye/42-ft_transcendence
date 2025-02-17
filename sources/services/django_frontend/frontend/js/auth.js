@@ -48,7 +48,7 @@ async function	signin()
 	load_home();
 }
 
-async function	signout(skip_toast = false)
+async function	signout()
 {
 	const request = await new Api("/api/user/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
@@ -58,8 +58,7 @@ async function	signout(skip_toast = false)
 	}
 	else
 	{
-		if (!skip_toast)
-			new Toast(Toast.SUCCESS, "Signed out.");
+		new Toast(Toast.SUCCESS, "Signed out.");
 		localStorage.removeItem("user_authenticated");
 		load_home();
 	}
