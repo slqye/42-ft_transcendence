@@ -128,20 +128,18 @@ async function load_tictactoe_match() {
 	init_tooltips();
 }
 
-async function load_tournament() {
-	if (!await Api.is_login())
-		return (load_home());
+async function load_create_tournament() {
 	const content = document.getElementById("content");
-	let template = await new Template("frontend/html/pages/tournament.html").load();
+	let template = await new Template("frontend/html/pages/create_tournament.html").load();
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
 	content.innerHTML = template.value;
-	if (window.location.pathname !== "/tournament")
-		history.pushState({ page: "tournament" }, "Tournament", "/tournament");
+	if (window.location.pathname !== "/create_tournament")
+		history.pushState({ page: "create_tournament" }, "Create a Tournament", "/create_tournament");
 	init_tooltips();
-	update_player_number();
+	await update_player_number();
 }
 
 async function load_about() {
@@ -217,23 +215,31 @@ async function load_signup() {
 	init_tooltips();
 }
 
-async function load_profile(pk = "me") {
-	if (pk === "me" && !await Api.is_login())
-		return (load_home());
+async function load_profile(pk) {
+	let idParam = null;
+	if (pk !== "me")
+	{
+		history.pushState({ page: "profile", id: pk }, "Profile", "/profile?id=" + pk);
+		const urlParams = new URLSearchParams(window.location.search);
+		idParam = urlParams.get('id');
+	}
+	else
+	{
+		if (!await Api.is_login())
+			return (load_home());
+		history.pushState({ page: "profile" }, "Profile", "/profile");
+		idParam = "me";
+	}
 	const content = document.getElementById("content");
 	let template = await new Template("frontend/html/pages/profile.html").load();
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	await set_profile(template, pk);
-	await set_profile_history(template, pk);
+	await set_profile(template, idParam);
+	await set_profile_history(template, idParam);
 	template.update();
 	content.innerHTML = template.string;
-	if (pk === "me" && window.location.pathname !== "/profile")
-		history.pushState({ page: "profile" }, "Profile", "/profile");
-	else if (pk !== "me" && window.location.pathname !== "/profile/" + pk)
-		history.pushState({ page: "profile", pk: pk }, "Profile", "/profile/" + pk);
 	init_tooltips();
 }
 
@@ -268,13 +274,112 @@ async function load_settings() {
 	init_tooltips();
 }
 
+async function load_tournament(pk)
+{
+	if (pk != -1)
+	{
+		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
+		const urlParams = new URLSearchParams(window.location.search);
+		pk = urlParams.get('id');
+	}
+	else
+	{
+		load_home();
+		return ;
+	}
+	const content = document.getElementById("content");
+	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
+	if (request.status != Api.SUCCESS)
+		return (new Toast(Toast.ERROR, "Failed to load tournament"));
+	const tournament = request.response;
+	let template = null;
+	if (tournament.is_done)
+	{
+		return (await load_tournament_details(pk));
+	}
+	else
+	{
+		const request = await new Api("/api/tournaments/" + pk + "/pairs/next/", Api.USER).set_method("GET").set_credentials("omit").request();
+		if (request.status != Api.SUCCESS)
+			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+		const next_pair = request.response.next_pair;
+		if (next_pair == null)
+			return (new Toast(Toast.WARNING, "No more matches in this tournament"));
+		const user_id = next_pair.user;
+		const opponent_id = next_pair.opponent;
+		const user_data = await fetch_user(user_id);
+		const opponent_data = await fetch_user(opponent_id);
+		if (user_data == null || opponent_data == null)
+			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+		if (await Api.is_login())
+			await tournament_user_signout(false, true);
+		if (await Api.is_opponent_login())
+			await tournament_opponent_signout(false, true);
+		template = await new Template("frontend/html/pages/tournament_login.html").load();
+		if (template == null)
+			return (console.error(ERROR_TEMPLATE));
+		load_navbar();
+		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
+		content.innerHTML = template.value;
+		let tournament_name_title = null;
+		if (tournament.is_pong)
+			tournament_name_title = "Pong Tournament : " + tournament.name;
+		else
+			tournament_name_title = "TicTacToe Tournament : " + tournament.name;
+		document.getElementById("tournament_name").innerHTML = tournament_name_title;
+		set_tournament_forms(user_data, opponent_data);
+	}
+	init_tooltips();
+}
+
+async function load_tournament_details(pk = -1)
+{
+	if (pk != -1)
+	{
+		history.pushState({ page: "tournament_details", id: pk }, "Tournament details", "/tournament_details?id=" + pk);
+		const urlParams = new URLSearchParams(window.location.search);
+		pk = urlParams.get('id');
+	}
+	else
+	{
+		load_home();
+		return ;
+	}
+	const content = document.getElementById("content");
+	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
+	if (request.status != Api.SUCCESS)
+		return (new Toast(Toast.ERROR, "Failed to load tournament details from the server."));
+	let template = await new Template("frontend/html/pages/tournament_details.html").load();
+	if (template == null)
+		return (console.error(ERROR_TEMPLATE));
+	history.pushState({ page: "tournament_details", id: pk }, "Tournament details", "/tournament_details?id=" + pk);
+	load_navbar();
+	await set_tournament_details(template, request.response);
+	template.update();
+	content.innerHTML = template.string;
+	init_tooltips();
+}
+
 window.onpopstate = async function (event) {
 	if (event.state)
 	{
 		const page = event.state.page;
-		if (page.startsWith("profile/"))
+		if (page.startsWith("profile"))
 		{
-			await load_profile(page.split("/")[1]);
+			const profileId = event.state.id || "me";
+			await load_profile(profileId);
+			return ;
+		}
+		if (page.startsWith("tournament_details"))
+		{
+			const tournamentId = event.state.tournament_id || -1;
+			await load_tournament_details(tournamentId);
+			return ;
+		}
+		if (page.startsWith("tournament"))
+		{
+			const tournamentId = event.state.tournament_id || -1;
+			await load_tournament(tournamentId);
 			return ;
 		}
 		switch (page)
@@ -303,6 +408,10 @@ window.onpopstate = async function (event) {
 				await load_settings(); break;
 			case "tournament":
 				await load_tournament(); break;
+			case "tournament_details":
+				await load_tournament_details(); break;
+			case "create_tournament":
+				await load_create_tournament(); break;
 			default:
 				console.error("Page not found:", page); break;
 		}

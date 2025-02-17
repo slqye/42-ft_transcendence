@@ -62,7 +62,6 @@ class Tournament(models.Model):
 				match_played=False
 			)
 		pairs_ = self.pairs.all()
-		next_pair = pairs_[0]
 
 class PongGameStats(models.Model):
 	user_score = models.PositiveIntegerField(default=0)
@@ -108,8 +107,8 @@ class Pair(models.Model):
 	round_number = models.PositiveIntegerField(default=1)
 	round_progression = models.BooleanField(default=False)
 
-	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_user')
-	opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pair_as_opponent')
+	user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='pair_as_user')
+	opponent = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='pair_as_opponent')
 
 	match = models.OneToOneField(
 		Match,  # or import your Match model

@@ -16,7 +16,6 @@ FRONTEND_ROOT = os.path.join(settings.BASE_DIR, "frontend")
 def frontend(request, path):
     # Ensure the file exists in the frontend directory
     file_path = os.path.join(FRONTEND_ROOT, path)
-    print(file_path)
 
     if os.path.isfile(file_path):
         # Serve the file using Django's built-in static file serving
