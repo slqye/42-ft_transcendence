@@ -4,31 +4,38 @@
 			<div class="col-12 d-flex flex-column align-items-center">
 				<h1>TicTacToe</h1>
 			</div>
-			<div id="scoreboard">
-				<span id="player1">Player1</span>
-				<span id="player1-score">0</span>
-				<span>-</span>
-				<span id="player2-score">0</span>
-				<span id="player2">Player2</span>
-			</div>
-			<div class="col-12 d-flex justify-content-center game-board">
-				<div class="row-12">
-					<div class="cell col mb-2" data-cell-index="0"></div>
-					<div class="cell col mb-2" data-cell-index="1"></div>
-					<div class="cell col mb-2" data-cell-index="2"></div>
-				</div>
-				<div class="row-12">
-					<div class="cell col mb-2" data-cell-index="3"></div>
-					<div class="cell col mb-2" data-cell-index="4"></div>
-					<div class="cell col mb-2" data-cell-index="5"></div>
-				</div>
-				<div class="row-12">
-					<div class="cell col mb-2" data-cell-index="6"></div>
-					<div class="cell col mb-2" data-cell-index="7"></div>
-					<div class="cell col mb-2" data-cell-index="8"></div>
+			<div class="col-12">
+				<div id="scoreboard">
+					<span id="player1">Player1</span>
+					<span id="player1-score">0</span>
+					<span>-</span>
+					<span id="player2-score">0</span>
+					<span id="player2">Player2</span>
 				</div>
 			</div>
-			<div class="row-12 d-flex flex-column align-items-center">
+			<div class="row d-flex justify-content-center text-center">
+				<div class="col-12 d-flex justify-content-center game-board">
+					<div class="row-12">
+						<div class="cell col mb-2" data-cell-index="0"></div>
+						<div class="cell col mb-2" data-cell-index="1"></div>
+						<div class="cell col mb-2" data-cell-index="2"></div>
+					</div>
+					<div class="row-12">
+						<div class="cell col mb-2" data-cell-index="3"></div>
+						<div class="cell col mb-2" data-cell-index="4"></div>
+						<div class="cell col mb-2" data-cell-index="5"></div>
+					</div>
+					<div class="row-12">
+						<div class="cell col mb-2" data-cell-index="6"></div>
+						<div class="cell col mb-2" data-cell-index="7"></div>
+						<div class="cell col mb-2" data-cell-index="8"></div>
+					</div>
+				</div>
+				<div id="progress_win_chance" class="progress w-75 px-0 d-none" role="progressbar" aria-label="Win chance" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+					<div id="progress_win_chance_value" class="progress-bar" style="width: 0%;"></div>
+				</div>
+			</div>
+			<div class="row d-flex flex-column align-items-center">
 				<div class="game-info">
 					<p id="game-status">Waiting to start...</p>
 					<button id="game-button" class="btn btn-outline-primary">Start the match</button>

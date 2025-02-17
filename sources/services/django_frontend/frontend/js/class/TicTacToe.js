@@ -34,6 +34,11 @@ class TicTacToe
 		document.getElementById('player1').textContent = this.player1.name;
 		document.getElementById('player2').textContent = this.player2.name;
 		this.is_ia = !await Api.is_opponent_login();
+		if (this.is_ia)
+		{
+			const progress = document.getElementById("progress_win_chance");
+			progress.classList.remove("d-none");
+		}
 	}
 
 	handleGame()
@@ -159,6 +164,7 @@ class TicTacToe
 		});
 		if (board == static_board)
 		{
+			this.set_game_win_chance_progress_bar(moves);
 			let max = moves[0];
 			moves.forEach(element => {
 				if (element[1] > max[1])
@@ -181,6 +187,25 @@ class TicTacToe
 				max = element;
 		});
 		return (max[1]);
+	}
+
+	set_game_win_chance_progress_bar(moves)
+	{
+		let wins = 0;
+		let looses = 0;
+		let draw = 0;
+
+		moves.forEach(element => {
+			if (element[1] == 1)
+				wins += 1;
+			else if (element[1] == -1)
+				looses += 1;
+			else
+				draw += 1;
+
+		});
+		const progress_value = document.getElementById("progress_win_chance_value");
+		progress_value.setAttribute("style", `width: ${looses * 100 / moves.length}%;`);
 	}
 
 	makeMove(clickedCell, index)
