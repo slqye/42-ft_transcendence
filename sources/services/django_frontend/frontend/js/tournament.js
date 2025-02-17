@@ -1,7 +1,7 @@
 async function	update_player_number()
 {
 	const select = document.getElementById("player_number_select");
-	const player_number = parseInt(Array.from(select.selectedOptions).map(option => option.value), 10);
+	const player_number = parseInt(select.value, 10);
 	const container = document.getElementById("players_input_container");
 	const template = await new Template("frontend/html/pages/player_input.html").load();
 
@@ -13,9 +13,15 @@ async function	update_player_number()
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	container.innerHTML = "";
-	for (let index = 0; index < player_number; index++)
+	for (let i = 0; i < player_number; i++)
 	{
-		container.innerHTML += template.value;
+		// Create a document fragment from the template's HTML
+		const fragment = document.createRange().createContextualFragment(template.value);
+		const inputField = fragment.querySelector("input");
+		if (inputField) {
+			inputField.id = `player_input_${i}`;
+		}
+		container.appendChild(fragment);
 	}
 }
 
@@ -48,7 +54,7 @@ async function	create_tournament()
 	}
 	else
 		is_pong = select_game.value == "1" ? true : false;
-	const usernames = document.querySelectorAll("#players_input_container input");
+	const usernames = document.querySelectorAll("#players_input_container .player_input");
 	let usernames_list = [];
 	for (let index = 0; index < usernames.length; index++)
 		usernames_list.push(usernames[index].value);

@@ -139,7 +139,7 @@ async function load_create_tournament() {
 	if (window.location.pathname !== "/create_tournament")
 		history.pushState({ page: "create_tournament" }, "Create a Tournament", "/create_tournament");
 	init_tooltips();
-	update_player_number();
+	await update_player_number();
 }
 
 async function load_about() {
@@ -295,9 +295,7 @@ async function load_tournament(pk)
 	let template = null;
 	if (tournament.is_done)
 	{
-		new Toast(Toast.ERROR, "Tournament already completed"); //TODO: remove later
-		template = await new Template("frontend/html/pages/tournament_completed.html").load();
-		//TODO: set the data
+		return (await load_tournament_details(pk));
 	}
 	else
 	{
