@@ -205,10 +205,9 @@ class TicTacToe
 			}
 		});
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
-		let match_id = -1;
 		if (request.status === Api.ERROR || request.code !== 201)
 		{
-			new Toast(Toast.ERROR, "An error occurred while attempting to create a match.");
+			return (new Toast(Toast.ERROR, "An error occurred while attempting to create a match."));
 		}
 		else
 		{
@@ -216,18 +215,18 @@ class TicTacToe
 			const accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status === Api.ERROR || accept_request.code !== 201)
 			{
-				new Toast(Toast.ERROR, "An error occurred while attempting to create a match.");
+				return (new Toast(Toast.ERROR, "An error occurred while attempting to create a match."));
 			}
 			else
 			{
 				new Toast(Toast.SUCCESS, "Match has been successfully created.");
-				match_id = accept_request.response.match.id;
+				this.match_id = accept_request.response.match.id;
 			}
 		}
 		if (this.tournament_id !== -1)
 		{
 			const put_tournament_request_body = JSON.stringify({
-				"match_id": match_id
+				"match_id": this.match_id
 			});
 			const put_tournament_request = await new Api(`/api/tournaments/${this.tournament_id}/`, Api.USER)
 				.set_credentials("omit")
