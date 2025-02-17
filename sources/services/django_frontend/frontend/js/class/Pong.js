@@ -348,16 +348,19 @@ class Pong
 	async terminateMatch()
 	{
 		let opponent = null;
-		try
+		if (!this.is_ia)
 		{
-			opponent = await fetch_opponent();
-			if (!opponent)
-				throw new Error();
-		}
-		catch (error)
-		{
-			this.setGameButtonToReplay();
-			return (new Toast("An opponent must be logged in to play a game."));
+			try
+			{
+				opponent = await fetch_opponent();
+				if (!opponent)
+					throw new Error();
+			}
+			catch (error)
+			{
+				this.setGameButtonToReplay();
+				return (new Toast("An opponent must be logged in to play a game."));
+			}
 		}
 		this.player1.average_time_to_score = 0;
 		this.player2.average_time_to_score = 0;
@@ -368,9 +371,8 @@ class Pong
 		let result = this.player1.score > this.player2.score ? 0 : 1;
 		if (this.player1.score === this.player2.score)
 			result = 2;
-		const request_body = JSON.stringify(
+		let request_body = JSON.stringify(
 		{
-			"opponent_user_id": opponent.id,
 			"is_pong": true,
 			"result": result,
 			"pong_game_stats": {
@@ -385,23 +387,30 @@ class Pong
 				"longest_bounce_streak": this.game_longest_bounces_streak
 				}
 		});
+		if (this.is_ia)
+		{
+			let request_object = JSON.parse(request_body);
+			request_object.opponent_user_id = "none";
+			request_object.versus_ai = true;
+			request_body = JSON.stringify(request_object);
+		}
+		else
+		{
+			let request_object = JSON.parse(request_body);
+			request_object.opponent_user_id = opponent.id;
+			request_body = JSON.stringify(request_object);
+		}
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
 		if (request.status == Api.ERROR || request.code != 201)
-		{
-			new Toast(Toast.ERROR, "An error occured while attempting to create a match.");
-		}
+			new Toast(Toast.ERROR, request.log);
 		else
 		{
 			let invitation_id = request.response.id;
 			const accept_request = await new Api("/api/invitations/" + invitation_id + "/accept/", Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status == Api.ERROR || accept_request.code != 201)
-			{
-				new Toast(Toast.ERROR, "An error occured while attempting to create a match.");
-			}
+				new Toast(Toast.ERROR, request.log);
 			else
-			{
 				new Toast(Toast.SUCCESS, "Match has been successfully created.");
-			}
 		}
 		this.setGameButtonToReplay();
 	}
