@@ -2,6 +2,9 @@ class TicTacToe
 {
 	static CROSS = "X";
 	static NOUGHT = "O";
+	static STATE_DONE_WIN = 2;
+	static STATE_DONE_DRAW = 1;
+	static STATE_NOT_DONE = 0;
 
 	constructor(player1, player2, win_condition)
 	{
@@ -17,14 +20,19 @@ class TicTacToe
 		this.currentPlayer = this.player2.name;
 		this.win_condition = win_condition;
 		this.handleGame = this.handleGame.bind(this);
+		this.cell_board = Array(9).fill(null);
+		this.is_ia = false;
+		this.first_player = this.player1;
+		this.second_player = this.player2;
 	}
 
-	init()
+	async init()
 	{
 		var gameButton = document.getElementById('game-button');
 		gameButton.addEventListener('click', this.handleGame);
 		document.getElementById('player1').textContent = this.player1.name;
 		document.getElementById('player2').textContent = this.player2.name;
+		this.is_ia = !await Api.is_opponent_login();
 	}
 
 	handleGame()
@@ -43,26 +51,33 @@ class TicTacToe
 		gameButton.removeEventListener('click', this.handleGame);
 		this.board = Array(9).fill(null);
 		this.setupCells();
-		this.switchPlayer();
 		if (this.player1.symbol === TicTacToe.CROSS)
 		{
 			this.player1.symbol = TicTacToe.NOUGHT;
 			this.player2.symbol = TicTacToe.CROSS;
+			this.first_player = this.player2;
+			this.second_player = this.player1;
 		}
 		else
 		{
 			this.player1.symbol = TicTacToe.CROSS;
 			this.player2.symbol = TicTacToe.NOUGHT;
+			this.first_player = this.player1;
+			this.second_player = this.player2;
 		}
+		this.switchPlayer();
 	}
 
 	setupCells()
 	{
+		let index = 0;
 		document.querySelectorAll('.cell').forEach(cell => {
 			cell.addEventListener('click', (e) => this.handleCellClick(e));
 			cell.setAttribute('class', 'cell col cursor-pointer mb-2');
 			cell.textContent = '';
 			cell.style.color = 'white';
+			this.cell_board[index] = cell;
+			index += 1;
 		});
 	}
 
@@ -71,11 +86,103 @@ class TicTacToe
 		const clickedCell = clickedCellEvent.target;
 		const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
 
-		if (this.board[clickedCellIndex] !== null || !this.roundActive) {
-			return;
-		}
-
+		if (this.board[clickedCellIndex] !== null || !this.roundActive) return ;
 		this.makeMove(clickedCell, clickedCellIndex);
+	}
+
+	static get_terminate_state(board)
+	{
+		const wins = [
+			[0, 1, 2],
+			[3, 4, 5],
+			[6, 7, 8],
+			[0, 3, 6],
+			[1, 4, 7],
+			[2, 5, 8],
+			[0, 4, 8],
+			[2, 4, 6]
+		];
+		let win_status = false;
+		wins.forEach(condition => {
+			const [a, b, c] = condition;
+			if (board[a] !== null && board[a] === board[b] && board[b] === board[c])
+				return (win_status = true);
+		});
+		if (win_status == true)
+			return (TicTacToe.STATE_DONE_WIN);
+		if (board.every(cell => cell !== null))
+			return (TicTacToe.STATE_DONE_DRAW);
+		return (TicTacToe.STATE_NOT_DONE);
+	}
+
+	get_player_turn(board)
+	{
+		let player1_moves = 0;
+		let player2_moves = 0;
+
+		board.forEach(cell => {
+			if (cell == this.first_player.name)
+				player1_moves += 1;
+			else if (cell == this.second_player.name)
+				player2_moves += 1;
+		});
+		if (player1_moves == 0 && player2_moves == 0) return (this.first_player);
+		else if (player1_moves > player2_moves) return (this.second_player);
+		else return (this.first_player)
+	}
+
+	play_ai()
+	{
+		let moves_values = this.make_minimax_move(this.board, this.board);
+		this.board[moves_values[0]] = this.player2.name;
+		this.cell_board[moves_values[0]].textContent = this.currentPlayer === this.player1.name ? 'X' : 'O';
+		this.cell_board[moves_values[0]].style.color = this.currentPlayer === this.player1.name ? 'red' : 'blue';
+	}
+
+	make_minimax_move(static_board, board)
+	{
+		const player = this.get_player_turn(board);
+		const state = TicTacToe.get_terminate_state(board);
+		let board_copy = null;
+		let index = 0;
+		let moves = [];
+
+		if (this.player1.name == player.name && state == TicTacToe.STATE_DONE_WIN) return (1);
+		else if (this.player2.name == player.name && state == TicTacToe.STATE_DONE_WIN) return (-1);
+		else if (state == TicTacToe.STATE_DONE_DRAW) return (0);
+		board.forEach(cell => {
+			if (cell == null)
+			{
+				board_copy = JSON.parse(JSON.stringify(board));
+				board_copy[index] = player.name;
+				moves.push([index, this.make_minimax_move(static_board, board_copy)]);
+			}
+			index += 1;
+		});
+		if (board == static_board)
+		{
+			let max = moves[0];
+			moves.forEach(element => {
+				if (element[1] > max[1])
+					max = element;
+			});
+			return (max);
+		}
+		if (this.player1.name == player.name)
+		{
+			let min = moves[0];
+			moves.forEach(element => {
+				if (element[1] < min[1])
+					min = element;
+			});
+			return (min[1]);
+		}
+		let max = moves[0];
+		moves.forEach(element => {
+			if (element[1] > max[1])
+				max = element;
+		});
+		return (max[1]);
 	}
 
 	makeMove(clickedCell, index)
@@ -98,6 +205,18 @@ class TicTacToe
 	{
 		this.currentPlayer = this.currentPlayer === this.player1.name ? this.player2.name : this.player1.name;
 		document.getElementById('game-status').textContent = this.currentPlayer + "'s turn";
+		if (this.is_ia && this.currentPlayer == this.player2.name)
+		{
+			this.play_ai();
+			if (this.checkWin()) {
+				return;
+			}
+			if (this.checkDraw()) {
+				this.endGame(null, "It's a draw!");
+				return;
+			}
+			this.switchPlayer();
+		}
 	}
 
 	checkWin()
@@ -114,7 +233,6 @@ class TicTacToe
 		];
 
 		var win = false;
-		console.clear();
 		winningConditions.forEach(condition => {
 			const [a, b, c] = condition;
 			if (this.board[a] === this.currentPlayer && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
@@ -170,22 +288,24 @@ class TicTacToe
 	async terminateMatch()
 	{
 		let opponent = null;
-		try
+		if (!this.is_ia)
 		{
-			opponent = await fetch_opponent();
-			if (!opponent)
-				throw new Error();
-		}
-		catch (error)
-		{
-			this.setGameButtonToReplay();
-			return new Toast("An opponent must be logged in to play a game.");
+			try
+			{
+				opponent = await fetch_opponent();
+				if (!opponent)
+					throw new Error();
+			}
+			catch (error)
+			{
+				this.setGameButtonToReplay();
+				return new Toast("An opponent must be logged in to play a game.");
+			}
 		}
 		let result = this.player1.score > this.player2.score ? 0 : 1;
 		if (this.player1.score === this.player2.score)
 			result = 2;
-		const request_body = JSON.stringify({
-			"opponent_user_id": opponent.id,
+		let request_body = JSON.stringify({
 			"is_pong": false,
 			"result": result,
 			"tictactoe_game_stats": {
@@ -201,24 +321,30 @@ class TicTacToe
 				"opponent_quickest_win_as_moves": this.player2.quickest_win_moves
 			}
 		});
-
+		if (this.is_ia)
+		{
+			let request_object = JSON.parse(request_body);
+			request_object.opponent_user_id = "none";
+			request_object.versus_ai = true;
+			request_body = JSON.stringify(request_object);
+		}
+		else
+		{
+			let request_object = JSON.parse(request_body);
+			request_object.opponent_user_id = opponent.id;
+			request_body = JSON.stringify(request_object);
+		}
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
 		if (request.status === Api.ERROR || request.code !== 201)
-		{
-			new Toast(Toast.ERROR, "An error occurred while attempting to create a match.");
-		}
+			new Toast(Toast.ERROR, request.log);
 		else
 		{
 			let invitation_id = request.response.id;
 			const accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status === Api.ERROR || accept_request.code !== 201)
-			{
-				new Toast(Toast.ERROR, "An error occurred while attempting to create a match.");
-			}
+				new Toast(Toast.ERROR, request.log);
 			else
-			{
-				new Toast(Toast.SUCCESS, "Match has been successfully created.");
-			}
+				new Toast(Toast.SUCCESS, request.log);
 		}
 		this.setGameButtonToReplay();
 	}

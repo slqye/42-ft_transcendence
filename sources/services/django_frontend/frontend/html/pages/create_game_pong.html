@@ -1,43 +1,64 @@
 <section id="start_game_pong">
-	<div class="container d-flex justify-content-center anim-slide-down" style="margin-top: 20vh;">
-		<div class="row w-100 d-flex justify-content-center text-center">
-			<div class="col-12 d-flex flex-column align-items-center">
-				<h1>Pong</h1>
-				<!-- Opponent Sign In Input-->
-				<div class="mb-3">
-					<h2 style="font-size: 1.3em;">Opponent Sign In</h2>
-					<form onsubmit="opponent_signin(event);" id="opponent-signin">
-						<div class="input-group my-2">
-							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
-							<input type="text" class="form-control" placeholder="Username" aria-label="username" id="opponent_signin_username" required>
-						</div>
-						<div class="input-group my-2">
-							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
-							<input type="password" class="form-control" placeholder="Password" aria-label="password" id="opponent_signin_password" required>
-						</div>
-						<button type="submit" class="btn btn-outline-primary mt-3" id="sign_in_as_opponent_button">Sign In as Opponent</button>
-						<!-- Opponent Info (Avatar and Logout Button) -->
-						<div id="opponent_info" class="mt-3 d-flex align-items-center justify-content-center d-none">
-							<img id="opponent_icon_display" class="rounded-circle me-2" src="/frontend/assets/default_profile_icon.webp" alt="Opponent Avatar" width="40" height="40">
-							<button type="button" class="btn btn-sm btn-danger" onclick="opponent_signout();">X</button>
-						</div>
-					</form>
-				</div>
-
-				<!-- Game Settings Menu -->
-				<div class="mb-3">
-					<h2 style="font-size: 1.3em;">Game Settings</h2>
-					<form id="pong-settings" onsubmit="event.preventDefault(); launch_pong_match();">
-						<div class="my-2 d-flex flex-column align-items-center">
-							<label for="win-condition" class="form-label">Win Condition</label>
-							<input type="number" class="form-control w-50" id="win-condition" min="3" value="3">
-							<small class="form-text text-muted">Number of points needed to win the match.</small>
-						</div>
-						<!-- Start Game Button -->
-						<button type="submit" class="btn btn-primary d-none" id="start-game-button">Start Game</button>
-					</form>
+	<div class="container justify-content-center mt-5 anim-slide-down">
+		<div class="border rounded">
+			<div class="row mx-0 my-2 align-items-center">
+				<div class="col-12 col-lg-8 m-0 p-0 d-flex align-items-center">
+					<h2 class="ms-3 my-0">Pong</h2>
 				</div>
 			</div>
+			<hr class="m-0">
+			<form class="row mt-5 mx-0" onsubmit="event.preventDefault(); launch_pong_match();">
+				<div class="col-10 col-lg-5 mx-auto py-2 align-items-center">
+					<h3>Settings</h3>
+					<div class="my-3">
+						<h5>Win condition</h5>
+						<input type="number" class="form-control" id="win-condition" min="3" value="3">
+						<small class="form-text text-muted">Number of points required to win the match.</small>
+					</div>
+					<div class="my-3">
+						<h5>Opponent type</h5>
+						<input type="radio" class="btn-check" name="options-outlined" id="user-outlined" autocomplete="off" onchange="user_switch()" checked>
+						<label class="btn btn-outline-primary" for="user-outlined"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></label>
+						<input type="radio" class="btn-check" name="options-outlined" id="ia-outlined" autocomplete="off" onchange="ia_switch()">
+						<label class="btn btn-outline-primary" for="ia-outlined"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></label>
+					</div>
+				</div>
+				<div class="vr m-0 p-0 d-none d-lg-block"></div>
+				<hr class="m-0 p-0 d-block d-lg-none w-75 mx-auto"></hr>
+				<div id="opponent_container" class="col-10 col-lg-5 mx-auto py-2 align-items-center">
+					<h3>Opponent</h3>
+					<div id="opponent_user" class="anim-fade-in">
+						<div class="input-group my-3">
+							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
+							<input type="text" class="form-control" placeholder="Username" aria-label="username" id="opponent_signin_username">
+						</div>
+						<div class="input-group my-3">
+							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
+							<input type="password" class="form-control" placeholder="Password" aria-label="password" id="opponent_signin_password">
+						</div>
+						<div class="my-3">
+							<button type="button" id="sign_in_as_opponent_button" class="btn btn-outline-primary" onclick="opponent_signin();">Sign in</button>
+						</div>
+						<div id="opponent_info" class="my-3 d-flex align-items-center justify-content-between d-none">
+							<button type="button" class="btn btn-danger m-0" onclick="opponent_signout();">Sign out</button>
+						</div>
+					</div>
+					<div id="opponent_ia" class="d-none anim-fade-in">
+						<div class="my-3">
+							<h5>AI difficulty</h5>
+							<select class="form-select" aria-label="ai difficulty select">
+								<option value="normal" selected>Normal</option>
+							</select>
+						</div>
+						<div class="my-3">
+							<small class="form-text text-muted">More soon... Stay tuned!</small>
+						</div>
+					</div>
+				</div>
+				<div class="my-4 d-flex justify-content-center">
+					<button id="start-game-button" class="btn btn-primary d-none anim-fade-in" type="submit">Launch game</button>
+				</div>
+			</form>
 		</div>
 	</div>
 </section>
