@@ -19,3 +19,20 @@ async function	create_tournament()
 {
 	console.log("creating tournament...");
 }
+
+function	change_history_type()
+{
+	const games_history = document.getElementById("history");
+	const tournamets_history = document.getElementById("history_tournaments");
+
+	if (games_history.classList.contains("d-none"))
+	{
+		games_history.classList.remove("d-none");
+		tournamets_history.classList.add("d-none");
+	}
+	else
+	{
+		games_history.classList.add("d-none");
+		tournamets_history.classList.remove("d-none");
+	}
+}
