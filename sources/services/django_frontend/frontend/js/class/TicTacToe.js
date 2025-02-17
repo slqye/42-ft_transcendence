@@ -22,6 +22,8 @@ class TicTacToe
 		this.handleGame = this.handleGame.bind(this);
 		this.cell_board = Array(9).fill(null);
 		this.is_ia = false;
+		this.first_player = this.player1;
+		this.second_player = this.player2;
 	}
 
 	async init()
@@ -49,17 +51,21 @@ class TicTacToe
 		gameButton.removeEventListener('click', this.handleGame);
 		this.board = Array(9).fill(null);
 		this.setupCells();
-		this.switchPlayer();
 		if (this.player1.symbol === TicTacToe.CROSS)
 		{
 			this.player1.symbol = TicTacToe.NOUGHT;
 			this.player2.symbol = TicTacToe.CROSS;
+			this.first_player = this.player2;
+			this.second_player = this.player1;
 		}
 		else
 		{
 			this.player1.symbol = TicTacToe.CROSS;
 			this.player2.symbol = TicTacToe.NOUGHT;
+			this.first_player = this.player1;
+			this.second_player = this.player2;
 		}
+		this.switchPlayer();
 	}
 
 	setupCells()
@@ -115,20 +121,19 @@ class TicTacToe
 		let player2_moves = 0;
 
 		board.forEach(cell => {
-			if (cell == this.player1.name)
+			if (cell == this.first_player.name)
 				player1_moves += 1;
-			else if (cell == this.player2.name)
+			else if (cell == this.second_player.name)
 				player2_moves += 1;
 		});
-		if (player1_moves == 0 && player2_moves == 0) return (this.player1);
-		else if (player1_moves > player2_moves) return (this.player2);
-		else return (this.player1)
+		if (player1_moves == 0 && player2_moves == 0) return (this.first_player);
+		else if (player1_moves > player2_moves) return (this.second_player);
+		else return (this.first_player)
 	}
 
 	play_ai()
 	{
 		let moves_values = this.make_minimax_move(this.board, this.board);
-		console.log(moves_values);
 		this.board[moves_values[0]] = this.player2.name;
 		this.cell_board[moves_values[0]].textContent = this.currentPlayer === this.player1.name ? 'X' : 'O';
 		this.cell_board[moves_values[0]].style.color = this.currentPlayer === this.player1.name ? 'red' : 'blue';
@@ -156,7 +161,6 @@ class TicTacToe
 		});
 		if (board == static_board)
 		{
-			console.log(moves);
 			let max = moves[0];
 			moves.forEach(element => {
 				if (element[1] > max[1])
