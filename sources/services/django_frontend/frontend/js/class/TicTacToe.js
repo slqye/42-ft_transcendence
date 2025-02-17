@@ -24,6 +24,7 @@ class TicTacToe
 		this.is_ia = false;
 		this.first_player = this.player1;
 		this.second_player = this.player2;
+		this.is_player_order_set = false;
 	}
 
 	async init()
@@ -55,16 +56,13 @@ class TicTacToe
 		{
 			this.player1.symbol = TicTacToe.NOUGHT;
 			this.player2.symbol = TicTacToe.CROSS;
-			this.first_player = this.player2;
-			this.second_player = this.player1;
 		}
 		else
 		{
 			this.player1.symbol = TicTacToe.CROSS;
 			this.player2.symbol = TicTacToe.NOUGHT;
-			this.first_player = this.player1;
-			this.second_player = this.player2;
 		}
+		this.is_player_order_set = false;
 		this.switchPlayer();
 	}
 
@@ -205,6 +203,18 @@ class TicTacToe
 	{
 		this.currentPlayer = this.currentPlayer === this.player1.name ? this.player2.name : this.player1.name;
 		document.getElementById('game-status').textContent = this.currentPlayer + "'s turn";
+		if (this.is_ia && this.currentPlayer == this.player2.name && !this.is_player_order_set)
+		{
+			this.first_player = this.player2;
+			this.second_player = this.player1;
+			this.is_player_order_set = true;
+		}
+		else if (!this.is_player_order_set)
+		{
+			this.first_player = this.player1;
+			this.second_player = this.player2;
+			this.is_player_order_set = true;
+		}
 		if (this.is_ia && this.currentPlayer == this.player2.name)
 		{
 			this.play_ai();
@@ -324,7 +334,7 @@ class TicTacToe
 		if (this.is_ia)
 		{
 			let request_object = JSON.parse(request_body);
-			request_object.opponent_user_id = "none";
+			request_object.opponent_user_id = null;
 			request_object.versus_ai = true;
 			request_body = JSON.stringify(request_object);
 		}

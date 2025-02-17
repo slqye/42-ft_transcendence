@@ -390,7 +390,7 @@ class Pong
 		if (this.is_ia)
 		{
 			let request_object = JSON.parse(request_body);
-			request_object.opponent_user_id = "none";
+			request_object.opponent_user_id = null;
 			request_object.versus_ai = true;
 			request_body = JSON.stringify(request_object);
 		}
