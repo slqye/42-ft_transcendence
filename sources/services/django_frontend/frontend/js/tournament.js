@@ -344,30 +344,16 @@ async function	set_tournament_details(template, tournament)
 	if (!tournament.is_done)
 	{
 		template.edit.id.set.content("tournament_status", "This tournament is still in progress.");
-		template.edit.id.get.element("tournament_status").classList.add("d-none");
+		template.edit.id.get.element("tournament_status").classList.remove("d-none");
 	}
 	else
 	{
 		template.edit.id.get.element("rankings").classList.remove("d-none");
-		//players = tournament.players; //TODO: make sure that the players are sorted by their ranking in the tournament
-		players = [
-			{
-				display_name: "Player 1",
-				username: "player1",
-				ranking: 1,
-				avatar_url: "/frontend/assets/default_profile_icon.webp"
-			},
-			{
-				display_name: "Player 2",
-				username: "player2",
-				ranking: 2,
-				avatar_url: "/frontend/assets/default_profile_icon.webp"
-			},
-		]
+		participants_ranking_ids = tournament.participants_ranking;
 		const rankings = template.edit.id.get.element("rankings");
-		for (let index = 0; index < players.length; index++)
+		for (let index = 0; index < participants_ranking_ids.length; index++)
 		{
-			const player = players[index];
+			const player = participants_ranking_ids[index];
 			let ranking_item_template = await new Template("frontend/html/pages/ranking_item.html").load();
 			if (ranking_item_template == null)
 				return (console.error(ERROR_TEMPLATE));

@@ -26,6 +26,7 @@ async function load_navbar() {
 			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
 			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 			navbar.edit.id.set.attribute("profile", "class", "nav-item");
+			navbar.edit.id.set.attribute("games", "class", "nav-item dropdown");
 		}
 		catch (error)
 		{
