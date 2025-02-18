@@ -30,6 +30,7 @@ def is_power_of_two(n: int) -> bool:
 class Tournament(models.Model):
 	name = models.CharField(max_length=100)
 	participants = models.ManyToManyField(User, related_name='tournaments_joined', blank=False)
+	participants_ranking = models.ManyToManyField(User, related_name='tournaments_joined_ranking', blank=True)
 	is_done = models.BooleanField(default=False)
 	is_pong = models.BooleanField()
 	created_at = models.DateTimeField(auto_now_add=True)

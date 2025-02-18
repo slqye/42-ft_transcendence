@@ -290,6 +290,8 @@ class PairSerializer(serializers.ModelSerializer):
 class TournamentSerializer(serializers.ModelSerializer):
 	# Nested pairs
 	pairs = PairSerializer(many=True, read_only=True)
+	participants = UserSerializer(many=True, read_only=True)
+	participants_ranking = UserSerializer(many=True, read_only=True)
 
 	# For creation, accept a list of participant IDs
 	participant_ids = serializers.PrimaryKeyRelatedField(
@@ -307,12 +309,13 @@ class TournamentSerializer(serializers.ModelSerializer):
 			'is_pong',
 			'participants',   # read-only
 			'participant_ids', # write-only
+			'participants_ranking',
 			'next_pair',
 			'is_done',
 			'pairs',		  # nested pairs
 			'created_at',
 		]
-		read_only_fields = ['id', 'participants', 'is_done', 'pairs', 'created_at', 'next_pair']
+		read_only_fields = ['id', 'participants', 'is_done', 'pairs', 'created_at', 'next_pair', 'participant_ranking']
 
 	def create(self, validated_data):
 		participant_ids = validated_data.pop('participant_ids', [])

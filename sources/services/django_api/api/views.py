@@ -649,6 +649,7 @@ class TournamentDetailView(APIView):
 		serializer = TournamentSerializer(tournament)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 	def put(self, request, pk):
 		tournament = get_object_or_404(Tournament, pk=pk)
 		if tournament.is_done:
@@ -673,15 +674,19 @@ class TournamentDetailView(APIView):
 		match_result = match_instance.result
 		if match_result == 0:
 			winner = pair.user
+			loser = pair.opponent
 		elif match_result == 1:
 			winner = pair.opponent
+			loser = pair.user
 		else:
 			# e.g. 0 => draw
 			return Response({"detail": "Cannot advance if the match is a draw."}, status=status.HTTP_400_BAD_REQUEST)
 
 		total_rounds = int(math.log2(tournament.participants.count()))
 		next_round = pair.round_number + 1
+		tournament.participants_ranking.add(loser)
 		if next_round > total_rounds:
+			tournament.participants_ranking.add(winner)
 			tournament.is_done = True
 			tournament.save()
 			return Response({
