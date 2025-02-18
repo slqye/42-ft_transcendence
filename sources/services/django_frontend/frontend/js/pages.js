@@ -283,6 +283,7 @@ async function load_tournament(pk)
 		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
 		const urlParams = new URLSearchParams(window.location.search);
 		pk = urlParams.get('id');
+		localStorage.setItem("tournament_id", pk);
 	}
 	else
 	{
@@ -297,6 +298,8 @@ async function load_tournament(pk)
 	let template = null;
 	if (tournament.is_done)
 	{
+		if (localStorage.getItem("tournament_id") != null)
+			localStorage.removeItem("tournament_id");
 		return (await load_tournament_details(pk));
 	}
 	else
@@ -313,10 +316,24 @@ async function load_tournament(pk)
 		const opponent_data = await fetch_user(opponent_id);
 		if (user_data == null || opponent_data == null)
 			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+		let user_signed_in = false;
+		let opponent_signed_in = false;
 		if (await Api.is_login())
-			await tournament_user_signout(false, true);
+		{
+			const signed_in_user = await fetch_me();
+			if (signed_in_user.username !== user_data.username)
+				await tournament_user_signout(false, true);
+			else
+				user_signed_in = true;
+		}
 		if (await Api.is_opponent_login())
-			await tournament_opponent_signout(false, true);
+		{
+			const signed_in_opponent = await fetch_opponent();
+			if (signed_in_opponent.username !== opponent_data.username)
+				await tournament_opponent_signout(false, true);
+			else
+				opponent_signed_in = true;
+		}
 		template = await new Template("frontend/html/pages/tournament_login.html").load();
 		if (template == null)
 			return (console.error(ERROR_TEMPLATE));
@@ -329,7 +346,7 @@ async function load_tournament(pk)
 		else
 			tournament_name_title = "TicTacToe Tournament : " + tournament.name;
 		document.getElementById("tournament_name").innerHTML = tournament_name_title;
-		set_tournament_forms(user_data, opponent_data);
+		set_tournament_forms(user_data, opponent_data, user_signed_in, opponent_signed_in);
 	}
 	init_tooltips();
 }

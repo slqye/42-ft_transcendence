@@ -185,12 +185,16 @@ async function	start_game_tournament()
 	}
 }
 
-function	set_tournament_forms(user_data, opponent_data)
+function	set_tournament_forms(user_data, opponent_data, user_signed_in, opponent_signed_in)
 {
 	document.getElementById("tournament_user_signin_username").value = user_data.username;
 	document.getElementById("tournament_user_signin_username").disabled = true;
 	document.getElementById("tournament_opponent_signin_username").value = opponent_data.username;
 	document.getElementById("tournament_opponent_signin_username").disabled = true;
+	if (user_signed_in)
+		set_connected_tournament_user_form(user_data);
+	if (opponent_signed_in)
+		set_connected_tournament_opponent_form(opponent_data);
 }
 
 function	set_connected_tournament_user_form(userData)
@@ -365,4 +369,13 @@ async function	set_tournament_details(template, tournament)
 			rankings.appendChild(ranking_item_template.edit.id.get.element("ranking_item"));
 		}
 	}
+}
+
+async function	select_tournament()
+{
+	const tournament_id_str = localStorage.getItem("tournament_id");
+	if (tournament_id_str == null)
+		return (await load_create_tournament());
+	const tournament_id = parseInt(tournament_id_str, 10);
+	await load_tournament(tournament_id);
 }
