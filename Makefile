@@ -19,6 +19,7 @@ $(NAME) : build up
 
 build :
 	@mkdir -p ${PWD}/data/database_data
+	@mkdir -p ${PWD}/data/prometheus_data
 	@docker compose -f ./sources/docker-compose.yml build
 		
 up :
@@ -50,8 +51,10 @@ flush_database :
 
 drop_database :
 	@docker exec -it transcendence_django_api python manage.py reset_db --noinput
+	@docker exec -it transcendence_prometheus rm -rf /etc/prometheus
 	@make fclean
 	@rm -rf sources/services/django_api/api/migrations
+
 
 new_database_re :
 	@make drop_database
