@@ -228,6 +228,7 @@ async function load_profile(pk = "me") {
 	load_navbar();
 	await set_profile(template, pk);
 	await set_profile_history(template, pk);
+	await set_profile_tournament_history(template, pk);
 	template.update();
 	content.innerHTML = template.string;
 	if (pk === "me" && window.location.pathname !== "/profile")

@@ -164,6 +164,7 @@ class TicTacToe
 		});
 		if (board == static_board)
 		{
+			console.log(moves);
 			this.set_game_win_chance_progress_bar(moves);
 			let max = moves[0];
 			moves.forEach(element => {

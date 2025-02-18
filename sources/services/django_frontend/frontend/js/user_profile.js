@@ -126,3 +126,8 @@ async function	set_profile_history(template, pk = "me")
 		return (console.error(error));
 	}
 }
+
+async function	set_profile_tournament_history(template, pk = "me")
+{
+	const tournament_history = template.edit.id.get.element("history_tournaments");
+}
