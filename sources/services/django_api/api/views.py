@@ -646,8 +646,46 @@ class TournamentDetailView(APIView):
 
 	def get(self, request, pk):
 		tournament = get_object_or_404(Tournament, pk=pk)
-		serializer = TournamentSerializer(tournament)
-		return Response(serializer.data, status=status.HTTP_200_OK)
+		if not tournament.is_done:
+			serializer = TournamentSerializer(tournament)
+			return Response(serializer.data, status=status.HTTP_200_OK)
+
+		participants = list(tournament.participants.all())
+		total_rounds = int(math.log2(len(participants)))
+		
+		elimination_rounds = {}  # {user_id: round_number}
+		played_pairs = tournament.pairs.filter(match_played=True)
+		for pair in played_pairs:
+			if not pair.match:
+				continue
+			if pair.match.result == 0:
+				loser = pair.opponent
+			elif pair.match.result == 1:
+				loser = pair.user
+			else:
+				# In case of a draw, our tournament logic should have already prevented advancement.
+				continue
+			# If a participant loses more than once, keep the round they lost in last (i.e. the highest round number)
+			elimination_rounds[loser.id] = max(elimination_rounds.get(loser.id, 0), pair.round_number)
+
+		# The champion never lost so will not appear in elimination_rounds.
+		# Assign champion an elimination round value higher than any other.
+		for participant in participants:
+			if participant.id not in elimination_rounds:
+				elimination_rounds[participant.id] = total_rounds + 1
+
+		# Sort participants by their elimination round in descending order.
+		# (Higher round number means they advanced further in the tournament.)
+		ranking = sorted(participants, key=lambda p: elimination_rounds[p.id], reverse=True)
+
+		tournament_data = TournamentSerializer(tournament).data
+		ranking_data = UserSerializer(ranking, many=True).data
+
+		# Add the ranking information to the response.
+		tournament_data['ranking'] = ranking_data
+
+		return Response(tournament_data, status=status.HTTP_200_OK)
+
 
 	def put(self, request, pk):
 		tournament = get_object_or_404(Tournament, pk=pk)
