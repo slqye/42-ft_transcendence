@@ -365,7 +365,7 @@ async function	set_tournament_details(template, tournament)
 			ranking_item_template.edit.id.set.content("ranking_position", ranking++);
 			ranking_item_template.edit.id.set.content("display_name", player.display_name);
 			ranking_item_template.edit.id.set.content("username", "@" + player.username);
-			ranking_item_template.edit.id.set.attribute("profile_icon", "src", player.avatar_url);
+			ranking_item_template.edit.id.set.attribute("profile_icon_tournament", "src", player.avatar_url);
 			rankings.appendChild(ranking_item_template.edit.id.get.element("ranking_item"));
 		}
 	}

@@ -1,6 +1,7 @@
 #profile_icon_tournament {
-	width: 30%;
-	height: auto;
+	height: 50%;
+	max-height: 35px;
+	width: auto;
 
 	border-radius: 100%;
 }

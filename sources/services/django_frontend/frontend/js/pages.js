@@ -33,6 +33,10 @@ async function load_navbar() {
 			new Toast(Toast.ERROR, error);
 		}
 	}
+	if ((window.location.pathname === "/home" || window.location.pathname === "/about") && await Api.is_opponent_login())
+	{
+		navbar.edit.id.set.attribute("signout_opponent_container", "class", "nav-item");
+	}
 	header.innerHTML = navbar.string;
 }
 
@@ -47,13 +51,13 @@ async function load_home() {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	if (window.location.pathname === "/home" && callback)
-		await signin_42_callback(role === "opponent");
+		await signin_42_callback(role === "opponent", type);
 	if (callback && type == "match_pong")
 		return (await load_create_game_pong());
 	else if (callback && type == "match_tictactoe")
 		return (await load_create_game_tictactoe());
 	else if (callback && type == "tournament")
-		return (await load_create_tournament());
+		return (await select_tournament());
 	load_navbar();
 	if (await Api.is_login())
 		template.edit.id.add.attribute("sign-in-button", "class", "d-none");

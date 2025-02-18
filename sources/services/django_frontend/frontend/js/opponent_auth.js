@@ -54,7 +54,7 @@ async function opponent_signin() {
 }
 
 async function opponent_signout() {
-	const request = await new Api("/api/opponent/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
+	const request = await new Api("/api/opponent/logout/", Api.OPPONENT).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 		new Toast(Toast.ERROR, request.log);
 	else
