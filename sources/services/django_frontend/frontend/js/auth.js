@@ -64,7 +64,7 @@ async function	signout()
 	}
 }
 
-async function	signin_42()
+async function	signin_42(is_opponent = false, type = "skip")
 {
 	let config = {};
 
@@ -84,17 +84,42 @@ async function	signin_42()
 		}
 		else
 		{
-			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${encodeURIComponent(config.API_42_REDIRECT_URI)}&response_type=code`;
+			let redirect_uri = config.API_42_REDIRECT_URI;
+			if (is_opponent)
+				redirect_uri += "?role=opponent";
+			else
+				redirect_uri += "?role=user";
+			if (type == "match_pong")
+				redirect_uri += "&type=match_pong";
+			else if (type == "match_tictactoe")
+				redirect_uri += "&type=match_tictactoe";
+			else if (type == "tournament")
+				redirect_uri += "&type=tournament";
+			else
+				redirect_uri += "&type=skip";
+			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&response_type=code&redirect_uri=${encodeURIComponent(redirect_uri)}`;
 			window.location.href = authUrl;
 		}
 	}
 }
 
-async function	signin_42_callback()
+async function	signin_42_callback(is_opponent = false, type = "skip", success_callback = false)
 {
-	localStorage.setItem("user_authenticated", "true");
-	if (await Api.is_login())
-		new Toast(Toast.SUCCESS, "Logged in with 42!\nMake sure to change your password if you want to log in as an opponent in your friend's game.");
+	if (!success_callback)
+		return (new Toast(Toast.ERROR, "An error occurred while logging in with 42."));
+	if (is_opponent)
+		localStorage.setItem("opponent_authenticated", "true");
+	else
+		localStorage.setItem("user_authenticated", "true");
+	if (!is_opponent && await Api.is_login())
+	{
+		new Toast(Toast.SUCCESS, "Logged in with 42!");
+	}
+	else if (is_opponent && await Api.is_opponent_login())
+	{
+		if (type !== "tournament")
+			new Toast(Toast.SUCCESS, "Opponent logged in with 42!");
+	}
 	else
 		new Toast(Toast.ERROR, "An error occurred while logging in with 42.");
 	history.pushState({ page: "home" }, "Home", "/home");

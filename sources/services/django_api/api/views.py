@@ -126,7 +126,7 @@ class UserLoginView(APIView):
 
 		response = Response({"detail": "User logged in successfully"})
 		# Set HttpOnly cookies
-		# secure=True and samesite='None' typically required if you’re over HTTPS or cross-site
+		# secure=True and samesite='None' typically required if you're over HTTPS or cross-site
 		response.set_cookie(
 			"user_access",
 			access_token,
@@ -780,9 +780,22 @@ class OAuthCallbackView(APIView):
 	permission_classes = [permissions.AllowAny]
 
 	def get(self, request):
+		role = request.GET.get('role')
+		type = request.GET.get('type')
+		redirect_uri = settings.API_42_REDIRECT_URI
+		if role == "user":
+			redirect_uri += "?role=user"
+		elif role == "opponent":
+			redirect_uri += "?role=opponent"
+		else:
+			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=false")
+		if (type != "match_pong" and type != "match_tictactoe" and type != "tournament" and type != "skip"):
+			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=false")
+		else:
+			redirect_uri += f"&type={type}"
 		code = request.GET.get('code')
 		if not code:
-			return Response({"error": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
+			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=false")
 
 		# Exchange code for access token
 		try:
@@ -793,15 +806,15 @@ class OAuthCallbackView(APIView):
 				'client_id': os.environ['API_42_UID'],
 				'client_secret': os.environ['API_42_SECRET'],
 				'code': code,
-					'redirect_uri': settings.API_42_REDIRECT_URI,
+				'redirect_uri': redirect_uri,
 				}
 			)
 		except Exception as e:
 			print("Error", e)
-			return Response({"error": "Failed to obtain access token"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=false")
 		
 		if token_response.status_code != 200:
-			return Response({"error": "Failed to obtain access token"}, status=status.HTTP_400_BAD_REQUEST)
+			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=false")
 
 		access_token = token_response.json().get('access_token')
 
@@ -813,10 +826,10 @@ class OAuthCallbackView(APIView):
 			)
 		except Exception as e:
 			print("Error", e)
-			return Response({"error": "Failed to fetch user information"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=false")
 		
 		if user_response.status_code != 200:
-			return Response({"error": "Failed to fetch user information"}, status=status.HTTP_400_BAD_REQUEST)
+			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=false")
 
 		user_data = user_response.json()
 		username = user_data.get('login')
@@ -832,17 +845,18 @@ class OAuthCallbackView(APIView):
 		refresh = RefreshToken.for_user(user)
 		access_token = str(refresh.access_token)
 		refresh_token = str(refresh)
+
+		response = redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}&success_callback=true")
 		
-		response = redirect(f"{settings.MAIN_URL}/home?callback=true")
 		response.set_cookie(
-			"user_access",
+			"user_access" if role == "user" else "opponent_access",
 			access_token,
 			httponly=True,
 			secure=True,
 			samesite='None'
 		)
 		response.set_cookie(
-			"user_refresh",
+			"user_refresh" if role == "user" else "opponent_refresh",
 			refresh_token,
 			httponly=True,
 			secure=True,

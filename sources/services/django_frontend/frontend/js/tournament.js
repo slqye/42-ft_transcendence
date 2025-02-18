@@ -185,12 +185,16 @@ async function	start_game_tournament()
 	}
 }
 
-function	set_tournament_forms(user_data, opponent_data)
+function	set_tournament_forms(user_data, opponent_data, user_signed_in, opponent_signed_in)
 {
 	document.getElementById("tournament_user_signin_username").value = user_data.username;
 	document.getElementById("tournament_user_signin_username").disabled = true;
 	document.getElementById("tournament_opponent_signin_username").value = opponent_data.username;
 	document.getElementById("tournament_opponent_signin_username").disabled = true;
+	if (user_signed_in)
+		set_connected_tournament_user_form(user_data);
+	if (opponent_signed_in)
+		set_connected_tournament_opponent_form(opponent_data);
 }
 
 function	set_connected_tournament_user_form(userData)
@@ -200,7 +204,7 @@ function	set_connected_tournament_user_form(userData)
 	document.getElementById("tournament_user_signin_username").disabled = true;
 	document.getElementById("tournament_user_signin_password").disabled = true;
 
-	document.getElementById("sign_in_as_tournament_user_button").classList.add('d-none');
+	document.getElementById("sign_in_user_options").classList.add('d-none');
 	document.getElementById("sign_out_as_tournament_user_button").classList.remove('d-none');
 
 	display_start_game_button_if_ready();
@@ -211,7 +215,7 @@ function	reset_tournament_user_form()
 	document.getElementById("tournament_user_signin_password").value = "";
 	document.getElementById("tournament_user_signin_password").disabled = false;
 
-	document.getElementById("sign_in_as_tournament_user_button").classList.remove('d-none');
+	document.getElementById("sign_in_user_options").classList.remove('d-none');
 	document.getElementById("sign_out_as_tournament_user_button").classList.add('d-none');
 
 	if (document.getElementById("start_game_button").classList.contains('d-none') == false)
@@ -265,7 +269,7 @@ function	set_connected_tournament_opponent_form(opponentData)
 	document.getElementById("tournament_opponent_signin_username").disabled = true;
 	document.getElementById("tournament_opponent_signin_password").disabled = true;
 
-	document.getElementById("sign_in_as_tournament_opponent_button").classList.add('d-none');
+	document.getElementById("sign_in_opponent_options").classList.add('d-none');
 	document.getElementById("sign_out_as_tournament_opponent_button").classList.remove('d-none');
 
 	display_start_game_button_if_ready();
@@ -276,7 +280,7 @@ function	reset_tournament_opponent_form()
 	document.getElementById("tournament_opponent_signin_password").value = "";
 	document.getElementById("tournament_opponent_signin_password").disabled = false;
 
-	document.getElementById("sign_in_as_tournament_opponent_button").classList.remove('d-none');
+	document.getElementById("sign_in_opponent_options").classList.remove('d-none');
 	document.getElementById("sign_out_as_tournament_opponent_button").classList.add('d-none');
 
 	if (document.getElementById("start_game_button").classList.contains('d-none') == false)
@@ -351,18 +355,27 @@ async function	set_tournament_details(template, tournament)
 		template.edit.id.get.element("rankings").classList.remove("d-none");
 		participants_ranking_ids = tournament.participants_ranking;
 		const rankings = template.edit.id.get.element("rankings");
-		for (let index = 0; index < participants_ranking_ids.length; index++)
+		let ranking = 1;
+		for (let index = participants_ranking_ids.length - 1; index >= 0; index--)
 		{
 			const player = participants_ranking_ids[index];
 			let ranking_item_template = await new Template("frontend/html/pages/ranking_item.html").load();
 			if (ranking_item_template == null)
 				return (console.error(ERROR_TEMPLATE));
-			ranking_item_template.edit.id.set.content("ranking_position", index + 1);
+			ranking_item_template.edit.id.set.content("ranking_position", ranking++);
 			ranking_item_template.edit.id.set.content("display_name", player.display_name);
 			ranking_item_template.edit.id.set.content("username", "@" + player.username);
-			ranking_item_template.edit.id.set.attribute("profile_icon", "src", player.avatar_url);
-			console.log("appending");
+			ranking_item_template.edit.id.set.attribute("profile_icon_tournament", "src", player.avatar_url);
 			rankings.appendChild(ranking_item_template.edit.id.get.element("ranking_item"));
 		}
 	}
+}
+
+async function	select_tournament()
+{
+	const tournament_id_str = localStorage.getItem("tournament_id");
+	if (tournament_id_str == null)
+		return (await load_create_tournament());
+	const tournament_id = parseInt(tournament_id_str, 10);
+	await load_tournament(tournament_id);
 }

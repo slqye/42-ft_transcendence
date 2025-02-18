@@ -17,7 +17,7 @@
 				</li>
 				<!-- tournament -->
 				<li class="nav-item">
-					<button class="nav-link btn btn-link" id="tournament" onclick="load_create_tournament();">Tournament</button>
+					<button class="nav-link btn btn-link" id="tournament" onclick="select_tournament();">Tournament</button>
 				</li>
 				<!-- about -->
 				<li class="nav-item">
@@ -54,6 +54,11 @@
 							<button class="dropdown-item" onclick="(async () => { await signout(); load_home(); })();">Sign out</button>
 						</ul>
 					</div>
+				</li>
+				<!-- signout opponent -->
+				<li class="nav-item m-1 d-none" id="signout_opponent_container">
+					<button type="button" class="btn btn-outline-danger d-none d-lg-inline-block mx-1" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); load_navbar(); })()">Opponent sign out</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); load_navbar(); })()">Opponent sign out</button>
 				</li>
 			</ul>
 		</div>
