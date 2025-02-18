@@ -8,6 +8,7 @@ class User(AbstractUser):
 	display_name= models.CharField(max_length=30, blank=True, unique=True)
 	language_code = models.CharField(max_length=2, default='en')
 	created_at = models.DateTimeField(auto_now_add=True)
+	is_ai = models.BooleanField(default=False)
 	pong_matches_played = models.PositiveIntegerField(default=0)
 	pong_wins = models.PositiveIntegerField(default=0)
 	pong_draws = models.PositiveIntegerField(default=0)
@@ -89,6 +90,7 @@ class TicTacToeGameStats(models.Model):
 class Match(models.Model):
 	host_user = models.ForeignKey(User, related_name='match_host_user', on_delete=models.CASCADE)
 	opponent_user = models.ForeignKey(User, related_name='match_opponent_user', on_delete=models.CASCADE)
+	versus_ai = models.BooleanField(default=False)
 	# Now an integer field. For example: 0 = pending/draw, 1 = win, etc.
 	result = models.IntegerField(default=0)
 	is_pong = models.BooleanField(blank=False, default=True)
@@ -125,6 +127,7 @@ class Pair(models.Model):
 class Invitation(models.Model):
 	status = models.BooleanField(default=False)
 	result = models.IntegerField()
+	versus_ai = models.BooleanField(default=False)
 	
 	host_user = models.ForeignKey(
 		User,
