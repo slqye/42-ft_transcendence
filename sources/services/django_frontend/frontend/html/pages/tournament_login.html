@@ -1,0 +1,56 @@
+<section id="tournament_login">
+	<div class="container justify-content-center mt-5 anim-slide-down">
+		<div class="border rounded">
+			<div class="row mx-0 my-2 align-items-center">
+				<div class="col-12 col-lg-8 m-0 p-0 d-flex align-items-center">
+					<h2 id="tournament_name" class="ms-3 my-0">Tournament</h2>
+				</div>
+			</div>
+			<hr class="m-0">
+			<form class="row mt-5 mx-0" onsubmit="event.preventDefault(); start_game_tournament();">
+				<div id="user_container" class="col-5 mx-auto py-2 align-items-center">
+					<h3>Player 1</h3>
+					<div id="tournament_user" class="anim-fade-in">
+						<div class="input-group my-3">
+							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
+							<input type="text" class="form-control" placeholder="Username" aria-label="username" id="tournament_user_signin_username">
+						</div>
+						<div class="input-group my-3">
+							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
+							<input type="password" class="form-control" placeholder="Password" aria-label="password" id="tournament_user_signin_password">
+						</div>
+						<div class="my-3">
+							<button type="button" id="sign_in_as_tournament_user_button" class="btn btn-outline-primary" onclick="tournament_user_signin();">Sign in</button>
+						</div>
+						<div class="my-3">
+							<button type="button" id="sign_out_as_tournament_user_button" class="btn btn-danger d-none" onclick="tournament_user_signout();">Sign out</button>
+						</div>
+					</div>
+				</div>
+				<div class="vr m-0 p-0"></div>
+				<div id="opponent_container" class="col-5 mx-auto py-2 align-items-center">
+					<h3>Player 2</h3>
+					<div id="tournament_opponent" class="anim-fade-in">
+						<div class="input-group my-3">
+							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
+							<input type="text" class="form-control" placeholder="Username" aria-label="username" id="tournament_opponent_signin_username">
+						</div>
+						<div class="input-group my-3">
+							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
+							<input type="password" class="form-control" placeholder="Password" aria-label="password" id="tournament_opponent_signin_password">
+						</div>
+						<div class="my-3">
+							<button type="button" id="sign_in_as_tournament_opponent_button" class="btn btn-outline-primary" onclick="tournament_opponent_signin();">Sign in</button>
+						</div>
+						<div class="my-3">
+							<button type="button" id="sign_out_as_tournament_opponent_button" class="btn btn-danger d-none" onclick="tournament_opponent_signout();">Sign out</button>
+						</div>
+					</div>
+				</div>
+				<div class="my-4 d-flex justify-content-center">
+					<button id="start_game_button" class="btn btn-primary d-none anim-fade-in" type="submit">Launch game</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</section>

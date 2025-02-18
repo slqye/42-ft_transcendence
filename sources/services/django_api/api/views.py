@@ -180,10 +180,10 @@ class RegisterUser(generics.CreateAPIView):
 	serializer_class = UserSerializer
 	permission_classes = [permissions.AllowAny]
 
-class UserList(generics.ListCreateAPIView):
+class UserList(generics.ListAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
-	permission_classes = [permissions.IsAdminUser]
+	permission_classes = [permissions.AllowAny]
 
 class UserDetail(generics.RetrieveAPIView):
 	queryset = User.objects.all()
@@ -319,11 +319,33 @@ class InvitationCreateView(generics.CreateAPIView):
 
 	def create(self, request, *args, **kwargs):
 		user_type = request.headers.get('X_User_Type', 'user')
-		if request.data['result'] < 0 or request.data['result'] > 2:
-			return Response({"detail": "Result must be either 0, 1 or 2"}, status=status.HTTP_400_BAD_REQUEST)
+		opponent = request.data.get('opponent')
+		versus_ai = request.data.get('versus_ai')
+		if isinstance(versus_ai, str):
+			versus_ai = versus_ai.lower() in ['true', '1']
+		try:
+			result = int(request.data.get('result'))
+		except (TypeError, ValueError):
+			return Response(
+				{"detail": "Result must be provided as an integer."},
+				status=status.HTTP_400_BAD_REQUEST
+			)
+		if result < 0 or result > 2:
+			return Response(
+				{"detail": "Result must be either 0, 1, or 2."},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		if user_type != 'user':
-			return Response({"detail": "You must be a 'user' to create an invitation."},
-							status=status.HTTP_403_FORBIDDEN)
+			return Response(
+				{"detail": "You must be a 'user' to create an invitation."},
+				status=status.HTTP_403_FORBIDDEN
+			)
+		# If playing versus AI, opponent must not be provided.
+		if versus_ai and opponent is not None:
+			return Response(
+				{"detail": "'opponent' must be None when creating a match versus AI."},
+				status=status.HTTP_403_FORBIDDEN
+			)
 		return super().create(request, *args, **kwargs)
 
 	def perform_create(self, serializer):
@@ -334,19 +356,39 @@ class InvitationAcceptView(APIView):
 
 	def post(self, request, pk, *args, **kwargs):
 		user_type = request.headers.get('X_User_Type')
-		if user_type != 'opponent':
-			return Response(
-				{"detail": "You must be an 'opponent' to accept an invitation."},
-				status=status.HTTP_403_FORBIDDEN
-			)
-
 		invitation = get_object_or_404(Invitation, pk=pk)
+		versus_ai = invitation.versus_ai
+		opponent_user = None
 
-		if invitation.opponent_user != request.user:
-			return Response(
-				{"detail": "You are not the invited opponent_user."},
-				status=status.HTTP_403_FORBIDDEN
-			)
+		if not versus_ai:
+			if user_type != 'opponent':
+				return Response(
+					{"detail": "You must be an 'opponent' to accept an invitation."},
+					status=status.HTTP_403_FORBIDDEN
+				)
+			if invitation.opponent_user != request.user:
+				return Response(
+					{"detail": "You are not the invited opponent user."},
+					status=status.HTTP_403_FORBIDDEN
+				)
+			opponent_user = invitation.opponent_user
+		else:
+			if user_type != 'user':
+				return Response(
+					{"detail": "You must be a 'user' to create a match versus AI."},
+					status=status.HTTP_403_FORBIDDEN
+				)
+			if invitation.opponent_user is not None:
+				return Response(
+					{"detail": "No opponent user must be selected to play versus AI."},
+					status=status.HTTP_403_FORBIDDEN
+				)
+			opponent_user = User.objects.filter(username='AI').first()
+			if not opponent_user:
+				return Response(
+					{"detail": "AI user does not exist."},
+					status=status.HTTP_500_INTERNAL_SERVER_ERROR
+				)
 
 		if invitation.status:
 			return Response(
@@ -354,17 +396,10 @@ class InvitationAcceptView(APIView):
 				status=status.HTTP_400_BAD_REQUEST
 			)
 
-		try:
-			invitation.status = True
-			invitation.save()
-		except Exception as e:
-			return Response(
-				{"detail": "Error updating invitation: " + str(e)},
-				status=status.HTTP_500_INTERNAL_SERVER_ERROR
-			)
-
 		host_user = invitation.host_user
-		opponent_user = invitation.opponent_user
+		invitation.status = True
+		invitation.save()
+
 		# 0 User_1 wins / 1 User_2 wins / 2 draw
 		try:
 			if invitation.is_pong:
@@ -410,7 +445,8 @@ class InvitationAcceptView(APIView):
 				tournament=invitation.tournament,
 				pong_game_stats=invitation.pong_game_stats,
 				tictactoe_game_stats=invitation.tictactoe_game_stats,
-				result=invitation.result  # match result as integer
+				result=invitation.result,  # match result as integer
+				versus_ai=invitation.versus_ai,
 			)
 		except Exception as e:
 			return Response(
@@ -600,10 +636,18 @@ class TournamentView(generics.GenericAPIView):
 		serializer = self.get_serializer(data=request.data, context={'request': request})
 		serializer.is_valid(raise_exception=True)
 		tournament = serializer.save()
+		first_pair = tournament.pairs.first()
+		tournament.next_pair = first_pair
+		tournament.save()
 		return Response(TournamentSerializer(tournament).data, status=status.HTTP_201_CREATED)
 
-class TournamentUpdateView(APIView):
+class TournamentDetailView(APIView):
 	permission_classes = [permissions.AllowAny]
+
+	def get(self, request, pk):
+		tournament = get_object_or_404(Tournament, pk=pk)
+		serializer = TournamentSerializer(tournament)
+		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def put(self, request, pk):
 		tournament = get_object_or_404(Tournament, pk=pk)

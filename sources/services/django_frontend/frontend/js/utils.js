@@ -78,3 +78,11 @@ async function	fetch_opponent()
 		return null;
 	return request.response;
 }
+
+async function	fetch_user(user_id)
+{
+	const request = await new Api("/api/users/" + user_id + "/", Api.USER).request();
+	if (request.status == Api.ERROR)
+		return null;
+	return request.response;
+}

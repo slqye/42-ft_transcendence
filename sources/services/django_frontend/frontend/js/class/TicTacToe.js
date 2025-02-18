@@ -6,7 +6,7 @@ class TicTacToe
 	static STATE_DONE_DRAW = 1;
 	static STATE_NOT_DONE = 0;
 
-	constructor(player1, player2, win_condition)
+	constructor(player1, player2, win_condition, tournament_id = -1)
 	{
 		this.board = Array(9).fill(null);
 
@@ -19,6 +19,8 @@ class TicTacToe
 		this.roundActive = false;
 		this.currentPlayer = this.player2.name;
 		this.win_condition = win_condition;
+		this.tournament_id = tournament_id;
+		this.match_id = -1;
 		this.handleGame = this.handleGame.bind(this);
 		this.cell_board = Array(9).fill(null);
 		this.is_ia = false;
@@ -344,6 +346,7 @@ class TicTacToe
 		let request_body = JSON.stringify({
 			"is_pong": false,
 			"result": result,
+			"tournament": this.tournament_id !== -1 ? this.tournament_id : null,
 			"tictactoe_game_stats": {
 				"user_score": this.player1.score,
 				"opponent_score": this.player2.score,
@@ -372,17 +375,45 @@ class TicTacToe
 		}
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
 		if (request.status === Api.ERROR || request.code !== 201)
-			new Toast(Toast.ERROR, request.log);
+			return (new Toast(Toast.ERROR, request.log));
 		else
 		{
 			let invitation_id = request.response.id;
 			const accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status === Api.ERROR || accept_request.code !== 201)
-				new Toast(Toast.ERROR, request.log);
+			{
+				return (new Toast(Toast.ERROR, "An error occurred while attempting to create a match."));
+			}
 			else
-				new Toast(Toast.SUCCESS, request.log);
+			{
+				new Toast(Toast.SUCCESS, "Match has been successfully created.");
+				this.match_id = accept_request.response.match.id;
+			}
 		}
-		this.setGameButtonToReplay();
+		if (this.tournament_id !== -1)
+		{
+			const put_tournament_request_body = JSON.stringify({
+				"match_id": this.match_id
+			});
+			const put_tournament_request = await new Api(`/api/tournaments/${this.tournament_id}/`, Api.USER)
+				.set_credentials("omit")
+				.set_method("PUT")
+				.set_body(put_tournament_request_body)
+				.request();
+			if (put_tournament_request.status === Api.ERROR)
+			{
+				new Toast(Toast.ERROR, "An error occurred while attempting to update the tournament." + "<br/>" + put_tournament_request.log);
+			}
+			else
+			{
+				new Toast(Toast.SUCCESS, "Tournament has been successfully updated.");
+				await load_tournament(this.tournament_id);
+			}
+		}
+		else
+		{
+			this.setGameButtonToReplay();
+		}
 	}
 
 	endGame(winner, result)
