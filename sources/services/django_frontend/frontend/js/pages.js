@@ -236,8 +236,9 @@ async function load_profile(pk) {
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	load_navbar();
-	await set_profile(template, idParam);
-	await set_profile_history(template, idParam);
+	await set_profile(template, pk);
+	await set_profile_history(template, pk);
+	await set_profile_tournament_history(template, pk);
 	template.update();
 	content.innerHTML = template.string;
 	init_tooltips();

@@ -26,6 +26,7 @@ class TicTacToe
 		this.is_ia = false;
 		this.first_player = this.player1;
 		this.second_player = this.player2;
+		this.is_player_order_set = false;
 	}
 
 	async init()
@@ -35,6 +36,11 @@ class TicTacToe
 		document.getElementById('player1').textContent = this.player1.name;
 		document.getElementById('player2').textContent = this.player2.name;
 		this.is_ia = !await Api.is_opponent_login();
+		if (this.is_ia)
+		{
+			const progress = document.getElementById("progress_win_chance");
+			progress.classList.remove("d-none");
+		}
 	}
 
 	handleGame()
@@ -57,16 +63,13 @@ class TicTacToe
 		{
 			this.player1.symbol = TicTacToe.NOUGHT;
 			this.player2.symbol = TicTacToe.CROSS;
-			this.first_player = this.player2;
-			this.second_player = this.player1;
 		}
 		else
 		{
 			this.player1.symbol = TicTacToe.CROSS;
 			this.player2.symbol = TicTacToe.NOUGHT;
-			this.first_player = this.player1;
-			this.second_player = this.player2;
 		}
+		this.is_player_order_set = false;
 		this.switchPlayer();
 	}
 
@@ -163,6 +166,8 @@ class TicTacToe
 		});
 		if (board == static_board)
 		{
+			console.log(moves);
+			this.set_game_win_chance_progress_bar(moves);
 			let max = moves[0];
 			moves.forEach(element => {
 				if (element[1] > max[1])
@@ -187,6 +192,25 @@ class TicTacToe
 		return (max[1]);
 	}
 
+	set_game_win_chance_progress_bar(moves)
+	{
+		let wins = 0;
+		let looses = 0;
+		let draw = 0;
+
+		moves.forEach(element => {
+			if (element[1] == 1)
+				wins += 1;
+			else if (element[1] == -1)
+				looses += 1;
+			else
+				draw += 1;
+
+		});
+		const progress_value = document.getElementById("progress_win_chance_value");
+		progress_value.setAttribute("style", `width: ${looses * 100 / moves.length}%;`);
+	}
+
 	makeMove(clickedCell, index)
 	{
 		this.board[index] = this.currentPlayer;
@@ -207,6 +231,18 @@ class TicTacToe
 	{
 		this.currentPlayer = this.currentPlayer === this.player1.name ? this.player2.name : this.player1.name;
 		document.getElementById('game-status').textContent = this.currentPlayer + "'s turn";
+		if (this.is_ia && this.currentPlayer == this.player2.name && !this.is_player_order_set)
+		{
+			this.first_player = this.player2;
+			this.second_player = this.player1;
+			this.is_player_order_set = true;
+		}
+		else if (!this.is_player_order_set)
+		{
+			this.first_player = this.player1;
+			this.second_player = this.player2;
+			this.is_player_order_set = true;
+		}
 		if (this.is_ia && this.currentPlayer == this.player2.name)
 		{
 			this.play_ai();
@@ -327,7 +363,7 @@ class TicTacToe
 		if (this.is_ia)
 		{
 			let request_object = JSON.parse(request_body);
-			request_object.opponent_user_id = "none";
+			request_object.opponent_user_id = null;
 			request_object.versus_ai = true;
 			request_body = JSON.stringify(request_object);
 		}

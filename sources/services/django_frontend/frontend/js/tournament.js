@@ -37,6 +37,23 @@ Loop until all matches are played :
 - Once created, the match is linked to the tournament with PUT /api/tournaments/{pk}/ with body {"match_id": 15} which front just got from match creation
 */
 
+function	change_history_type()
+{
+	const games_history = document.getElementById("history");
+	const tournamets_history = document.getElementById("history_tournaments");
+
+	if (games_history.classList.contains("d-none"))
+	{
+		games_history.classList.remove("d-none");
+		tournamets_history.classList.add("d-none");
+	}
+	else
+	{
+		games_history.classList.add("d-none");
+		tournamets_history.classList.remove("d-none");
+	}
+}
+
 async function	create_tournament()
 {
 	const tournament_name = document.getElementById("tournament_name").value;
