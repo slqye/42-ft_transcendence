@@ -56,7 +56,10 @@ class UserTokenRefreshView(APIView):
 			return response
 
 		except TokenError:
-			return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+			response = Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+			response.delete_cookie("user_access")
+			response.delete_cookie("user_refresh")
+			return response
 
 class OpponentTokenRefreshView(APIView):
 	permission_classes = [permissions.AllowAny]  # Allow access without authentication
@@ -88,7 +91,10 @@ class OpponentTokenRefreshView(APIView):
 			return response
 
 		except TokenError:
-			return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+			response = Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+			response.delete_cookie("opponent_access")
+			response.delete_cookie("opponent_refresh")
+			return response
 		
 class UserLogoutView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
