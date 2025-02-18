@@ -92,13 +92,29 @@ services:
     labels:
       is-transcendence: "yes"
 
-  prometheus:
-    container_name: transcendence_prometheus
-    image: prom/prometheus
-    volumes:
-      - transcendence_prometheus_data:/etc/prometheus
+  nginx_exporter:
+    container_name: nginx_exporter
+    image: nginx/nginx-prometheus-exporter
     networks:
       - transcendence_network_backend
+    ports:
+      - "9113:9113"
+    command:
+      - -nginx.scrape-uri=http://localhost:8000/metrics
+    depends_on:
+      - nginx
+
+  prometheus:
+    container_name: transcendence_prometheus
+    image: prometheus
+    networks:
+      - transcendence_network_backend
+    build:
+      context: services/prometheus
+      labels:
+        is-transcendence: "yes"
+    volumes:
+      - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
     depends_on:
@@ -116,15 +132,6 @@ volumes:
     driver_opts:
       type: none
       device: ${PWD}/data/database_data
-      o: bind
-    labels:
-      is-transcendence: "yes"
-  transcendence_prometheus_data:
-    name: transcendence_prometheus_data
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/data/prometheus_data
       o: bind
     labels:
       is-transcendence: "yes"

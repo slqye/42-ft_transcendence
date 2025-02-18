@@ -19,7 +19,6 @@ $(NAME) : build up
 
 build :
 	@mkdir -p ${PWD}/data/database_data
-	@mkdir -p ${PWD}/data/prometheus_data
 	@docker compose -f ./sources/docker-compose.yml build
 		
 up :
@@ -40,6 +39,7 @@ clean : down
 fclean : clean
 	@docker compose -f ./sources/docker-compose.yml down --rmi all
 	@docker image prune --filter label=is-transcendence=yes --force
+
 
 re :
 	@make fclean
