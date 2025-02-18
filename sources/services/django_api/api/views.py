@@ -779,13 +779,20 @@ def index(request, path=None):
 class OAuthCallbackView(APIView):
 	permission_classes = [permissions.AllowAny]
 
-	def get(self, request, role):
+	def get(self, request):
+		role = request.GET.get('role')
+		type = request.GET.get('type')
+		redirect_uri = settings.API_42_REDIRECT_URI
 		if role == "user":
-			redirect_uri = settings.API_42_REDIRECT_URI_USER
+			redirect_uri += "?role=user"
 		elif role == "opponent":
-			redirect_uri = settings.API_42_REDIRECT_URI_OPPONENT
+			redirect_uri += "?role=opponent"
 		else:
 			return Response({"error": "Invalid role for OAuth callback."}, status=status.HTTP_400_BAD_REQUEST)
+		if (type != "match_pong" and type != "match_tictactoe" and type != "tournament" and type != "skip"):
+			return Response({"error": "Invalid type for OAuth callback."}, status=status.HTTP_400_BAD_REQUEST)
+		else:
+			redirect_uri += f"&type={type}"
 		code = request.GET.get('code')
 		if not code:
 			return Response({"error": "No code provided."}, status=status.HTTP_400_BAD_REQUEST)
@@ -838,8 +845,8 @@ class OAuthCallbackView(APIView):
 		refresh = RefreshToken.for_user(user)
 		access_token = str(refresh.access_token)
 		refresh_token = str(refresh)
-		
-		response = redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}")
+
+		response = redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type}")
 		
 		response.set_cookie(
 			"user_access" if role == "user" else "opponent_access",
@@ -863,7 +870,6 @@ class FrontendConfigView(APIView):
 	def get(self, request):
 		config = {
 			"API_42_UID": settings.API_42_UID,
-			"API_42_REDIRECT_URI_USER": settings.API_42_REDIRECT_URI_USER,
-			"API_42_REDIRECT_URI_OPPONENT": settings.API_42_REDIRECT_URI_OPPONENT,
+			"API_42_REDIRECT_URI": settings.API_42_REDIRECT_URI,
 		}
 		return Response(config)

@@ -64,7 +64,7 @@ async function	signout()
 	}
 }
 
-async function	signin_42(is_opponent = false)
+async function	signin_42(is_opponent = false, type = "skip")
 {
 	let config = {};
 
@@ -77,15 +77,27 @@ async function	signin_42(is_opponent = false)
 	else
 	{
 		config = request.response;
-		if (!config.API_42_UID || !config.API_42_REDIRECT_URI_USER || !config.API_42_REDIRECT_URI_OPPONENT)
+		if (!config.API_42_UID || !config.API_42_REDIRECT_URI)
 		{
 			new Toast(Toast.ERROR, "OAuth configuration is missing.");
 			return ;
 		}
 		else
 		{
-			const redirect_uri = is_opponent ? config.API_42_REDIRECT_URI_OPPONENT : config.API_42_REDIRECT_URI_USER;
-			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${redirect_uri}&response_type=code`;
+			let redirect_uri = config.API_42_REDIRECT_URI;
+			if (is_opponent)
+				redirect_uri += "?role=opponent";
+			else
+				redirect_uri += "?role=user";
+			if (type == "match_pong")
+				redirect_uri += "&type=match_pong";
+			else if (type == "match_tictactoe")
+				redirect_uri += "&type=match_tictactoe";
+			else if (type == "tournament")
+				redirect_uri += "&type=tournament";
+			else
+				redirect_uri += "&type=skip";
+			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&response_type=code&redirect_uri=${encodeURIComponent(redirect_uri)}`;
 			window.location.href = authUrl;
 		}
 	}

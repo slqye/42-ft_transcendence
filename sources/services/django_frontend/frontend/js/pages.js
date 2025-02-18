@@ -42,11 +42,18 @@ async function load_home() {
 	const urlParams = new URLSearchParams(window.location.search);
 	const callback = urlParams.get('callback');
 	const role = urlParams.get('role');
+	const type = urlParams.get('type');
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	if (window.location.pathname === "/home" && callback)
 		await signin_42_callback(role === "opponent");
+	if (callback && type == "match_pong")
+		return (await load_create_game_pong());
+	else if (callback && type == "match_tictactoe")
+		return (await load_create_game_tictactoe());
+	else if (callback && type == "tournament")
+		return (await load_create_tournament());
 	load_navbar();
 	if (await Api.is_login())
 		template.edit.id.add.attribute("sign-in-button", "class", "d-none");
@@ -76,6 +83,7 @@ async function load_create_game_pong() {
 		if (opponentData)
 			set_connected_opponent_form(opponentData);
 	}
+	set_theme_signin42();
 }
 
 async function load_pong_match() {
@@ -113,6 +121,7 @@ async function load_create_game_tictactoe() {
 		if (opponentData)
 			set_connected_opponent_form(opponentData);
 	}
+	set_theme_signin42();
 }
 
 async function load_tictactoe_match() {
@@ -171,31 +180,7 @@ async function load_signin() {
 	
 	load_navbar();
 	content.innerHTML = template.value;
-
-	const theme = document.body.getAttribute("data-bs-theme");
-	const logo = document.getElementById("logo_42");
-	const signin_42_btn = document.getElementById("signin_42");
-
-	if (theme === "dark")
-	{
-		if (logo)
-			logo.src = "/frontend/assets/42logo_dark.svg";
-		if (signin_42_btn)
-		{
-			signin_42_btn.classList.remove("btn-outline-dark");
-			signin_42_btn.classList.add("btn-outline-light");
-		}
-	}
-	else
-	{
-		if (logo)
-			logo.src = "/frontend/assets/42logo_light.svg";
-		if (signin_42_btn)
-		{
-			signin_42_btn.classList.remove("btn-outline-light");
-			signin_42_btn.classList.add("btn-outline-dark");
-		}
-	}
+	set_theme_signin42();
 
 	if (window.location.pathname !== "/signin")
 		history.pushState({ page: "signin" }, "Signin", "/signin");
@@ -346,47 +331,7 @@ async function load_tournament(pk)
 		else
 			tournament_name_title = "TicTacToe Tournament : " + tournament.name;
 		document.getElementById("tournament_name").innerHTML = tournament_name_title;
-
-		const theme = document.body.getAttribute("data-bs-theme");
-		const logo_user = document.getElementById("logo_42_user");
-		const logo_opponent = document.getElementById("logo_42_opponent");
-		const signin_42_user_btn = document.getElementById("signin_42_user");
-		const signin_42_opponent_btn = document.getElementById("signin_42_opponent");
-
-		if (theme === "dark")
-		{
-			if (logo_user)
-				logo_user.src = "/frontend/assets/42logo_dark.svg";
-			if (logo_opponent)
-				logo_opponent.src = "/frontend/assets/42logo_dark.svg";
-			if (signin_42_user_btn)
-			{
-				signin_42_user_btn.classList.remove("btn-outline-dark");
-				signin_42_user_btn.classList.add("btn-outline-light");
-			}
-			if (signin_42_opponent_btn)
-			{
-				signin_42_opponent_btn.classList.remove("btn-outline-dark");
-				signin_42_opponent_btn.classList.add("btn-outline-light");
-			}
-		}
-		else
-		{
-			if (logo_user)
-				logo_user.src = "/frontend/assets/42logo_light.svg";
-			if (logo_opponent)
-				logo_opponent.src = "/frontend/assets/42logo_light.svg";
-			if (signin_42_user_btn)
-			{
-				signin_42_user_btn.classList.remove("btn-outline-light");
-				signin_42_user_btn.classList.add("btn-outline-dark");
-			}
-			if (signin_42_opponent_btn)
-			{
-				signin_42_opponent_btn.classList.remove("btn-outline-light");
-				signin_42_opponent_btn.classList.add("btn-outline-dark");
-			}
-		}
+		set_theme_signin42();
 		set_tournament_forms(user_data, opponent_data, user_signed_in, opponent_signed_in);
 	}
 	init_tooltips();

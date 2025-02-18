@@ -1,11 +1,7 @@
-.signin_42:hover img#logo_42 {
+.signin_42_user_btn:hover img#logo_42_user {
     filter: invert(1);
 }
 
-.signin_42:hover img#logo_42_user {
-    filter: invert(1);
-}
-
-.signin_42:hover img#logo_42_opponent {
+.signin_42_opponent_btn:hover img#logo_42_opponent {
     filter: invert(1);
 }
