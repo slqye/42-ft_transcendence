@@ -204,7 +204,7 @@ function	set_connected_tournament_user_form(userData)
 	document.getElementById("tournament_user_signin_username").disabled = true;
 	document.getElementById("tournament_user_signin_password").disabled = true;
 
-	document.getElementById("sign_in_as_tournament_user_button").classList.add('d-none');
+	document.getElementById("sign_in_user_options").classList.add('d-none');
 	document.getElementById("sign_out_as_tournament_user_button").classList.remove('d-none');
 
 	display_start_game_button_if_ready();
@@ -215,7 +215,7 @@ function	reset_tournament_user_form()
 	document.getElementById("tournament_user_signin_password").value = "";
 	document.getElementById("tournament_user_signin_password").disabled = false;
 
-	document.getElementById("sign_in_as_tournament_user_button").classList.remove('d-none');
+	document.getElementById("sign_in_user_options").classList.remove('d-none');
 	document.getElementById("sign_out_as_tournament_user_button").classList.add('d-none');
 
 	if (document.getElementById("start_game_button").classList.contains('d-none') == false)
@@ -269,7 +269,7 @@ function	set_connected_tournament_opponent_form(opponentData)
 	document.getElementById("tournament_opponent_signin_username").disabled = true;
 	document.getElementById("tournament_opponent_signin_password").disabled = true;
 
-	document.getElementById("sign_in_as_tournament_opponent_button").classList.add('d-none');
+	document.getElementById("sign_in_opponent_options").classList.add('d-none');
 	document.getElementById("sign_out_as_tournament_opponent_button").classList.remove('d-none');
 
 	display_start_game_button_if_ready();
@@ -280,7 +280,7 @@ function	reset_tournament_opponent_form()
 	document.getElementById("tournament_opponent_signin_password").value = "";
 	document.getElementById("tournament_opponent_signin_password").disabled = false;
 
-	document.getElementById("sign_in_as_tournament_opponent_button").classList.remove('d-none');
+	document.getElementById("sign_in_opponent_options").classList.remove('d-none');
 	document.getElementById("sign_out_as_tournament_opponent_button").classList.add('d-none');
 
 	if (document.getElementById("start_game_button").classList.contains('d-none') == false)

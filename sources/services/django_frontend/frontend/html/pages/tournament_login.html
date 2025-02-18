@@ -19,8 +19,14 @@
 							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
 							<input type="password" class="form-control" placeholder="Password" aria-label="password" id="tournament_user_signin_password">
 						</div>
-						<div class="my-3">
+						<div class="my-3" id="sign_in_user_options">
 							<button type="button" id="sign_in_as_tournament_user_button" class="btn btn-outline-primary" onclick="tournament_user_signin();">Sign in</button>
+							<div class="justify-content-center">
+								<button class="btn mt-2 d-flex align-items-center px-2 signin_42" id="signin_42_user" style="padding: 0.5em;" onclick="signin_42(false);">
+									<span>Sign in with </span>
+									<img src="/frontend/assets/42logo_dark.svg" alt="42 icon" id="logo_42_user" class="px-1" style="height: 1em; width: auto;">
+								</button>
+							</div>
 						</div>
 						<div class="my-3">
 							<button type="button" id="sign_out_as_tournament_user_button" class="btn btn-danger d-none" onclick="tournament_user_signout();">Sign out</button>
@@ -39,8 +45,14 @@
 							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
 							<input type="password" class="form-control" placeholder="Password" aria-label="password" id="tournament_opponent_signin_password">
 						</div>
-						<div class="my-3">
-							<button type="button" id="sign_in_as_tournament_opponent_button" class="btn btn-outline-primary" onclick="tournament_opponent_signin();">Sign in</button>
+						<div class="my-3" id="sign_in_opponent_options">
+							<button type="button" id="sign_in_as_tournament_opponent_button" class="btn btn-outline-primary" onclick="event.preventDefault(); tournament_opponent_signin();">Sign in</button>
+							<div class="justify-content-center">
+								<button class="btn mt-2 d-flex align-items-center px-2 signin_42" id="signin_42_opponent" style="padding: 0.5em;" onclick="event.preventDefault(); signin_42(true);">
+									<span>Sign in with </span>
+									<img src="/frontend/assets/42logo_dark.svg" alt="42 icon" id="logo_42_opponent" class="px-1" style="height: 1em; width: auto;">
+								</button>
+							</div>
 						</div>
 						<div class="my-3">
 							<button type="button" id="sign_out_as_tournament_opponent_button" class="btn btn-danger d-none" onclick="tournament_opponent_signout();">Sign out</button>

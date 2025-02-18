@@ -13,7 +13,11 @@ function	switch_theme_light(body)
 	const icon_sun = document.getElementById("theme_icon_sun");
 	const icon_moon = document.getElementById("theme_icon_moon");
 	const signin_42_btn = document.getElementById("signin_42");
+	const signin_42_user_btn = document.getElementById("signin_42_user");
+	const signin_42_opponent_btn = document.getElementById("signin_42_opponent");
 	const logo_42 = document.getElementById("logo_42");
+	const logo_42_user = document.getElementById("logo_42_user");
+	const logo_42_opponent = document.getElementById("logo_42_opponent");
 
 	body.setAttribute("data-bs-theme", "light");
 	body.classList.remove("bg-dark");
@@ -27,9 +31,27 @@ function	switch_theme_light(body)
 		logo_42.src = "/frontend/assets/42logo_light.svg";
 	}
 
+	if (logo_42_user) {
+		logo_42_user.src = "/frontend/assets/42logo_light.svg";
+	}
+
+	if (logo_42_opponent) {
+		logo_42_opponent.src = "/frontend/assets/42logo_light.svg";
+	}
+
 	if (signin_42_btn) {
 		signin_42_btn.classList.remove("btn-outline-light");
 		signin_42_btn.classList.add("btn-outline-dark");
+	}
+
+	if (signin_42_user_btn) {
+		signin_42_user_btn.classList.remove("btn-outline-light");
+		signin_42_user_btn.classList.add("btn-outline-dark");
+	}
+
+	if (signin_42_opponent_btn) {
+		signin_42_opponent_btn.classList.remove("btn-outline-light");
+		signin_42_opponent_btn.classList.add("btn-outline-dark");
 	}
 }
 
@@ -38,7 +60,11 @@ function	switch_theme_dark(body)
 	const icon_sun = document.getElementById("theme_icon_sun");
 	const icon_moon = document.getElementById("theme_icon_moon");
 	const logo_42 = document.getElementById("logo_42");
+	const logo_42_user = document.getElementById("logo_42_user");
+	const logo_42_opponent = document.getElementById("logo_42_opponent");
 	const signin_42_btn = document.getElementById("signin_42");
+	const signin_42_user_btn = document.getElementById("signin_42_user");
+	const signin_42_opponent_btn = document.getElementById("signin_42_opponent");
 	body.setAttribute("data-bs-theme", "dark");
 	body.classList.remove("bg-light");
 	body.classList.add("bg-dark");
@@ -51,9 +77,27 @@ function	switch_theme_dark(body)
 		logo_42.src = "/frontend/assets/42logo_dark.svg";
 	}
 
+	if (logo_42_user) {
+		logo_42_user.src = "/frontend/assets/42logo_dark.svg";
+	}
+
+	if (logo_42_opponent) {
+		logo_42_opponent.src = "/frontend/assets/42logo_dark.svg";
+	}
+
 	if (signin_42_btn) {
 		signin_42_btn.classList.remove("btn-outline-dark");
 		signin_42_btn.classList.add("btn-outline-light");
+	}
+
+	if (signin_42_user_btn) {
+		signin_42_user_btn.classList.remove("btn-outline-dark");
+		signin_42_user_btn.classList.add("btn-outline-light");
+	}
+
+	if (signin_42_opponent_btn) {
+		signin_42_opponent_btn.classList.remove("btn-outline-dark");
+		signin_42_opponent_btn.classList.add("btn-outline-light");
 	}
 }
 

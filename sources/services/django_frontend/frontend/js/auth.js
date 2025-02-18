@@ -64,7 +64,7 @@ async function	signout()
 	}
 }
 
-async function	signin_42()
+async function	signin_42(is_opponent = false)
 {
 	let config = {};
 
@@ -77,24 +77,34 @@ async function	signin_42()
 	else
 	{
 		config = request.response;
-		if (!config.API_42_UID || !config.API_42_REDIRECT_URI_USER)
+		if (!config.API_42_UID || !config.API_42_REDIRECT_URI_USER || !config.API_42_REDIRECT_URI_OPPONENT)
 		{
 			new Toast(Toast.ERROR, "OAuth configuration is missing.");
 			return ;
 		}
 		else
 		{
-			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${encodeURIComponent(config.API_42_REDIRECT_URI_USER)}&response_type=code`;
+			const redirect_uri = is_opponent ? config.API_42_REDIRECT_URI_OPPONENT : config.API_42_REDIRECT_URI_USER;
+			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${redirect_uri}&response_type=code`;
 			window.location.href = authUrl;
 		}
 	}
 }
 
-async function	signin_42_callback()
+async function	signin_42_callback(is_opponent = false)
 {
-	localStorage.setItem("user_authenticated", "true");
-	if (await Api.is_login())
+	if (is_opponent)
+		localStorage.setItem("opponent_authenticated", "true");
+	else
+		localStorage.setItem("user_authenticated", "true");
+	if (!is_opponent && await Api.is_login())
+	{
 		new Toast(Toast.SUCCESS, "Logged in with 42!");
+	}
+	else if (is_opponent && await Api.is_opponent_login())
+	{
+		new Toast(Toast.SUCCESS, "Opponent logged in with 42!");
+	}
 	else
 		new Toast(Toast.ERROR, "An error occurred while logging in with 42.");
 	history.pushState({ page: "home" }, "Home", "/home");

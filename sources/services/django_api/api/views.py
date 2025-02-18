@@ -839,7 +839,7 @@ class OAuthCallbackView(APIView):
 		access_token = str(refresh.access_token)
 		refresh_token = str(refresh)
 		
-		response = redirect(f"{settings.MAIN_URL}/home?callback=true")
+		response = redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}")
 		
 		response.set_cookie(
 			"user_access" if role == "user" else "opponent_access",
