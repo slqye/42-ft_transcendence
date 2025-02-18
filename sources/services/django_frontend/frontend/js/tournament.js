@@ -355,13 +355,14 @@ async function	set_tournament_details(template, tournament)
 		template.edit.id.get.element("rankings").classList.remove("d-none");
 		participants_ranking_ids = tournament.participants_ranking;
 		const rankings = template.edit.id.get.element("rankings");
-		for (let index = 0; index < participants_ranking_ids.length; index++)
+		let ranking = 1;
+		for (let index = participants_ranking_ids.length - 1; index >= 0; index--)
 		{
 			const player = participants_ranking_ids[index];
 			let ranking_item_template = await new Template("frontend/html/pages/ranking_item.html").load();
 			if (ranking_item_template == null)
 				return (console.error(ERROR_TEMPLATE));
-			ranking_item_template.edit.id.set.content("ranking_position", index + 1);
+			ranking_item_template.edit.id.set.content("ranking_position", ranking++);
 			ranking_item_template.edit.id.set.content("display_name", player.display_name);
 			ranking_item_template.edit.id.set.content("username", "@" + player.username);
 			ranking_item_template.edit.id.set.attribute("profile_icon", "src", player.avatar_url);
