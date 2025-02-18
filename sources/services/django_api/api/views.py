@@ -346,6 +346,22 @@ class InvitationCreateView(generics.CreateAPIView):
 				{"detail": "'opponent' must be None when creating a match versus AI."},
 				status=status.HTTP_403_FORBIDDEN
 			)
+		if versus_ai:
+			ai_user = User.objects.filter(username='AI').first()
+			if not ai_user:
+				return Response(
+					{"detail": "AI user does not exist."},
+					status=status.HTTP_500_INTERNAL_SERVER_ERROR
+				)
+
+			mutable_data = request.data.copy()
+			mutable_data['opponent_user_id'] = ai_user.id
+			if hasattr(request.data, '_mutable'):
+				request.data._mutable = True
+				request.data['opponent_user_id'] = ai_user.id
+			else:
+				request._full_data = mutable_data
+
 		return super().create(request, *args, **kwargs)
 
 	def perform_create(self, serializer):
@@ -371,24 +387,14 @@ class InvitationAcceptView(APIView):
 					{"detail": "You are not the invited opponent user."},
 					status=status.HTTP_403_FORBIDDEN
 				)
-			opponent_user = invitation.opponent_user
 		else:
 			if user_type != 'user':
 				return Response(
 					{"detail": "You must be a 'user' to create a match versus AI."},
 					status=status.HTTP_403_FORBIDDEN
 				)
-			if invitation.opponent_user is not None:
-				return Response(
-					{"detail": "No opponent user must be selected to play versus AI."},
-					status=status.HTTP_403_FORBIDDEN
-				)
-			opponent_user = User.objects.filter(username='AI').first()
-			if not opponent_user:
-				return Response(
-					{"detail": "AI user does not exist."},
-					status=status.HTTP_500_INTERNAL_SERVER_ERROR
-				)
+		opponent_user = invitation.opponent_user
+
 
 		if invitation.status:
 			return Response(
