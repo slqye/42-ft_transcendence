@@ -148,7 +148,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 API_42_UID = os.environ['API_42_UID']
 API_42_SECRET = os.environ['API_42_SECRET']
 MAIN_URL = os.environ['MAIN_URL']
-API_42_REDIRECT_URI = MAIN_URL + "/api/42oauth/callback/"
+API_42_REDIRECT_URI_USER = MAIN_URL + "/api/42oauth/user_callback/"
+API_42_REDIRECT_URI_OPPONENT = MAIN_URL + "/api/42oauth/opponent_callback/"
 
 CORS_ALLOWED_ORIGINS = [
 	"https://localhost:8000",

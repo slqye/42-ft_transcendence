@@ -40,6 +40,6 @@ urlpatterns = [
 	path('tournaments/<int:pk>/pairs/', views.TournamentFetchPairs.as_view(), name='tournament-pairs'),
 	path('tournaments/<int:pk>/pairs/next/', views.TournamentFetchNextPair.as_view(), name='tournament-next-pair'),
 
-	path('42oauth/callback/', views.OAuthCallbackView.as_view(), name='callback'),
+	path('42oauth/<str:role>_callback/', views.OAuthCallbackView.as_view(), name='oauth_callback'),
 	path('config/', views.FrontendConfigView.as_view(), name="config"),
 ]

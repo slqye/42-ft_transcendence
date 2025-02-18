@@ -18,6 +18,7 @@ async function	set_profile(template, pk = "me")
 		const data = request.response;
 		template.edit.id.set.content("profile_display_name", data.display_name);
 		template.edit.id.set.content("profile_user_name", "@" + data.username);
+		template.edit.id.set.attribute("profile_icon", "src", data.avatar_url);
 		let pong_winrate = request_stats.response.pong_winrate;
 		if (request_stats.response.pong_matches_played == 0)
 			pong_winrate = 50;

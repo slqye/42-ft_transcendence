@@ -126,7 +126,7 @@ class UserLoginView(APIView):
 
 		response = Response({"detail": "User logged in successfully"})
 		# Set HttpOnly cookies
-		# secure=True and samesite='None' typically required if you’re over HTTPS or cross-site
+		# secure=True and samesite='None' typically required if you're over HTTPS or cross-site
 		response.set_cookie(
 			"user_access",
 			access_token,
@@ -779,10 +779,16 @@ def index(request, path=None):
 class OAuthCallbackView(APIView):
 	permission_classes = [permissions.AllowAny]
 
-	def get(self, request):
+	def get(self, request, role):
+		if role == "user":
+			redirect_uri = settings.API_42_REDIRECT_URI_USER
+		elif role == "opponent":
+			redirect_uri = settings.API_42_REDIRECT_URI_OPPONENT
+		else:
+			return Response({"error": "Invalid role for OAuth callback."}, status=status.HTTP_400_BAD_REQUEST)
 		code = request.GET.get('code')
 		if not code:
-			return Response({"error": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({"error": "No code provided."}, status=status.HTTP_400_BAD_REQUEST)
 
 		# Exchange code for access token
 		try:
@@ -793,7 +799,7 @@ class OAuthCallbackView(APIView):
 				'client_id': os.environ['API_42_UID'],
 				'client_secret': os.environ['API_42_SECRET'],
 				'code': code,
-					'redirect_uri': settings.API_42_REDIRECT_URI,
+				'redirect_uri': redirect_uri,
 				}
 			)
 		except Exception as e:
@@ -834,15 +840,16 @@ class OAuthCallbackView(APIView):
 		refresh_token = str(refresh)
 		
 		response = redirect(f"{settings.MAIN_URL}/home?callback=true")
+		
 		response.set_cookie(
-			"user_access",
+			"user_access" if role == "user" else "opponent_access",
 			access_token,
 			httponly=True,
 			secure=True,
 			samesite='None'
 		)
 		response.set_cookie(
-			"user_refresh",
+			"user_refresh" if role == "user" else "opponent_refresh",
 			refresh_token,
 			httponly=True,
 			secure=True,
@@ -856,6 +863,7 @@ class FrontendConfigView(APIView):
 	def get(self, request):
 		config = {
 			"API_42_UID": settings.API_42_UID,
-			"API_42_REDIRECT_URI": settings.API_42_REDIRECT_URI,
+			"API_42_REDIRECT_URI_USER": settings.API_42_REDIRECT_URI_USER,
+			"API_42_REDIRECT_URI_OPPONENT": settings.API_42_REDIRECT_URI_OPPONENT,
 		}
 		return Response(config)

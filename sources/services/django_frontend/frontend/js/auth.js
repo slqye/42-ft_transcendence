@@ -77,14 +77,14 @@ async function	signin_42()
 	else
 	{
 		config = request.response;
-		if (!config.API_42_UID || !config.API_42_REDIRECT_URI)
+		if (!config.API_42_UID || !config.API_42_REDIRECT_URI_USER)
 		{
 			new Toast(Toast.ERROR, "OAuth configuration is missing.");
 			return ;
 		}
 		else
 		{
-			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${encodeURIComponent(config.API_42_REDIRECT_URI)}&response_type=code`;
+			const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${config.API_42_UID}&redirect_uri=${encodeURIComponent(config.API_42_REDIRECT_URI_USER)}&response_type=code`;
 			window.location.href = authUrl;
 		}
 	}
