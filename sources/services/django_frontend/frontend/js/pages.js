@@ -47,11 +47,12 @@ async function load_home() {
 	const callback = urlParams.get('callback');
 	const role = urlParams.get('role');
 	const type = urlParams.get('type');
+	const success_callback = urlParams.get('success_callback');
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	if (window.location.pathname === "/home" && callback)
-		await signin_42_callback(role === "opponent", type);
+		await signin_42_callback(role === "opponent", type, success_callback === "true");
 	if (callback && type == "match_pong")
 		return (await load_create_game_pong());
 	else if (callback && type == "match_tictactoe")

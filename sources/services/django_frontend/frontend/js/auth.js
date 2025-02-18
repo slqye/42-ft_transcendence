@@ -103,8 +103,10 @@ async function	signin_42(is_opponent = false, type = "skip")
 	}
 }
 
-async function	signin_42_callback(is_opponent = false, type = "skip")
+async function	signin_42_callback(is_opponent = false, type = "skip", success_callback = false)
 {
+	if (!success_callback)
+		return (new Toast(Toast.ERROR, "An error occurred while logging in with 42."));
 	if (is_opponent)
 		localStorage.setItem("opponent_authenticated", "true");
 	else
