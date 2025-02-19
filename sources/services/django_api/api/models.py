@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 import math, random
 
 class User(AbstractUser):
-	avatar_url = models.CharField(max_length=255, blank=True, default='https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360')
+	avatar_url = models.CharField(max_length=255, blank=True, default='')
 	display_name = models.CharField(max_length=10, blank=True, unique=True)
 	username = models.CharField(max_length=10, blank=False, unique=True)
 	language_code = models.CharField(max_length=2, default='en')
