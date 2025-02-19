@@ -10,7 +10,7 @@ RUN apk update && apk upgrade && \
 	apk add --no-cache build-base jpeg-dev zlib-dev libpng-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev libwebp-dev tcl-dev tk-dev
 
 WORKDIR /app
-RUN mkdir -p media
+RUN mkdir -p user_media
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 

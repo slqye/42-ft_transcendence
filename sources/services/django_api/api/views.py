@@ -6,6 +6,7 @@ from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.db import models
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Match, Tournament, Pair, Invitation, Friendship
 from .serializers import UserSerializer, MatchSerializer, TournamentSerializer, PairSerializer, TournamentListSerializer, InvitationSerializer, FriendshipSerializer, PictureSerializer
@@ -804,6 +805,7 @@ class FrontendConfigView(APIView):
 			"API_42_REDIRECT_URI": settings.API_42_REDIRECT_URI,
 		}
 		return Response(config)
+
 
 class PictureUploadView(APIView):
 	parser_classes = [MultiPartParser, FormParser]

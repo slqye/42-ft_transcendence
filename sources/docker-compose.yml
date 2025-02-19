@@ -11,6 +11,7 @@ services:
     env_file: .env
     volumes:
       - ./services/django_frontend/:/app
+      - transcendence_file_uploads:/app/frontend/assets/user_media
     networks:
       - transcendence_network_backend
     expose:
@@ -34,7 +35,7 @@ services:
     env_file: .env
     volumes:
       - ./services/django_api/:/app
-      - transcendence_file_uploads:/app/media
+      - transcendence_file_uploads:/app/user_media
     networks:
       - transcendence_network_backend
     expose:
