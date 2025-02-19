@@ -15,6 +15,7 @@ urlpatterns = [
 	path("users/", views.UserList.as_view(), name="user-list"),
 	path("users/me/", views.CurrentUser.as_view(), name="current-user"),
 	path("users/<int:pk>/", views.UserDetail.as_view(), name="user-detail"),
+	path('users/update/picture-upload/', views.PictureUploadView.as_view(), name="picture-upload"),
 	path("users/update/<str:field>/", views.UpdateUserField.as_view(), name="update-user-field"),
 	path('users/<str:username>/', views.UserFetchUsername.as_view(), name='user-detail-username'),
 	path("users/list/username/", views.UserFetchIdViaUsernames.as_view(), name='user-ids-via-username'),
@@ -42,4 +43,5 @@ urlpatterns = [
 
 	path('42oauth/callback/', views.OAuthCallbackView.as_view(), name='oauth_callback'),
 	path('config/', views.FrontendConfigView.as_view(), name="config"),
+
 ]

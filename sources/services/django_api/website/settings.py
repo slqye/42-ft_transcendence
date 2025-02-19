@@ -161,3 +161,9 @@ CSRF_TRUSTED_ORIGINS = [
 	"https://localhost:8000",
 	MAIN_URL,
 ]
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Media files settings
+MEDIA_URL = '/user_media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'user_media')

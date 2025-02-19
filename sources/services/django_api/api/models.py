@@ -155,3 +155,7 @@ class Invitation(models.Model):
 		on_delete=models.SET_NULL,
 		related_name='invitation'
 	)
+
+class Picture(models.Model):
+	image = models.ImageField(upload_to='uploads/')
+	uploaded_at = models.DateTimeField(auto_now_add=True)

@@ -6,10 +6,10 @@ from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.db import models
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Match, Tournament, Pair, Invitation, Friendship
-from .serializers import UserSerializer, MatchSerializer, TournamentSerializer, PairSerializer, TournamentListSerializer, InvitationSerializer, FriendshipSerializer
-
+from .serializers import UserSerializer, MatchSerializer, TournamentSerializer, PairSerializer, TournamentListSerializer, InvitationSerializer, FriendshipSerializer, PictureSerializer
 from django.contrib.auth import get_user_model, login, authenticate
 
 from rest_framework import generics, permissions, status
@@ -17,7 +17,9 @@ from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import redirect, get_object_or_404
+from PIL import Image
 
 # Create your views here.
 
@@ -879,3 +881,48 @@ class FrontendConfigView(APIView):
 			"API_42_REDIRECT_URI": settings.API_42_REDIRECT_URI,
 		}
 		return Response(config)
+
+class PictureUploadView(APIView):
+	parser_classes = [MultiPartParser, FormParser]
+	permission_classes = [permissions.IsAuthenticated]
+
+	def post(self, request, *args, **kwargs):
+		serializer = PictureSerializer(data=request.data)
+		if serializer.is_valid():
+			image_file = serializer.validated_data.get('image')
+			try:
+				# Open the image using Pillow.
+				image_obj = Image.open(image_file)
+			except Exception as e:
+				return Response(
+					{"detail": "Error processing image: " + str(e)},
+					status=status.HTTP_400_BAD_REQUEST
+				)
+
+			if image_obj.size != (512, 512):
+				return Response(
+					{"detail": "Image must be exactly 512x512 pixels."},
+					status=status.HTTP_400_BAD_REQUEST
+				)
+			ext = os.path.splitext(image_file.name)[1]
+			user = request.user
+			new_name = f"{user.username}{ext}"
+			image_file.name = new_name
+			upload_dir = os.path.join("user_media", "uploads")
+			if os.path.exists(upload_dir):
+				for existing_file in os.listdir(upload_dir):
+					if existing_file.startswith(request.user.username + '.'):
+						print(existing_file)
+						try:
+							os.remove(os.path.join(upload_dir, existing_file))
+						except Exception as e:
+							return Response(
+								{"detail": f"Error removing old image {existing_file}: {str(e)}"},
+								status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+			else:
+				os.makedirs(upload_dir)
+			serializer.save()
+			user.avatar_url = 'frontend/assets/' + serializer.data.get('image')
+			user.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

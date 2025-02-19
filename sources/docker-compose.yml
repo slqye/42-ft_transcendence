@@ -11,6 +11,7 @@ services:
     env_file: .env
     volumes:
       - ./services/django_frontend/:/app
+      - transcendence_file_uploads:/app/frontend/assets/user_media
     networks:
       - transcendence_network_backend
     expose:
@@ -34,6 +35,7 @@ services:
     env_file: .env
     volumes:
       - ./services/django_api/:/app
+      - transcendence_file_uploads:/app/user_media
     networks:
       - transcendence_network_backend
     expose:
@@ -102,6 +104,16 @@ volumes:
       o: bind
     labels:
       is-transcendence: "yes"
+  transcendence_file_uploads:
+    name: transcendence_file_uploads
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/file_uploads
+      o: bind
+    labels:
+      is-transcendence: "yes"
+
 
 networks:
   transcendence_network_backend:
