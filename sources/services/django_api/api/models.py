@@ -5,7 +5,8 @@ import math, random
 
 class User(AbstractUser):
 	avatar_url = models.CharField(max_length=255, blank=True, default='https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360')
-	display_name= models.CharField(max_length=30, blank=True, unique=True)
+	display_name = models.CharField(max_length=10, blank=True, unique=True)
+	username = models.CharField(max_length=10, blank=False, unique=True)
 	language_code = models.CharField(max_length=2, default='en')
 	created_at = models.DateTimeField(auto_now_add=True)
 	is_ai = models.BooleanField(default=False)
