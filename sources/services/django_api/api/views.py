@@ -133,8 +133,6 @@ class UserLoginView(APIView):
 		refresh_token = str(refresh)
 
 		response = Response({"detail": "User logged in successfully"})
-		# Set HttpOnly cookies
-		# secure=True and samesite='None' typically required if you're over HTTPS or cross-site
 		response.set_cookie(
 			"user_access",
 			access_token,
@@ -233,8 +231,6 @@ class UserFetchIdViaUsernames(generics.RetrieveAPIView):
 			}
 			
 			return Response(response_data, status=status.HTTP_200_OK)
-			
-
 
 class UpdateUserField(APIView):
 	permission_classes = [permissions.IsAuthenticated]
@@ -262,15 +258,8 @@ class CurrentUser(APIView):
 
 	def get(self, request, *args, **kwargs):
 		user = request.user
-		return Response({
-		  'id': user.id,
-				'display_name': user.display_name,
-		  'username': user.username,
-			 'password': user.password,
-			'email': user.email,
-			'avatar_url': getattr(user, 'avatar_url', None),
-			'language_code': getattr(user, 'language_code', 'en'),
-		})
+		serializer = UserSerializer(user)
+		return Response(serializer.data)
 
 class UserStats(APIView):
 	permission_classes = [permissions.IsAuthenticated]
