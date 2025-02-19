@@ -520,13 +520,9 @@ class UserTicTacToeMatches(APIView):
 			target_user = request.user
 		else:
 			target_user = get_object_or_404(User, pk=pk)
-		matches = Match.objects.filter(
-			is_pong=False
-		).filter(
-			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)
-		).order_by('-created_at')
+		tournaments = target_user.tournaments_joined.all().order_by('-created_at')[:10]
 
-		serializer = MatchSerializer(matches, many=True)
+		serializer = TournamentSerializer(tournaments, many=True)
 		return Response(serializer.data)
 
 ############################## FRIENDSHIP ##############################
@@ -778,6 +774,23 @@ class TournamentFetchNextPair(generics.RetrieveAPIView):
 			"next_pair": serializer.data,
 			"current_round": tournament.next_pair.round_number
 		}, status=status.HTTP_200_OK)
+
+class UserTournaments(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+	http_method_names = ["get"]
+
+	def get(self, request, pk, *args, **kwargs):
+		if pk == "me":
+			target_user = request.user
+		else:
+			target_user = get_object_or_404(User, pk=pk)
+		
+		matches = Tournament.objects.filter(
+			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)
+		).order_by('-created_at')[:10]
+
+		serializer = MatchSerializer(matches, many=True)
+		return Response(serializer.data)
 
 ############################## OAUTH et d'autres trucs ##############################
 

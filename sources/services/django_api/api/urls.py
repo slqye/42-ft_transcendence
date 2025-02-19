@@ -25,8 +25,9 @@ urlpatterns = [
 	path('friendships/<str:pk>/', views.FriendshipView.as_view(), name='friendship-detail'),
 	path('users/<str:pk>/friendships/', views.FriendListView.as_view(), name='user-friendship-list'),
 
-	# Matches information
+	# Matches and tournaments information
 	path("users/<str:pk>/matches/", views.UserMatches.as_view(), name="user-matches"),
+	path("users/<str:pk>/tournaments/", views.UserTournaments.as_view(), name="user-tournaments"),
 	path("users/<str:pk>/matches/ttt/", views.UserTicTacToeMatches.as_view(), name="user-ttt-matches"),
 	path("users/<str:pk>/matches/pong/", views.UserPongMatches.as_view(), name="user-pong-matches"),
 	path("users/<str:pk>/stats/", views.UserStats.as_view(), name="user-stats"),
