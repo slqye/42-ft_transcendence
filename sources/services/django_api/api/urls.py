@@ -1,5 +1,6 @@
 from django.urls import path, re_path, include
 from . import views
+from django_prometheus import exports
 
 urlpatterns = [
 	# USER registration and token management
@@ -42,4 +43,7 @@ urlpatterns = [
 
 	path('42oauth/callback/', views.OAuthCallbackView.as_view(), name='callback'),
 	path('config/', views.FrontendConfigView.as_view(), name="config"),
+
+	# Prometheus
+	path('metrics/', exports.ExportToDjangoView),
 ]

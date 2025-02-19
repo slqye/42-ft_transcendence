@@ -73,6 +73,18 @@ services:
       timeout: 5s
       retries: 5
   
+  postgres_exporter:
+    container_name: transcendence_postgres_exporter
+    image: wrouesnel/postgres_exporter:v0.8.0
+    environment:
+      DATA_SOURCE_NAME: postgres://user:password@postgres:5432/db_name?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+    networks:
+      - transcendence_network_backend
+
   nginx:
     container_name: transcendence_nginx
     image: nginx
@@ -93,8 +105,8 @@ services:
       is-transcendence: "yes"
 
   nginx_exporter:
-    container_name: nginx_exporter
-    image: nginx/nginx-prometheus-exporter
+    container_name: transcendence_nginx_exporter
+    image: nginx/nginx-prometheus-exporter:1.4
     networks:
       - transcendence_network_backend
     ports:
