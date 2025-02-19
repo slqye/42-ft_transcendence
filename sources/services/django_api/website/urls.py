@@ -27,11 +27,10 @@ urlpatterns = [
 	path('api/', include('api.urls')),
 
 	# Prometheus
-	path('', include('django_prometheus.urls')),
+	path('django_prometheus/', include('django_prometheus.urls')),
 
 	# Catch-all for any other URL -> index view
 	path('', views.index, name='index'),
 	path('<path:path>', views.index, name='catch-all-index'),
-
 
 ]
