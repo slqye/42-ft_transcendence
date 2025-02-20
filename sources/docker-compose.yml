@@ -78,6 +78,7 @@ services:
     image: wrouesnel/postgres_exporter:v0.8.0
     environment:
       DATA_SOURCE_NAME: postgres://user:password@postgres:5432/db_name?sslmode=disable
+    restart: always
     ports:
       - "9187:9187"
     depends_on:
@@ -94,6 +95,7 @@ services:
         is-transcendence: "yes"
     networks:
       - transcendence_network_backend
+    restart: always
     ports:
       - 8000:443
     depends_on:
@@ -109,6 +111,7 @@ services:
     image: nginx/nginx-prometheus-exporter:1.4
     networks:
       - transcendence_network_backend
+    restart: always
     ports:
       - "9113:9113"
     command:
@@ -127,13 +130,27 @@ services:
         is-transcendence: "yes"
     volumes:
       - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
     ports:
       - 9090:9090
+    labels:
+      is-transcendence: "yes"
+
+  grafana:
+    container_name: transcendence_grafana
+    image: grafana
+    build:
+      context: services/grafana
+      labels:
+        is-transcendence: "yes"
+    restart: always
+    ports:
+      - '3000:3000'
+    env_file: .env
+    networks:
+      - transcendence_network_backend
     depends_on:
-      django_api:
-        condition: service_healthy
-      django_frontend:
-        condition: service_healthy
+      - prometheus
     labels:
       is-transcendence: "yes"
 
