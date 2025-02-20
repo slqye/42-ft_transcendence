@@ -1,7 +1,5 @@
 function	format_winrate_value(rate)
 {
-	if (rate == 0)
-		return ("N/A");
 	return (rate.toFixed(0) + "%");
 }
 
