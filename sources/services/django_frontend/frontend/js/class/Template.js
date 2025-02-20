@@ -30,6 +30,14 @@ class	Template
 				element.textContent = translations[language][key];
 			  }
 			});
+
+			const placeholderElements = this.html.querySelectorAll("[data-translate-placeholder]");
+			placeholderElements.forEach((element) => {
+				const key = element.getAttribute("data-translate-placeholder");
+				if (translations[language] && translations[language][key]) {
+					element.setAttribute("placeholder", translations[language][key]);
+				}
+			});
 	  
 			this.string = this.html.documentElement.outerHTML;
 			return (this);

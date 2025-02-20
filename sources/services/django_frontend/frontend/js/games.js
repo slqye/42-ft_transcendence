@@ -118,3 +118,19 @@ async function	ia_switch()
 			reset_opponent_form();
 	}
 }
+
+// function	end_game_message(winner)
+// {
+// 	const language = localStorage.getItem("preferred-language") || "en";
+// 	if (winner)
+// 	{
+// 		return ;
+// 	}
+// 	else
+// 	{
+// 		if (language === "en")
+// 			return ("The game is a draw!");
+// 		else
+// 			return ("Le jeu est un match nul!");
+// 	}
+// }

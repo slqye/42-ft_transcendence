@@ -43,6 +43,12 @@ const translations = {
         rankings: "Rankings",
         player_1: "Player 1",
         player_2: "Player 2",
+        // placeholders
+        username: "Username",
+        display_name: "Display name",
+        email: "Email",
+        password: "Password",
+        confirm_password: "Confirm password",
     },
     fr: {
         about_us: "À propos de nous",
@@ -88,6 +94,13 @@ const translations = {
         rankings: "Classements",
         player_1: "Joueur 1",
         player_2: "Joueur 2",
+        // placeholders
+        username: "Nom d'utilisateur",
+        display_name: "Nom d'affichage",
+        email: "Email",
+        password: "Mot de passe",
+        confirm_password: "Confirmer le mot de passe",
+        // games messages
     },
 };
 
@@ -100,5 +113,14 @@ function translate_page(language) {
             element.textContent = translations[language][key];
         }
     });
+
+    const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+    placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[language] && translations[language][key]) {
+            element.setAttribute('placeholder', translations[language][key]);
+        }
+    });
+
     localStorage.setItem('preferred-language', language);
 }
