@@ -98,19 +98,11 @@ volumes:
   transcendence_database_data:
     name: transcendence_database_data
     driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/data/database_data
-      o: bind
     labels:
       is-transcendence: "yes"
   transcendence_file_uploads:
     name: transcendence_file_uploads
     driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/data/file_uploads
-      o: bind
     labels:
       is-transcendence: "yes"
 
