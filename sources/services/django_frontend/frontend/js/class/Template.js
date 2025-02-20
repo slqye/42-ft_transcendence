@@ -20,6 +20,18 @@ class	Template
 				throw new Error;
 			this.string = await response.text();
 			this.html = this.parser.parseFromString(this.string, "text/html");
+
+			const language = localStorage.getItem("preferred-language") || "en";
+
+			const elements = this.html.querySelectorAll("[data-translate]");
+			elements.forEach((element) => {
+			  const key = element.getAttribute("data-translate");
+			  if (translations[language] && translations[language][key]) {
+				element.textContent = translations[language][key];
+			  }
+			});
+	  
+			this.string = this.html.documentElement.outerHTML;
 			return (this);
 		}
 		catch

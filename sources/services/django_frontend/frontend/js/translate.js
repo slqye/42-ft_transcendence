@@ -91,7 +91,7 @@ const translations = {
     },
 };
 
-function translatePage(language) {
+function translate_page(language) {
     const elements = document.querySelectorAll('[data-translate]');
     
     elements.forEach(element => {
@@ -102,14 +102,3 @@ function translatePage(language) {
     });
     localStorage.setItem('preferred-language', language);
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Check localStorage first
-    const savedLanguage = localStorage.getItem('preferred-language');
-    
-    if (savedLanguage) {
-        translatePage(savedLanguage);
-    } else {
-        translatePage('en');
-    }
-});
