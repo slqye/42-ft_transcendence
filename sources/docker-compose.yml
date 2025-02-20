@@ -128,8 +128,6 @@ services:
       context: services/prometheus
       labels:
         is-transcendence: "yes"
-    volumes:
-      - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     restart: always
     ports:
       - 9090:9090
