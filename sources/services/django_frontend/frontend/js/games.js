@@ -13,9 +13,9 @@ async function	launch_pong_match()
 		return (new Toast(Toast.ERROR, "A host player must be logged in to play a game."));
 	}
 	let selected_opponent = document.querySelector("input[name='options-outlined']:checked");
+	let opponent = null;
 	if (selected_opponent.id == "user-outlined")
 	{
-		let opponent = null;
 		try
 		{
 			opponent = await fetch_opponent();
