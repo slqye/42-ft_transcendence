@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.db import models
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth import get_user_model, authenticate
+from django.utils import timezone
 
 from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
@@ -93,6 +94,8 @@ class UserLogoutView(APIView):
 	http_method_names = ["post"]
 
 	def post(self, request, *args, **kwargs):
+		request.user.last_active = None
+		request.user.save(update_fields=["last_active"])
 		response = Response({"detail": "User logged out"}, status=status.HTTP_200_OK)
 		response.delete_cookie("user_access")
 		response.delete_cookie("user_refresh")
