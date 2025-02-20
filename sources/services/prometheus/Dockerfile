@@ -1,4 +1,5 @@
 FROM prom/prometheus:v3.2.0
 
-COPY ./conf/prometheus.yml /etc/prometheus/prometheus.yml
-COPY ./conf/alert.rules.yml /etc/prometheus/rules/alert.rules.yml
+RUN mkdir -p /prometheus/data_storage/
+COPY ./conf/prometheus.yml /prometheus/prometheus.yml
+COPY ./conf/alert.rules.yml /prometheus/rules/alert.rules.yml

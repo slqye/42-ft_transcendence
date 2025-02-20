@@ -19,6 +19,7 @@ $(NAME) : build up
 
 build :
 	@mkdir -p ${PWD}/data/database_data
+	@mkdir -p ${PWD}/data/prometheus_data
 	@docker compose -f ./sources/docker-compose.yml build
 		
 up :

@@ -129,6 +129,10 @@ services:
       labels:
         is-transcendence: "yes"
     restart: always
+    volumes:
+      - transcendence_prometheus_data:/prometheus/data_storage/
+    command:
+      - "--storage.tsdb.path=/prometheus/data_storage/"
     ports:
       - 9090:9090
     labels:
@@ -159,6 +163,15 @@ volumes:
     driver_opts:
       type: none
       device: ${PWD}/data/database_data
+      o: bind
+    labels:
+      is-transcendence: "yes"
+  transcendence_prometheus_data:
+    name: transcendence_prometheus_data
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/prometheus_data
       o: bind
     labels:
       is-transcendence: "yes"
