@@ -675,7 +675,7 @@ class UserTournaments(APIView):
 			target_user = request.user
 		else:
 			target_user = get_object_or_404(User, pk=pk)
-		tournaments = target_user.tournaments_joined.all().order_by("-created_at")[:10]
+		tournaments = target_user.tournaments_joined.filter(is_done=True).order_by("-created_at")[:10]
 		serializer = TournamentSerializer(tournaments, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
