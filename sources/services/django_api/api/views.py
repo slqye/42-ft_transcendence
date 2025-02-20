@@ -738,6 +738,7 @@ class OAuthCallbackView(APIView):
 			user.email = user_data.get("email")
 			user.avatar_url = user_data.get("image", {}).get("link")
 			user.display_name = user_data.get("login")
+			user.set_unusable_password()
 			user.save()
 		refresh = RefreshToken.for_user(user)
 		acc_token = str(refresh.access_token)
