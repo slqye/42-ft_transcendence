@@ -20,7 +20,7 @@ $(NAME) : build up
 build :
 	@mkdir -p ${PWD}/data/database_data
 	@mkdir -p ${PWD}/data/file_uploads
-	@docker compose -f ./sources/docker-compose.yml build
+	@docker compose -f ./sources/docker-compose.yml build --no-cache
 		
 up :
 	@docker compose -f ./sources/docker-compose.yml up -d
