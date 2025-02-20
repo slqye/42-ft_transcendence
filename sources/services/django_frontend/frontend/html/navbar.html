@@ -23,6 +23,17 @@
 				<li class="nav-item">
 					<button class="nav-link btn btn-link" id="about" onclick="load_about();">About</button>
 				</li>
+				<!-- language -->
+				<li class="nav-item dropdown">
+					<button class="nav-link btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Language</button>
+					<ul class="dropdown-menu">
+						<li><button class="dropdown-item" onclick="translate_page('en');">English</button></li>
+						<li><button class="dropdown-item" onclick="translate_page('fr');">French</button></li>
+						<li><button class="dropdown-item" onclick="translate_page('de');">Deutch</button></li>
+						<li><button class="dropdown-item" onclick="translate_page('it');">Italian</button></li>
+						<li><button class="dropdown-item" onclick="translate_page('es');">Spanish</button></li>
+					</ul>
+				</li>
 			</ul>
 			<!-- left -->
 			<ul class="navbar-nav ms-auto d-lg-flex align-items-lg-center">
