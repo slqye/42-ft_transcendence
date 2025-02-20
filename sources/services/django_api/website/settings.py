@@ -58,11 +58,9 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
+	'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
 	'DEFAULT_AUTHENTICATION_CLASSES': [
 		'api.authentication.DualCookieJWTAuthentication',
-		#"rest_framework_simplejwt.authentication.JWTAuthentication",
-		# 'rest_framework.authentication.TokenAuthentication',
-		# 'rest_framework.authentication.SessionAuthentication',
 	]
 }
 
