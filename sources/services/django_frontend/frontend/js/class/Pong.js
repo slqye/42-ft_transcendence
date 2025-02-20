@@ -409,7 +409,11 @@ class Pong
 		else
 		{
 			let invitation_id = request.response.id;
-			const accept_request = await new Api("/api/invitations/" + invitation_id + "/accept/", Api.OPPONENT).set_method("POST").request();
+			let accept_request;
+			if (this.is_ia)
+				accept_request = await new Api("/api/invitations/" + invitation_id + "/accept/", Api.USER).set_method("POST").request();
+			else
+				accept_request = await new Api("/api/invitations/" + invitation_id + "/accept/", Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status == Api.ERROR || accept_request.code != 201)
 			{
 				return (new Toast(Toast.ERROR, "An error occured while attempting to create a match."));
