@@ -342,7 +342,7 @@ class TicTacToe
 		let result = this.player1.score > this.player2.score ? 0 : 1;
 		if (this.player1.score === this.player2.score)
 			result = 2;
-		let request_body = JSON.stringify({
+		let request_body = await JSON.stringify({
 			"is_pong": false,
 			"result": result,
 			"tournament": this.tournament_id !== -1 ? this.tournament_id : null,
@@ -361,16 +361,16 @@ class TicTacToe
 		});
 		if (this.is_ia)
 		{
-			let request_object = JSON.parse(request_body);
+			let request_object = await JSON.parse(request_body);
 			request_object.opponent_user_id = null;
 			request_object.versus_ai = true;
-			request_body = JSON.stringify(request_object);
+			request_body = await JSON.stringify(request_object);
 		}
 		else
 		{
-			let request_object = JSON.parse(request_body);
+			let request_object = await JSON.parse(request_body);
 			request_object.opponent_user_id = opponent.id;
-			request_body = JSON.stringify(request_object);
+			request_body = await JSON.stringify(request_object);
 		}
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
 		if (request.status === Api.ERROR || request.code !== 201)
