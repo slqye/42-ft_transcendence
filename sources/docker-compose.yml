@@ -169,10 +169,6 @@ volumes:
   transcendence_prometheus_data:
     name: transcendence_prometheus_data
     driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/data/prometheus_data
-      o: bind
     labels:
       is-transcendence: "yes"
   transcendence_file_uploads:
