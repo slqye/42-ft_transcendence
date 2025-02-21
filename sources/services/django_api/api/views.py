@@ -933,7 +933,7 @@ class PictureUploadView(APIView):
 				os.makedirs(upload_dir)
 
 			serializer.save()
-			user.avatar_url = "frontend/assets/" + serializer.data.get("image")
+			user.avatar_url = "frontend/assets" + serializer.data.get("image")
 			user.save()
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
