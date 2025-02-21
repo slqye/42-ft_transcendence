@@ -43,6 +43,7 @@ const translations = {
         rankings: "Rankings",
         player_1: "Player 1",
         player_2: "Player 2",
+        password_requirements: "Require at least 8 characters, one digit, one lowercase letter, one uppercase letter, and one special character.",
         // placeholders
         username: "Username",
         display_name: "Display name",
@@ -103,6 +104,7 @@ const translations = {
         rankings: "Classements",
         player_1: "Joueur 1",
         player_2: "Joueur 2",
+        password_requirements: "Requiert au moins 8 caractères, un chiffre, une lettre minuscule, une lettre majuscule et un caractère spécial.",
         // placeholders
         username: "Nom d'utilisateur",
         display_name: "Nom d'affichage",
@@ -163,6 +165,7 @@ const translations = {
         rankings: "Ranglisten",
         player_1: "Spieler 1",
         player_2: "Spieler 2",
+        password_requirements: "Erfordert mindestens 8 Zeichen, eine Ziffer, einen Kleinbuchstaben, einen Großbuchstaben und ein Sonderzeichen.",
         // placeholders
         username: "Benutzername",
         display_name: "Anzeigename",
@@ -196,6 +199,14 @@ function translate_page(language) {
         const key = element.getAttribute('data-translate-placeholder');
         if (translations[language] && translations[language][key]) {
             element.setAttribute('placeholder', translations[language][key]);
+        }
+    });
+
+    const tooltipElements = document.querySelectorAll('[data-bs-title-translate]');
+    tooltipElements.forEach(element => {
+        const key = element.getAttribute('data-bs-title-translate');
+        if (translations[language] && translations[language][key]) {
+            element.setAttribute('data-bs-title', translations[language][key]);
         }
     });
 
@@ -824,4 +835,26 @@ function str_page_not_found()
         return "Seite nicht gefunden.";
     else
         return "Page not found.";
+}
+
+function str_online()
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return "En ligne";
+    else if (language == 'de')
+        return "Online";
+    else
+        return "Online";
+}
+
+function str_offline()
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return "Hors ligne";
+    else if (language == 'de')
+        return "Offline";
+    else
+        return "Offline";
 }
