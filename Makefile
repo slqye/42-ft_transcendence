@@ -18,7 +18,7 @@ all : $(NAME)
 $(NAME) : build up
 
 build :
-	@docker compose -f ./sources/docker-compose.yml build --no-cache
+	@docker compose -f ./sources/docker-compose.yml build
 		
 up :
 	@docker compose -f ./sources/docker-compose.yml up -d
@@ -37,6 +37,7 @@ clean : down
 fclean : clean
 	@docker compose -f ./sources/docker-compose.yml down --rmi all --volumes
 	@docker image prune --filter label=is-transcendence=yes --force
+	@rm -rf sources/services/django_api/api/migrations
 
 re : clean build up
 
