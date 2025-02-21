@@ -66,7 +66,6 @@ async function	launch_tictactoe_match()
 	{
 		try
 		{
-			console.log("tryy");
 			opponent = await fetch_opponent();
 			if (!opponent)
 				throw new Error();
