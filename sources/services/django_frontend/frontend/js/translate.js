@@ -726,3 +726,25 @@ function str_profile_picture_updated()
     else
         return "Profile picture updated successfully.";
 }
+
+function str_template_error()
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return "Une erreur est survenue lors du chargement du template.";
+    else if (language == 'de')
+        return "Ein Fehler ist beim Laden des Templates aufgetreten.";
+    else
+        return "An error occurred while loading the template.";
+}
+
+function str_page_not_found()
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return "Page non trouvée.";
+    else if (language == 'de')
+        return "Seite nicht gefunden.";
+    else
+        return "Page not found.";
+}

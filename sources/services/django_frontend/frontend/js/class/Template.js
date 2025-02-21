@@ -1,5 +1,3 @@
-const ERROR_TEMPLATE = "Template error.";
-
 class	Template
 {
 	constructor(path)

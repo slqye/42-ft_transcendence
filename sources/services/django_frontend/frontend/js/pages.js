@@ -10,7 +10,7 @@ async function load_navbar() {
 	let navbar = await new Template("frontend/html/navbar.html").load();
 
 	if (navbar == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	if (body.getAttribute("data-bs-theme") != "dark")
 	{
 		navbar.edit.id.set.attribute("theme_icon_sun", "class", "px-2 d-none d-lg-none");
@@ -50,7 +50,7 @@ async function load_home() {
 	const success_callback = urlParams.get('success_callback');
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	if (window.location.pathname === "/home" && callback)
 		await signin_42_callback(role === "opponent", type, success_callback === "true");
 	if (callback && type == "match_pong")
@@ -75,7 +75,7 @@ async function load_create_game_pong() {
 	let template = await new Template("frontend/html/pages/create_game_pong.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/create_game_pong")
@@ -98,7 +98,7 @@ async function load_pong_match() {
 	let template = await new Template("frontend/html/pages/match_pong.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/match_pong")
@@ -113,7 +113,7 @@ async function load_create_game_tictactoe() {
 	let template = await new Template("frontend/html/pages/create_game_tictactoe.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/create_game_tictactoe")
@@ -136,7 +136,7 @@ async function load_tictactoe_match() {
 	let template = await new Template("frontend/html/pages/match_tictactoe.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/match_tictactoe")
@@ -149,7 +149,7 @@ async function load_create_tournament() {
 	let template = await new Template("frontend/html/pages/create_tournament.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/create_tournament")
@@ -163,7 +163,7 @@ async function load_about() {
 	let template = await new Template("frontend/html/pages/about.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/about")
@@ -181,7 +181,7 @@ async function load_signin() {
 	let template = await new Template("frontend/html/pages/signin.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	
 	load_navbar();
 	content.innerHTML = template.value;
@@ -198,7 +198,7 @@ async function load_signup() {
 	let template = await new Template("frontend/html/pages/signup.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/signup")
@@ -225,7 +225,7 @@ async function load_profile(pk) {
 	let template = await new Template("frontend/html/pages/profile.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	await set_profile(template, pk);
 	await set_profile_history(template, pk);
@@ -242,7 +242,7 @@ async function load_friends() {
 	let template = await new Template("frontend/html/pages/friends.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	await set_friend_list(template);
 	content.innerHTML = template.value;
@@ -258,7 +258,7 @@ async function load_settings() {
 	let template = await new Template("frontend/html/pages/settings.html").load();
 
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	load_navbar();
 	content.innerHTML = template.value;
 	if (window.location.pathname !== "/settings")
@@ -326,7 +326,7 @@ async function load_tournament(pk)
 		}
 		template = await new Template("frontend/html/pages/tournament_login.html").load();
 		if (template == null)
-			return (console.error(ERROR_TEMPLATE));
+			return (new Toast(Toast.ERROR, str_template_error()));
 		load_navbar();
 		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
 		content.innerHTML = template.value;
@@ -357,7 +357,7 @@ async function load_tournament_details(pk = -1)
 		return (new Toast(Toast.ERROR, str_failed_to_load_tournament_details_from_server()));
 	let template = await new Template("frontend/html/pages/tournament_details.html").load();
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	history.pushState({ page: "tournament_details", id: pk }, "Tournament details", "/tournament_details?id=" + pk);
 	load_navbar();
 	await set_tournament_details(template, request.response);
@@ -419,7 +419,7 @@ window.onpopstate = async function (event) {
 			case "create_tournament":
 				await load_create_tournament(); break;
 			default:
-				console.error("Page not found:", page); break;
+				return (new Toast(Toast.ERROR, str_page_not_found()));
 		}
 	}
 };

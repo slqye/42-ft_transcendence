@@ -11,7 +11,7 @@ async function	update_player_number()
 		return ;
 	}
 	if (template == null)
-		return (console.error(ERROR_TEMPLATE));
+		return (new Toast(Toast.ERROR, str_template_error()));
 	container.innerHTML = "";
 	for (let i = 0; i < player_number; i++)
 	{
@@ -357,7 +357,7 @@ async function	set_tournament_details(template, tournament)
 			const player = participants_ranking_ids[index];
 			let ranking_item_template = await new Template("frontend/html/pages/ranking_item.html").load();
 			if (ranking_item_template == null)
-				return (console.error(ERROR_TEMPLATE));
+				return (new Toast(Toast.ERROR, str_template_error()));
 			ranking_item_template.edit.id.set.content("ranking_position", ranking++);
 			ranking_item_template.edit.id.set.content("display_name", player.display_name);
 			ranking_item_template.edit.id.set.content("username", "@" + player.username);

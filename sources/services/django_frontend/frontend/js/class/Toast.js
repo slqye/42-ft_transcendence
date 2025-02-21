@@ -18,7 +18,7 @@ class Toast
 		let toast = await new Template(this.type).load();
 
 		if (toast == null)
-			return (console.error(ERROR_TEMPLATE));
+			return (new Toast(Toast.ERROR, str_template_error()));
 		toast.edit.class.set.contents("toast-body", this.content);
 		container.innerHTML = toast.string;
 		let toast_bootstrap = bootstrap.Toast.getOrCreateInstance(document.getElementById("liveToast"));
