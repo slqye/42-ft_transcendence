@@ -46,15 +46,8 @@ flush_database :
 	@docker exec -it transcendence_django_api python manage.py flush --no-input
 	@rm -rf sources/services/django_api/api/migrations
 
-drop_database :
-	@docker exec -it transcendence_django_api python manage.py reset_db --noinput
-	@docker exec -it transcendence_prometheus rm -rf /prometheus
-	@make fclean
-	@rm -rf sources/services/django_api/api/migrations
-
-
 new_database_re :
-	@make drop_database
+	@make fclean
 	@make build
 	@make up
 
@@ -68,4 +61,4 @@ status :
 	@echo "${COLOR_GREEN}Images :${COLOR_RESET}"
 	@docker image ls --filter label=is-transcendence=yes
 
-.PHONY:	all build up stop start down clean fclean re flush_database drop_database new_database_re status
+.PHONY:	all build up stop start down clean fclean re flush_database new_database_re status
