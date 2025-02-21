@@ -25,6 +25,19 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}
 
 ALLOWED_HOSTS = ["*"]
 
@@ -43,10 +56,13 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
-	'django_extensions',
+	'django_prometheus',
 ]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 MIDDLEWARE = [
+	'django_prometheus.middleware.PrometheusBeforeMiddleware',
 	'corsheaders.middleware.CorsMiddleware',
 	'django.middleware.security.SecurityMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
@@ -55,14 +71,15 @@ MIDDLEWARE = [
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django_prometheus.middleware.PrometheusAfterMiddleware'
 ]
 
+PROMETHEUS_METRICS_EXPORT_NAMESPACE = "django"
+
 REST_FRAMEWORK = {
+	'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
 	'DEFAULT_AUTHENTICATION_CLASSES': [
 		'api.authentication.DualCookieJWTAuthentication',
-		#"rest_framework_simplejwt.authentication.JWTAuthentication",
-		# 'rest_framework.authentication.TokenAuthentication',
-		# 'rest_framework.authentication.SessionAuthentication',
 	]
 }
 

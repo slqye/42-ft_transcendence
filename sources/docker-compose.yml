@@ -39,13 +39,15 @@ services:
     networks:
       - transcendence_network_backend
     expose:
-      - 8081
+      - "8081"
     restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy
     labels:
       is-transcendence: "yes"
+    command: >
+      gunicorn --bind 0.0.0.0:8081 --workers 3 website.wsgi:application
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/api/"]
       interval: 10s
@@ -75,6 +77,19 @@ services:
       timeout: 5s
       retries: 5
   
+  postgres_exporter:
+    container_name: transcendence_postgres_exporter
+    image: wrouesnel/postgres_exporter:v0.8.0
+    environment:
+      DATA_SOURCE_NAME: postgres://user:password@postgres:5432/db_name?sslmode=disable
+    restart: always
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+    networks:
+      - transcendence_network_backend
+
   nginx:
     container_name: transcendence_nginx
     image: nginx
@@ -84,6 +99,7 @@ services:
         is-transcendence: "yes"
     networks:
       - transcendence_network_backend
+    restart: always
     ports:
       - 8000:443
     depends_on:
@@ -94,9 +110,64 @@ services:
     labels:
       is-transcendence: "yes"
 
+  nginx_exporter:
+    container_name: transcendence_nginx_exporter
+    image: nginx/nginx-prometheus-exporter:1.4
+    networks:
+      - transcendence_network_backend
+    restart: always
+    ports:
+      - "9113:9113"
+    command:
+      - -nginx.scrape-uri=http://localhost:8000/metrics
+    depends_on:
+      - nginx
+
+  prometheus:
+    container_name: transcendence_prometheus
+    image: prometheus
+    networks:
+      - transcendence_network_backend
+    build:
+      context: services/prometheus
+      labels:
+        is-transcendence: "yes"
+    restart: always
+    volumes:
+      - transcendence_prometheus_data:/prometheus/data_storage/
+    command:
+      - "--storage.tsdb.path=/prometheus/data_storage/"
+    ports:
+      - 9090:9090
+    labels:
+      is-transcendence: "yes"
+
+  grafana:
+    container_name: transcendence_grafana
+    image: grafana
+    build:
+      context: services/grafana
+      labels:
+        is-transcendence: "yes"
+    restart: always
+    ports:
+      - '3000:3000'
+    env_file: .env
+    networks:
+      - transcendence_network_backend
+    depends_on:
+      - prometheus
+    labels:
+      is-transcendence: "yes"
+
 volumes:
   transcendence_database_data:
     name: transcendence_database_data
+    driver: local
+    labels:
+      is-transcendence: "yes"
+  transcendence_prometheus_data:
+    name: transcendence_prometheus_data
     driver: local
     labels:
       is-transcendence: "yes"
@@ -105,7 +176,6 @@ volumes:
     driver: local
     labels:
       is-transcendence: "yes"
-
 
 networks:
   transcendence_network_backend:

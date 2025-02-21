@@ -1,6 +1,3 @@
 #!/bin/sh
-
-#exec gunicorn --bind 0.0.0.0:8080 website.wsgi:application
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver 0.0.0.0:8080
+set -e
+exec gunicorn --bind 0.0.0.0:8080 --workers 3 website.wsgi:application

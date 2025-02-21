@@ -146,23 +146,23 @@ async function	set_profile_tournament_history(template, pk = "me")
 			if (template_history_item == null)
 				return (new Toast(Toast.ERROR, str_template_error()));
 			let ranking = element.participants_ranking;
-			let winner = ranking[ranking.length];
+			let winner = ranking[ranking.length - 1];
 			if (user.username == winner.username)
 				template_history_item.edit.id.add.attribute("tournament_button", "class", " bg-success");
 			else
-				template_history_item.edit.id.add.attribute("tournament_button", "class", " bg-warning");
-			template_history_item.edit.it.set.attribute("user_profile_icon", "src", winner.avatar_url);
+				template_history_item.edit.id.add.attribute("tournament_button", "class", " bg-danger");
+			template_history_item.edit.id.set.attribute("user_profile_icon", "src", winner.avatar_url);
 			template_history_item.edit.id.set.content("user_name", winner.username);
 			template_history_item.edit.id.set.content("tournament_name", element.name);
 			for (let rank_index = 0; rank_index < ranking.length; rank_index++) {
-				const user_ranked = ranking[ranking.length - rank_index];
+				const user_ranked = ranking[ranking.length - rank_index - 1];
 				let line = `
 					<tr>
 						<td class="text-start">${user_ranked.username}</td>
-						<td>#${rank_index}</td>
+						<td>#${rank_index + 1}</td>
 					</tr>
 				`
-				template_history_item.edit.id.set.content("user_ranking_container", line);
+				template_history_item.edit.id.add.content("user_ranking_container", line);
 			}
 	
 			tournament_history.appendChild(template_history_item.edit.id.get.element("tournament"));
