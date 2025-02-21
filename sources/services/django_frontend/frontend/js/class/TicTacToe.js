@@ -133,7 +133,7 @@ class TicTacToe
 		});
 		if (player1_moves == 0 && player2_moves == 0) return (this.first_player);
 		else if (player1_moves > player2_moves) return (this.second_player);
-		else return (this.first_player)
+		else return (this.first_player);
 	}
 
 	play_ai()
@@ -220,7 +220,7 @@ class TicTacToe
 			return;
 		}
 		if (this.checkDraw()) {
-			this.endGame(null, "It's a draw!");
+			this.endGame(null, str_draw());
 			return;
 		}
 		this.switchPlayer();
@@ -249,7 +249,7 @@ class TicTacToe
 				return;
 			}
 			if (this.checkDraw()) {
-				this.endGame(null, "It's a draw!");
+				this.endGame(null, str_draw());
 				return;
 			}
 			this.switchPlayer();
@@ -273,7 +273,7 @@ class TicTacToe
 		winningConditions.forEach(condition => {
 			const [a, b, c] = condition;
 			if (this.board[a] === this.currentPlayer && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
-				this.endGame(this.currentPlayer, this.currentPlayer + " wins!");
+				this.endGame(this.currentPlayer, str_player_wins(this.currentPlayer));
 				win = true;
 			}
 		});
@@ -318,7 +318,7 @@ class TicTacToe
 	{
 		var gameButton = document.getElementById('game-button');
 		gameButton.setAttribute('class', 'btn btn-outline-primary');
-		gameButton.textContent = 'Play a new match';
+		gameButton.textContent = str_button_replay();
 		gameButton.addEventListener('click', this.resetMatch);
 	}
 
@@ -336,7 +336,7 @@ class TicTacToe
 			catch (error)
 			{
 				this.setGameButtonToReplay();
-				return new Toast("An opponent must be logged in to play a game.");
+				return (new Toast(Toast.ERROR, "An opponent must be logged in to play a game."));
 			}
 		}
 		let result = this.player1.score > this.player2.score ? 0 : 1;

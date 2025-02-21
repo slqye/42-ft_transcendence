@@ -124,3 +124,47 @@ function translate_page(language) {
 
     localStorage.setItem('preferred-language', language);
 }
+
+function str_player_scores(player)
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return player + " marque un point !";
+    else if (language == 'de')
+        return player + " erzielt einen Punkt !";
+    else
+        return player + " scores!";
+}
+
+function str_player_wins(winner)
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return winner + " gagne la partie !";
+    else if (language == 'de')
+        return winner + " gewinnt das Spiel !";
+    else
+        return winner + " wins the match !";
+}
+
+function str_draw()
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return "Égalité !";
+    else if (language == 'de')
+        return "Unentschieden !";
+    else
+        return "It's a draw !";
+}
+
+function str_button_replay()
+{
+    let language = localStorage.getItem('preferred-language');
+    if (language == 'fr')
+        return "Rejouer";
+    else if (language == 'de')
+        return "Nochmal spielen";
+    else
+        return "Replay";
+}
