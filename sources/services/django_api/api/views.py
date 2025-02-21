@@ -303,7 +303,7 @@ class UserStats(APIView):
 		if pk == "me":
 			target_user = request.user
 		else:
-			target_user = get_object_or_404_custom(User, pk=pk)
+			target_user = get_object_or_404_custom(User, request, pk=pk)
 		pong_matches = target_user.pong_matches_played
 		pong_wins = target_user.pong_wins
 		pong_draws = target_user.pong_draws
@@ -392,7 +392,7 @@ class InvitationAcceptView(APIView):
 
 	def post(self, request, pk, *args, **kwargs):
 		user_type = request.headers.get("X_User_Type")
-		invitation = get_object_or_404_custom(Invitation, pk=pk)
+		invitation = get_object_or_404_custom(Invitation, request, pk=pk)
 		if not invitation.versus_ai:
 			if user_type != "opponent":
 				return Response(
@@ -496,7 +496,7 @@ class UserMatches(APIView):
 		if pk == "me":
 			target_user = request.user
 		else:
-			target_user = get_object_or_404_custom(User, pk=pk)
+			target_user = get_object_or_404_custom(User, request, pk=pk)
 		matches = Match.objects.filter(
 			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)
 		).order_by("-created_at")[:10]
@@ -512,7 +512,7 @@ class UserPongMatches(APIView):
 		if pk == "me":
 			target_user = request.user
 		else:
-			target_user = get_object_or_404_custom(User, pk=pk)
+			target_user = get_object_or_404_custom(User, request, pk=pk)
 		matches = Match.objects.filter(is_pong=True).filter(
 			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)
 		).order_by("-created_at")
@@ -528,7 +528,7 @@ class UserTicTacToeMatches(APIView):
 		if pk == "me":
 			target_user = request.user
 		else:
-			target_user = get_object_or_404_custom(User, pk=pk)
+			target_user = get_object_or_404_custom(User, request, pk=pk)
 		matches = Match.objects.filter(is_pong=False).filter(
 			models.Q(host_user=target_user) | models.Q(opponent_user=target_user)
 		).order_by("-created_at")
@@ -542,11 +542,12 @@ class FriendshipView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 	http_method_names = ["post", "put", "delete"]
 
-	def get_object(self, pk):
-		return get_object_or_404_custom(Friendship, pk=pk)
+	def get_object(self, request, pk):
+		return get_object_or_404_custom(Friendship, request, pk=pk)
 
 	def post(self, request, pk=None):
-		friend_user = get_object_or_404_custom(User, username=pk)
+		friend_user = get_object_or_404_custom(User, request, username=pk)
+		print("Why")
 		if friend_user.id == request.user.id:
 			return Response(
 				{"detail": get_error_message("Cannot create friendship with yourself.", request)},
@@ -618,7 +619,7 @@ class FriendListView(APIView):
 		if pk == "me":
 			target_user = request.user
 		else:
-			target_user = get_object_or_404_custom(User, pk=pk)
+			target_user = get_object_or_404_custom(User, request, pk=pk)
 
 		friendships = Friendship.objects.filter(
 			models.Q(user_id_1=target_user) | models.Q(user_id_2=target_user)
@@ -668,12 +669,12 @@ class TournamentDetailView(APIView):
 	http_method_names = ["get", "put", "delete"]
 
 	def get(self, request, pk):
-		tournament = get_object_or_404_custom(Tournament, pk=pk)
+		tournament = get_object_or_404_custom(Tournament, request, pk=pk)
 		serializer = TournamentSerializer(tournament)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
 	def put(self, request, pk):
-		tournament = get_object_or_404_custom(Tournament, pk=pk)
+		tournament = get_object_or_404_custom(Tournament, request, pk=pk)
 		if tournament.is_done:
 			return Response(
 				{"detail": get_error_message("This tournament is already done.", request)},
@@ -691,7 +692,7 @@ class TournamentDetailView(APIView):
 				{"detail": get_error_message("Missing match_id.", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
-		match_instance = get_object_or_404_custom(Match, pk=match_id)
+		match_instance = get_object_or_404_custom(Match, request, pk=match_id)
 		if (pair.user != match_instance.host_user
 				or pair.opponent != match_instance.opponent_user
 				or match_instance.tournament != pair.tournament):
@@ -768,7 +769,7 @@ class TournamentDetailView(APIView):
 		}, status=status.HTTP_200_OK)
 
 	def delete(self, request, pk):
-		tournament = get_object_or_404_custom(Tournament, pk=pk)
+		tournament = get_object_or_404_custom(Tournament, request, pk=pk)
 		tournament.delete()
 		return Response({"detail": "Tournament deleted."}, status=status.HTTP_204_NO_CONTENT)
 
@@ -779,7 +780,7 @@ class TournamentFetchPairs(generics.RetrieveAPIView):
 	http_method_names = ["get"]
 
 	def get(self, request, pk, format=None):
-		tournament = get_object_or_404_custom(Tournament, pk=pk)
+		tournament = get_object_or_404_custom(Tournament, request, pk=pk)
 		pairs = tournament.pairs.all()
 		serializer = PairSerializer(pairs, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)
@@ -791,7 +792,7 @@ class TournamentFetchNextPair(generics.RetrieveAPIView):
 	http_method_names = ["get"]
 
 	def get(self, request, pk, format=None):
-		tournament = get_object_or_404_custom(Tournament, pk=pk)
+		tournament = get_object_or_404_custom(Tournament, request, pk=pk)
 		if not tournament.next_pair:
 			return Response(
 				{"detail": "Tournament completed.", "current_round": "completed", "next_pair": None},
@@ -812,7 +813,7 @@ class UserTournaments(APIView):
 		if pk == "me":
 			target_user = request.user
 		else:
-			target_user = get_object_or_404_custom(User, pk=pk)
+			target_user = get_object_or_404_custom(User, request, pk=pk)
 		tournaments = target_user.tournaments_joined.filter(is_done=True).order_by("-created_at")[:10]
 		serializer = TournamentSerializer(tournaments, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)
