@@ -6,7 +6,7 @@ async function	edit_personal_info(key, value)
 		new Toast(Toast.ERROR, request.log);
 	else
 	{
-		new Toast(Toast.SUCCESS, `Your ${key} has been modified!`);
+		new Toast(Toast.SUCCESS, str_personal_info_updated());
 		load_settings();
 	}
 }
@@ -15,7 +15,7 @@ async function edit_profile_picture(imageInput)
 {
 	const formData = new FormData()
 	if (imageInput.files.length === 0) {
-		new Toast(Toast.ERROR, "No file selected.");
+		new Toast(Toast.ERROR, str_no_file_selected());
 		return;
 	}
 	formData.append('image', imageInput.files[0]);
@@ -24,7 +24,7 @@ async function edit_profile_picture(imageInput)
 		new Toast(Toast.ERROR, request.log);
 	else
 	{
-		new Toast(Toast.SUCCESS, `Your profile picture has been succesfully updated!`);
+		new Toast(Toast.SUCCESS, str_profile_picture_updated());
 		load_settings();
 	}
 }

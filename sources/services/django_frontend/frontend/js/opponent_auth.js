@@ -42,11 +42,11 @@ async function opponent_signin() {
 	{
 		const opponentData = await fetch_opponent();
 		if (!opponentData)
-			new Toast(Toast.ERROR, "Failed to fetch opponent's data.");
+			new Toast(Toast.ERROR, str_failed_to_fetch_opponent_data());
 		else
 		{
 			localStorage.setItem("opponent_authenticated", "true");
-			new Toast(Toast.SUCCESS, "Opponent logged-in!");
+			new Toast(Toast.SUCCESS, str_opponent_logged_in());
 			if (window.location.pathname === "/create_game_pong" || window.location.pathname === "/create_game_tictactoe"	)
 				set_connected_opponent_form(opponentData);
 		}
@@ -60,7 +60,7 @@ async function opponent_signout() {
 	else
 	{
 		localStorage.removeItem("opponent_authenticated");
-		new Toast(Toast.SUCCESS, "Opponent signed out!");
+		new Toast(Toast.SUCCESS, str_opponent_signed_out());
 		if (window.location.pathname === "/create_game_pong" || window.location.pathname === "/create_game_tictactoe")
 			reset_opponent_form();
 	}

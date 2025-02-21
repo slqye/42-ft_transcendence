@@ -359,7 +359,7 @@ class Pong
 			catch (error)
 			{
 				this.setGameButtonToReplay();
-				return (new Toast(Toast.ERROR, "An opponent must be logged in to play a game."));
+				return (new Toast(Toast.ERROR, str_opponent_required()));
 			}
 		}
 		this.player1.average_time_to_score = 0;
@@ -404,7 +404,7 @@ class Pong
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
 		if (request.status == Api.ERROR || request.code != 201)
 		{
-			return (new Toast(Toast.ERROR, "An error occured while attempting to create a match."));
+			return (new Toast(Toast.ERROR, str_match_creation_error()));
 		}
 		else
 		{
@@ -416,11 +416,11 @@ class Pong
 				accept_request = await new Api("/api/invitations/" + invitation_id + "/accept/", Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status == Api.ERROR || accept_request.code != 201)
 			{
-				return (new Toast(Toast.ERROR, "An error occured while attempting to create a match."));
+				return (new Toast(Toast.ERROR, str_match_creation_error()));
 			}
 			else
 			{
-				new Toast(Toast.SUCCESS, "Match has been successfully created.");
+				new Toast(Toast.SUCCESS, str_match_creation_success());
 				this.match_id = accept_request.response.match.id;
 			}
 		}
@@ -436,11 +436,11 @@ class Pong
 				.request();
 			if (put_tournament_request.status === Api.ERROR)
 			{
-				new Toast(Toast.ERROR, "An error occurred while attempting to update the tournament." + "<br/>" + put_tournament_request.log);
+				new Toast(Toast.ERROR, str_tournament_update_error());
 			}
 			else
 			{
-				new Toast(Toast.SUCCESS, "Tournament has been successfully updated.");
+				new Toast(Toast.SUCCESS, str_tournament_update_success());
 				await load_tournament(this.tournament_id);
 			}
 		}

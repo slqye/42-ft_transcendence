@@ -71,7 +71,7 @@ async function	add_friend(username)
 		new Toast(Toast.ERROR, request.log);
 		return (console.error(request.log));
 	}
-	return (new Toast(Toast.SUCCESS, "Friend request sent."));
+	return (new Toast(Toast.SUCCESS, str_friend_request_sent()));
 }
 
 async function	accept_friend_request(current_html)
@@ -83,7 +83,7 @@ async function	accept_friend_request(current_html)
 		new Toast(Toast.ERROR, request.log);
 		return (console.error(request.log));
 	}
-	return (new Toast(Toast.SUCCESS, "Friend request accepted."), load_friends());
+	return (new Toast(Toast.SUCCESS, str_friend_request_accepted()), load_friends());
 }
 
 async function	refuse_friend_request(current_html)
@@ -95,5 +95,5 @@ async function	refuse_friend_request(current_html)
 		new Toast(Toast.ERROR, request.log);
 		return (console.error(request.log));
 	}
-	return (new Toast(Toast.SUCCESS, "Friend request accepted."), load_friends());
+	return (new Toast(Toast.SUCCESS, str_friend_request_refused()), load_friends());
 }

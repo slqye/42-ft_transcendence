@@ -7,7 +7,7 @@ async function	signup()
 	const password_confirm = document.getElementById("signup_password_confirm").value;
 
 	if (password != password_confirm)
-		return (new Toast(Toast.ERROR, "Password does not match."));
+		return (new Toast(Toast.ERROR, str_password_mismatch_error()));
 	const request_body = JSON.stringify(
 	{
 		"display_name": display_name,
@@ -23,7 +23,7 @@ async function	signup()
 		new Toast(Toast.ERROR, request.log);
 		return ;
 	}
-	new Toast(Toast.SUCCESS, "Account has been created.");
+	new Toast(Toast.SUCCESS, str_account_creation_success());
 	load_signin();
 }
 
@@ -43,7 +43,7 @@ async function	signin()
 		new Toast(Toast.ERROR, request.log);
 		return ;
 	}
-	new Toast(Toast.SUCCESS, "Logged-in.");
+	new Toast(Toast.SUCCESS, str_user_logged_in());
 	localStorage.setItem("user_authenticated", "true");
 	load_home();
 }
@@ -58,7 +58,7 @@ async function	signout()
 	}
 	else
 	{
-		new Toast(Toast.SUCCESS, "Signed out.");
+		new Toast(Toast.SUCCESS, str_user_logged_out());
 		localStorage.removeItem("user_authenticated");
 		load_home();
 	}
@@ -79,7 +79,7 @@ async function	signin_42(is_opponent = false, type = "skip")
 		config = request.response;
 		if (!config.API_42_UID || !config.API_42_REDIRECT_URI)
 		{
-			new Toast(Toast.ERROR, "OAuth configuration is missing.");
+			new Toast(Toast.ERROR, str_oauth_configuration_missing());
 			return ;
 		}
 		else
@@ -106,21 +106,21 @@ async function	signin_42(is_opponent = false, type = "skip")
 async function	signin_42_callback(is_opponent = false, type = "skip", success_callback = false)
 {
 	if (!success_callback)
-		return (new Toast(Toast.ERROR, "An error occurred while logging in with 42."));
+		return (new Toast(Toast.ERROR, str_login_42_error()));
 	if (is_opponent)
 		localStorage.setItem("opponent_authenticated", "true");
 	else
 		localStorage.setItem("user_authenticated", "true");
 	if (!is_opponent && await Api.is_login())
 	{
-		new Toast(Toast.SUCCESS, "Logged in with 42!");
+		new Toast(Toast.SUCCESS, str_user_logged_in_42());
 	}
 	else if (is_opponent && await Api.is_opponent_login())
 	{
 		if (type !== "tournament")
-			new Toast(Toast.SUCCESS, "Opponent logged in with 42!");
+			new Toast(Toast.SUCCESS, str_opponent_logged_in_42());
 	}
 	else
-		new Toast(Toast.ERROR, "An error occurred while logging in with 42.");
+		new Toast(Toast.ERROR, str_login_42_error());
 	history.pushState({ page: "home" }, "Home", "/home");
 }

@@ -22,7 +22,7 @@ async function load_navbar() {
 		{
 			const data = await fetch_me();
 			if (!data)
-				throw new Error("Failed to fetch user data");
+				throw new Error(str_failed_to_fetch_user_data());
 			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
 			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 			navbar.edit.id.set.attribute("profile", "class", "nav-item");
@@ -174,7 +174,7 @@ async function load_about() {
 async function load_signin() {
 	if (await Api.is_login())
 	{
-		new Toast(Toast.WARNING, "You are already logged in!");
+		new Toast(Toast.WARNING, str_already_logged_in());
 		return ;
 	}
 	const content = document.getElementById("content");
@@ -283,7 +283,7 @@ async function load_tournament(pk)
 	const content = document.getElementById("content");
 	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
 	if (request.status != Api.SUCCESS)
-		return (new Toast(Toast.ERROR, "Failed to load tournament"));
+		return (new Toast(Toast.ERROR, str_failed_to_load_tournament()));
 	const tournament = request.response;
 	let template = null;
 	if (tournament.is_done)
@@ -296,16 +296,16 @@ async function load_tournament(pk)
 	{
 		const request = await new Api("/api/tournaments/" + pk + "/pairs/next/", Api.USER).set_method("GET").set_credentials("omit").request();
 		if (request.status != Api.SUCCESS)
-			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+			return (new Toast(Toast.ERROR, str_failed_to_load_next_match_of_this_tournament()));
 		const next_pair = request.response.next_pair;
 		if (next_pair == null)
-			return (new Toast(Toast.WARNING, "No more matches in this tournament"));
+			return (new Toast(Toast.WARNING, str_no_more_matches_in_this_tournament()));
 		const user_id = next_pair.user;
 		const opponent_id = next_pair.opponent;
 		const user_data = await fetch_user(user_id);
 		const opponent_data = await fetch_user(opponent_id);
 		if (user_data == null || opponent_data == null)
-			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+			return (new Toast(Toast.ERROR, str_failed_to_load_next_match_of_this_tournament()));
 		let user_signed_in = false;
 		let opponent_signed_in = false;
 		if (await Api.is_login())
@@ -330,11 +330,7 @@ async function load_tournament(pk)
 		load_navbar();
 		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
 		content.innerHTML = template.value;
-		let tournament_name_title = null;
-		if (tournament.is_pong)
-			tournament_name_title = "Pong Tournament : " + tournament.name;
-		else
-			tournament_name_title = "TicTacToe Tournament : " + tournament.name;
+		const tournament_name_title = str_tournament_name_title(tournament)
 		document.getElementById("tournament_name").innerHTML = tournament_name_title;
 		set_theme_signin42();
 		set_tournament_forms(user_data, opponent_data, user_signed_in, opponent_signed_in);
@@ -358,7 +354,7 @@ async function load_tournament_details(pk = -1)
 	const content = document.getElementById("content");
 	const request = await new Api("/api/tournaments/" + pk + "/", Api.USER).set_method("GET").set_credentials("omit").request();
 	if (request.status != Api.SUCCESS)
-		return (new Toast(Toast.ERROR, "Failed to load tournament details from the server."));
+		return (new Toast(Toast.ERROR, str_failed_to_load_tournament_details_from_server()));
 	let template = await new Template("frontend/html/pages/tournament_details.html").load();
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));

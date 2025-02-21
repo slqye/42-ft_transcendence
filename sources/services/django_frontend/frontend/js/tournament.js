@@ -7,7 +7,7 @@ async function	update_player_number()
 
 	if (player_number !== 4 && player_number !== 8 && player_number !== 16)
 	{
-		new Toast(Toast.ERROR, "Invalid number of players.");
+		new Toast(Toast.ERROR, str_invalid_number_of_players());
 		return ;
 	}
 	if (template == null)
@@ -59,14 +59,14 @@ async function	create_tournament()
 	const tournament_name = document.getElementById("tournament_name").value;
 	if (tournament_name == "")
 	{
-		new Toast(Toast.ERROR, "Please enter a tournament name.");
+		new Toast(Toast.ERROR, str_please_enter_a_tournament_name());
 		return ;
 	}
 	const select_game = document.getElementById("select_game");
 	let is_pong = false;
 	if (select_game.value != "0" && select_game.value != "1")
 	{
-		new Toast(Toast.ERROR, "Please select a valid game.");
+		new Toast(Toast.ERROR, str_please_select_a_valid_game());
 		return ;
 	}
 	else
@@ -79,14 +79,14 @@ async function	create_tournament()
 	{
 		if (usernames_list[index] == "")
 		{
-			new Toast(Toast.ERROR, "Please enter all usernames.");
+			new Toast(Toast.ERROR, str_please_enter_all_usernames());
 			return ;
 		}
 		for (let index2 = 0; index2 < usernames_list.length; index2++)
 		{
 			if (usernames_list[index] == usernames_list[index2] && index != index2)
 			{
-				new Toast(Toast.ERROR, "Please enter unique usernames.");
+				new Toast(Toast.ERROR, str_please_enter_unique_usernames());
 				return ;
 			}
 		}
@@ -134,7 +134,7 @@ async function	create_tournament()
 		else
 		{
 			tournament_id = request.response.id;
-			new Toast(Toast.SUCCESS, "Tournament created successfully.");
+			new Toast(Toast.SUCCESS, str_tournament_created_successfully());
 		}
 	}
 	catch (error)
@@ -152,23 +152,23 @@ async function	start_game_tournament()
 	const url_params = new URLSearchParams(window.location.search);
 	const tournament_id = url_params.get('id');
 	if (!tournament_id)
-		return (new Toast(Toast.ERROR, "Tournament ID is missing."));
+		return (new Toast(Toast.ERROR, str_tournament_id_is_missing()));
 	const request = await new Api("/api/tournaments/" + tournament_id + "/pairs/next/", Api.USER).set_method("GET").set_credentials("omit").request();
 	if (request.status == Api.ERROR || request.response == null)
 		throw (new Error(request.log));
 	const next_pair = request.response.next_pair;
 	if (next_pair == null)
-		throw (new Error("No more matches in this tournament"));
+		throw (new Error(str_no_more_matches_in_this_tournament()));
 	const user_id = next_pair.user;
 	const opponent_id = next_pair.opponent;
 	const player_1 = await fetch_me();
 	const player_2 = await fetch_opponent();
 	if (player_1 == null || player_2 == null)
-		return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+		return (new Toast(Toast.ERROR, str_failed_to_load_next_match_of_this_tournament()));
 	if (player_1.id != user_id)
-		return (new Toast(Toast.ERROR, player_1.username + " is not the first player of this tournament match, please check your credentials"));
+		return (new Toast(Toast.ERROR, player_1.username + " " + str_is_not_the_first_player_of_this_tournament_match_please_check_your_credentials()));
 	if (player_2.id != opponent_id)
-		return (new Toast(Toast.ERROR, player_2.username + " is not the second player of this tournament match, please check your credentials"));
+		return (new Toast(Toast.ERROR, player_2.username + " " + str_is_not_the_second_player_of_this_tournament_match_please_check_your_credentials()));
 	if (next_pair.is_pong)
 	{
 		await load_pong_match();
@@ -237,11 +237,11 @@ async function	tournament_user_signin()
 	{
 		const userData = await fetch_me();
 		if (!userData)
-			new Toast(Toast.ERROR, "Failed to fetch player 1 data.");
+			new Toast(Toast.ERROR, str_failed_to_fetch_player_1_data());
 		else
 		{
 			localStorage.setItem("user_authenticated", "true");
-			new Toast(Toast.SUCCESS, "Player 1 logged-in!");
+			new Toast(Toast.SUCCESS, str_player_1_logged_in());
 			set_connected_tournament_user_form(userData);
 		}
 	}
@@ -256,7 +256,7 @@ async function	tournament_user_signout(reset_form = true, skip_toast = false)
 	{
 		localStorage.removeItem("user_authenticated");
 		if (!skip_toast)
-			new Toast(Toast.SUCCESS, "Player 1 signed out!");
+			new Toast(Toast.SUCCESS, str_player_1_signed_out());
 		if (reset_form)
 			reset_tournament_user_form();
 	}
@@ -302,11 +302,11 @@ async function	tournament_opponent_signin()
 	{
 		const opponentData = await fetch_opponent();
 		if (!opponentData)
-			new Toast(Toast.ERROR, "Failed to fetch player 2 data.");
+			new Toast(Toast.ERROR, str_failed_to_fetch_player_2_data());
 		else
 		{
 			localStorage.setItem("opponent_authenticated", "true");
-			new Toast(Toast.SUCCESS, "Player 2 logged-in!");
+			new Toast(Toast.SUCCESS, str_player_2_logged_in());
 			set_connected_tournament_opponent_form(opponentData);
 		}
 	}
@@ -321,7 +321,7 @@ async function	tournament_opponent_signout(reset_form = true, skip_toast = false
 	{
 		localStorage.removeItem("opponent_authenticated");
 		if (!skip_toast)
-			new Toast(Toast.SUCCESS, "Player 2 signed out!");
+			new Toast(Toast.SUCCESS, str_player_2_signed_out());
 		if (reset_form)
 			reset_tournament_opponent_form();
 	}
@@ -337,17 +337,13 @@ function	display_start_game_button_if_ready()
 
 async function	set_tournament_details(template, tournament)
 {
-	let tournament_name_title = "Tournament";
-	if (tournament.is_pong)
-		tournament_name_title = "Pong Tournament : " + tournament.name;
-	else
-		tournament_name_title = "TicTacToe Tournament : " + tournament.name;
+	let tournament_name_title = str_tournament_name_title(tournament);
 
 	template.edit.id.set.content("tournament_name", tournament_name_title);
 
 	if (!tournament.is_done)
 	{
-		template.edit.id.set.content("tournament_status", "This tournament is still in progress.");
+		template.edit.id.set.content("tournament_status", str_tournament_is_still_in_progress());
 		template.edit.id.get.element("tournament_status").classList.remove("d-none");
 	}
 	else

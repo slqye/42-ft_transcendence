@@ -10,7 +10,7 @@ async function	launch_pong_match()
 	}
 	catch (error)
 	{
-		return (new Toast(Toast.ERROR, "A host player must be logged in to play a game."));
+		return (new Toast(Toast.ERROR, str_host_player_must_be_logged_in_to_play_a_game()));
 	}
 	let selected_opponent = document.querySelector("input[name='options-outlined']:checked");
 	let opponent = null;
@@ -24,15 +24,15 @@ async function	launch_pong_match()
 		}
 		catch (error)
 		{
-			return (new Toast(Toast.ERROR, "An opponent must be logged in to play a game."));
+			return (new Toast(Toast.ERROR, str_opponent_must_be_logged_in_to_play_a_game()));
 		}
 		if (user.username === opponent.username)
-			return (new Toast(Toast.ERROR, "You cannot play against yourself!"));
+			return (new Toast(Toast.ERROR, str_cannot_play_against_yourself()));
 	}
 	if (win_condition < 3)
-		return (new Toast(Toast.ERROR, "The win condition must be at least 3!"));
+		return (new Toast(Toast.ERROR, str_win_condition_must_be_at_least_3()));
 	else if (win_condition > 10)
-		return (new Toast(Toast.ERROR, "The win condition must be at most 10!"));
+		return (new Toast(Toast.ERROR, str_win_condition_must_be_at_most_10()));
 	await load_pong_match();
 	let game = document.getElementById("game");
 	let score = document.getElementById("score");
@@ -55,7 +55,7 @@ async function	launch_tictactoe_match()
 	}
 	catch (error)
 	{
-		return (new Toast(Toast.ERROR, "A host player must be logged in to play a game."));
+		return (new Toast(Toast.ERROR, str_host_player_must_be_logged_in_to_play_a_game()));
 	}
 	let selected_opponent = document.querySelector("input[name='options-outlined']:checked");
 	if (selected_opponent.id == "user-outlined")
@@ -69,15 +69,15 @@ async function	launch_tictactoe_match()
 		}
 		catch (error)
 		{
-			return (new Toast(Toast.ERROR, "An opponent must be logged in to play a game."));
+			return (new Toast(Toast.ERROR, str_opponent_must_be_logged_in_to_play_a_game()));
 		}
 		if (user.username === opponent.username)
-			return (new Toast(Toast.ERROR, "You cannot play against yourself!"));
+			return (new Toast(Toast.ERROR, str_cannot_play_against_yourself()));
 	}
 	if (win_condition < 3)
-		return (new Toast(Toast.ERROR, "The win condition must be at least 3!"));
+		return (new Toast(Toast.ERROR, str_win_condition_must_be_at_least_3()));
 	else if (win_condition > 10)
-		return (new Toast(Toast.ERROR, "The win condition must be at most 10!"));
+		return (new Toast(Toast.ERROR, str_win_condition_must_be_at_most_10()));
 	await load_tictactoe_match();
 	if (selected_opponent.id == "user-outlined")
 		var game = new TicTacToe(new Player(user.display_name), new Player(opponent.display_name), win_condition);
@@ -118,19 +118,3 @@ async function	ia_switch()
 			reset_opponent_form();
 	}
 }
-
-// function	end_game_message(winner)
-// {
-// 	const language = localStorage.getItem("preferred-language") || "en";
-// 	if (winner)
-// 	{
-// 		return ;
-// 	}
-// 	else
-// 	{
-// 		if (language === "en")
-// 			return ("The game is a draw!");
-// 		else
-// 			return ("Le jeu est un match nul!");
-// 	}
-// }

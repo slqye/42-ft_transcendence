@@ -28,13 +28,24 @@ class	Api
 		this.add_header("X-User-Type", this.type)
 	}
 
+	static str_network_error()
+	{
+		let language = localStorage.getItem('preferred-language');
+		if (language == 'fr')
+			return "Erreur de réseau.";
+		else if (language == 'de')
+			return "Netzwerkfehler.";
+		else
+			return "Network error.";
+	}
+
 	async request()
 	{
 		this.depth++;
 		if (this.depth > 2)
 		{
 			this.status = Api.ERROR;
-			this.log = "Network error.";
+			this.log = Api.str_network_error();
 			return (this);
 		}
 		try
