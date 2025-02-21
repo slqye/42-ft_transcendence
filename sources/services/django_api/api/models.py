@@ -1,23 +1,34 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
 import math, random
 
 class User(AbstractUser):
-	avatar_url = models.CharField(max_length=255, blank=True, default='https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3407.jpg?w=360')
-	display_name= models.CharField(max_length=30, blank=True, unique=True)
+	avatar_url = models.CharField(max_length=255, blank=True, default='')
+	display_name = models.CharField(max_length=10, blank=True, unique=True)
+	username = models.CharField(max_length=10, blank=False, unique=True)
 	language_code = models.CharField(max_length=2, default='en')
 	created_at = models.DateTimeField(auto_now_add=True)
 	is_ai = models.BooleanField(default=False)
+	last_active = models.DateTimeField(null=True, blank=True)
+
 	pong_matches_played = models.PositiveIntegerField(default=0)
 	pong_wins = models.PositiveIntegerField(default=0)
 	pong_draws = models.PositiveIntegerField(default=0)
 	pong_losses = models.PositiveIntegerField(default=0)
-
 	tictactoe_matches_played = models.PositiveIntegerField(default=0)
 	tictactoe_wins = models.PositiveIntegerField(default=0)
 	tictactoe_draws = models.PositiveIntegerField(default=0)
 	tictactoe_losses = models.PositiveIntegerField(default=0)
+
+	@property
+	def is_connected(self):
+		threshold = timedelta(minutes=5)
+		if self.last_active:
+			return timezone.now() - self.last_active <= threshold
+		return False
 
 class Friendship(models.Model):
 	user_id_1 = models.ForeignKey(User, related_name='friendship_user_1', on_delete=models.CASCADE)
@@ -92,8 +103,7 @@ class Match(models.Model):
 	host_user = models.ForeignKey(User, related_name='match_host_user', on_delete=models.CASCADE)
 	opponent_user = models.ForeignKey(User, related_name='match_opponent_user', on_delete=models.CASCADE)
 	versus_ai = models.BooleanField(default=False)
-	# Now an integer field. For example: 0 = pending/draw, 1 = win, etc.
-	result = models.IntegerField(default=0)
+	result = models.IntegerField()
 	is_pong = models.BooleanField(blank=False, default=True)
 	pong_game_stats = models.OneToOneField(
 		PongGameStats, null=True, blank=True, on_delete=models.SET_NULL, related_name='match'
@@ -114,7 +124,7 @@ class Pair(models.Model):
 	opponent = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='pair_as_opponent')
 
 	match = models.OneToOneField(
-		Match,  # or import your Match model
+		Match,
 		on_delete=models.SET_NULL,
 		null=True, blank=True,
 		related_name='pair'
@@ -155,3 +165,7 @@ class Invitation(models.Model):
 		on_delete=models.SET_NULL,
 		related_name='invitation'
 	)
+
+class Picture(models.Model):
+	image = models.ImageField(upload_to='uploads/')
+	uploaded_at = models.DateTimeField(auto_now_add=True)

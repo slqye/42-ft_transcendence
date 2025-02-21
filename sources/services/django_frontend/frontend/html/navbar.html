@@ -8,20 +8,20 @@
 			<!-- right -->
 			<ul class="navbar-nav">
 				<!-- games -->
-				<li class="nav-item dropdown">
+				<li class="nav-item dropdown d-none" id="games">
 					<button class="nav-link dropdown-toggle" id="dropdown_title" role="button" data-bs-toggle="dropdown" aria-expanded="false">Games</button>
 					<ul class="dropdown-menu">
-						<li><button class="dropdown-item" onclick="load_create_game_pong();">Pong</button></li>
-						<li><button class="dropdown-item" onclick="load_create_game_tictactoe();">Tictactoe</button></li>
+						<li><button class="dropdown-item" onclick="stop_all_games(); load_create_game_pong();">Pong</button></li>
+						<li><button class="dropdown-item" onclick="stop_all_games(); load_create_game_tictactoe();">Tictactoe</button></li>
 					</ul>
 				</li>
 				<!-- tournament -->
 				<li class="nav-item">
-					<button class="nav-link btn btn-link" id="tournament" onclick="load_create_tournament();">Tournament</button>
+					<button class="nav-link btn btn-link" id="tournament" onclick="stop_all_games(); select_tournament();">Tournament</button>
 				</li>
 				<!-- about -->
 				<li class="nav-item">
-					<button class="nav-link btn btn-link" id="about" onclick="load_about();">About</button>
+					<button class="nav-link btn btn-link" id="about" onclick="stop_all_games(); load_about();">About</button>
 				</li>
 			</ul>
 			<!-- left -->
@@ -36,8 +36,8 @@
 				</li>
 				<!-- signin -->
 				<li class="nav-item" id="signin">
-					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in" onclick="load_signin();">Sign in</button>
-					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in" onclick="load_signin();">Sign in</button>
+					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in" onclick="stop_all_games(); load_signin();">Sign in</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in" onclick="stop_all_games(); load_signin();">Sign in</button>
 				</li>
 				<li class="nav-item d-none" id="profile">
 					<div class="dropdown dropstart">
@@ -48,12 +48,17 @@
 							<p class="mb-0" id="theme">Profile</p>
 						</button>
 						<ul class="dropdown-menu">
-							<button class="dropdown-item" onclick="load_profile('me')">Profile</button>
-							<button class="dropdown-item" onclick="load_friends();">Friends</button>
-							<button class="dropdown-item" onclick="load_settings();">Settings</button>
-							<button class="dropdown-item" onclick="(async () => { await signout(); load_home(); })();">Sign out</button>
+							<button class="dropdown-item" onclick="stop_all_games(); load_profile('me')">Profile</button>
+							<button class="dropdown-item" onclick="stop_all_games(); load_friends();">Friends</button>
+							<button class="dropdown-item" onclick="stop_all_games(); load_settings();">Settings</button>
+							<button class="dropdown-item" onclick="(async () => { await stop_all_games(); signout(); load_home(); })();">Sign out</button>
 						</ul>
 					</div>
+				</li>
+				<!-- signout opponent -->
+				<li class="nav-item m-1 d-none" id="signout_opponent_container">
+					<button type="button" class="btn btn-outline-danger d-none d-lg-inline-block mx-1" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); stop_all_games(); load_navbar(); })()">Opponent sign out</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); stop_all_games(); load_navbar(); })()">Opponent sign out</button>
 				</li>
 			</ul>
 		</div>

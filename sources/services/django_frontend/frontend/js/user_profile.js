@@ -1,7 +1,5 @@
 function	format_winrate_value(rate)
 {
-	if (rate == 0)
-		return ("N/A");
 	return (rate.toFixed(0) + "%");
 }
 
@@ -18,6 +16,7 @@ async function	set_profile(template, pk = "me")
 		const data = request.response;
 		template.edit.id.set.content("profile_display_name", data.display_name);
 		template.edit.id.set.content("profile_user_name", "@" + data.username);
+		template.edit.id.set.attribute("profile_icon", "src", data.avatar_url);
 		let pong_winrate = request_stats.response.pong_winrate;
 		if (request_stats.response.pong_matches_played == 0)
 			pong_winrate = 50;
@@ -129,5 +128,48 @@ async function	set_profile_history(template, pk = "me")
 
 async function	set_profile_tournament_history(template, pk = "me")
 {
-	const tournament_history = template.edit.id.get.element("history_tournaments");
+	try
+	{
+		const request = await new Api("/api/users/" + pk + "/tournaments/", Api.USER).request();
+		if (request.status == Api.ERROR)
+			return (console.error(request.log));
+		const request_profile = await new Api("/api/users/" + pk + "/", Api.USER).request();
+		if (request_profile.status == Api.ERROR)
+			return (console.error(request_profile.log));
+		let user = await request_profile.response;
+		const data = await request.response;
+		const tournament_history = template.edit.id.get.element("history_tournaments");
+		for (let index = 0; index < data.length; index++)
+		{
+			const element = data[index];
+			let template_history_item = await new Template("frontend/html/pages/history_tournament_item.html").load();
+			if (template_history_item == null)
+				return console.error(ERROR_TEMPLATE);
+			let ranking = element.participants_ranking;
+			let winner = ranking[ranking.length - 1];
+			if (user.username == winner.username)
+				template_history_item.edit.id.add.attribute("tournament_button", "class", " bg-success");
+			else
+				template_history_item.edit.id.add.attribute("tournament_button", "class", " bg-danger");
+			template_history_item.edit.id.set.attribute("user_profile_icon", "src", winner.avatar_url);
+			template_history_item.edit.id.set.content("user_name", winner.username);
+			template_history_item.edit.id.set.content("tournament_name", element.name);
+			for (let rank_index = 0; rank_index < ranking.length; rank_index++) {
+				const user_ranked = ranking[ranking.length - rank_index - 1];
+				let line = `
+					<tr>
+						<td class="text-start">${user_ranked.username}</td>
+						<td>#${rank_index + 1}</td>
+					</tr>
+				`
+				template_history_item.edit.id.add.content("user_ranking_container", line);
+			}
+	
+			tournament_history.appendChild(template_history_item.edit.id.get.element("tournament"));
+		}
+	}
+	catch (error)
+	{
+		return (console.error(error));
+	}
 }

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Friendship, Match, Tournament, Pair, PongGameStats, TicTacToeGameStats, Invitation
+from .models import User, Friendship, Match, Tournament, Pair, PongGameStats, TicTacToeGameStats, Invitation, Picture
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -20,8 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = User
-		fields = ['id', 'username', 'display_name', 'password', 'avatar_url', 'language_code', 'created_at', 'is_ai']
-		read_only_fields = ['id', 'created_at', 'is_ai']
+		fields = ['id', 'username', 'display_name', 'password', 'avatar_url', 'language_code', 'created_at', 'is_ai', 'is_connected']
+		read_only_fields = ['id', 'created_at', 'is_ai', 'is_connected']
 
 	def create(self, validated_data):
 		user = User(
@@ -341,9 +341,13 @@ class TournamentSerializer(serializers.ModelSerializer):
 	def _is_power_of_two(self, n):
 		return (n & (n - 1) == 0) and n != 0
 
-
 class TournamentListSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Tournament
 		fields = ['id', 'name', 'status', 'is_done', 'created_at']
 		read_only_fields = fields
+
+class PictureSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Picture
+		fields = ['id', 'image', 'uploaded_at']

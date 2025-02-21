@@ -6,7 +6,7 @@ function	set_connected_opponent_form(opponentData)
 	document.getElementById("opponent_signin_username").disabled = true;
 	document.getElementById("opponent_signin_password").disabled = true;
 
-	document.getElementById("sign_in_as_opponent_button").classList.add('d-none');
+	document.getElementById("sign_in_opponent_options").classList.add('d-none');
 	document.getElementById("opponent_info").classList.remove('d-none');
 
 	document.getElementById("start-game-button").classList.remove('d-none');
@@ -17,7 +17,7 @@ function	reset_opponent_form()
 	document.getElementById("opponent_signin_username").disabled = false;
 	document.getElementById("opponent_signin_password").disabled = false;
 
-	document.getElementById("sign_in_as_opponent_button").classList.remove('d-none');
+	document.getElementById("sign_in_opponent_options").classList.remove('d-none');
 	document.getElementById("opponent_info").classList.add('d-none');
 
 	document.getElementById("opponent_signin_username").value = "";
@@ -54,7 +54,7 @@ async function opponent_signin() {
 }
 
 async function opponent_signout() {
-	const request = await new Api("/api/opponent/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
+	const request = await new Api("/api/opponent/logout/", Api.OPPONENT).set_method("POST").set_omit_refresh(true).request();
 	if (request.status == Api.ERROR)
 		new Toast(Toast.ERROR, request.log);
 	else

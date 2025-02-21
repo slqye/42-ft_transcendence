@@ -110,7 +110,7 @@ class	Api
 
 	// Setters
 	set_method(method) { this.method = method; return (this); }
-	set_headers(headers) { this.header = headers; return (this); }
+	set_headers(headers) { this.headers = headers; return (this); }
 	set_credentials(credentials) { this.credentials = credentials; return (this); }
 	set_body(body) { this.body = body; return (this); }
 	set_omit_refresh(omit_refresh) { this.omit_refresh = omit_refresh; return (this); }

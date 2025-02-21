@@ -10,7 +10,8 @@ def create_ai_user(sender, **kwargs):
 			ai_user = User.objects.create_user(
 				username=ai_username,
 				display_name="AI",
-				is_ai=True
+				is_ai=True,
+				avatar_url="frontend/assets/user_media/AI.png"
 			)
 			ai_user.set_unusable_password()
 			ai_user.save()

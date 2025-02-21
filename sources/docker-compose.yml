@@ -11,6 +11,7 @@ services:
     env_file: .env
     volumes:
       - ./services/django_frontend/:/app
+      - transcendence_file_uploads:/app/frontend/assets/user_media
     networks:
       - transcendence_network_backend
     expose:
@@ -34,16 +35,19 @@ services:
     env_file: .env
     volumes:
       - ./services/django_api/:/app
+      - transcendence_file_uploads:/app/user_media
     networks:
       - transcendence_network_backend
     expose:
-      - 8081
+      - "8081"
     restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy
     labels:
       is-transcendence: "yes"
+    command: >
+      gunicorn --bind 0.0.0.0:8081 --workers 3 website.wsgi:application
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/api/"]
       interval: 10s
@@ -160,10 +164,6 @@ volumes:
   transcendence_database_data:
     name: transcendence_database_data
     driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/data/database_data
-      o: bind
     labels:
       is-transcendence: "yes"
   transcendence_prometheus_data:
@@ -173,6 +173,11 @@ volumes:
       type: none
       device: ${PWD}/data/prometheus_data
       o: bind
+    labels:
+      is-transcendence: "yes"
+  transcendence_file_uploads:
+    name: transcendence_file_uploads
+    driver: local
     labels:
       is-transcendence: "yes"
 

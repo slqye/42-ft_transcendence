@@ -26,11 +26,16 @@ async function load_navbar() {
 			navbar.edit.id.set.attribute("img-profile-icon", "src", data.avatar_url);
 			navbar.edit.id.set.attribute("signin", "class", "nav-item d-none");
 			navbar.edit.id.set.attribute("profile", "class", "nav-item");
+			navbar.edit.id.set.attribute("games", "class", "nav-item dropdown");
 		}
 		catch (error)
 		{
 			new Toast(Toast.ERROR, error);
 		}
+	}
+	if ((window.location.pathname === "/home" || window.location.pathname === "/about") && await Api.is_opponent_login())
+	{
+		navbar.edit.id.set.attribute("signout_opponent_container", "class", "nav-item");
 	}
 	header.innerHTML = navbar.string;
 }
@@ -40,11 +45,20 @@ async function load_home() {
 	let template = await new Template("frontend/html/pages/home.html").load();
 	const urlParams = new URLSearchParams(window.location.search);
 	const callback = urlParams.get('callback');
+	const role = urlParams.get('role');
+	const type = urlParams.get('type');
+	const success_callback = urlParams.get('success_callback');
 
 	if (template == null)
 		return (console.error(ERROR_TEMPLATE));
 	if (window.location.pathname === "/home" && callback)
-		await signin_42_callback();
+		await signin_42_callback(role === "opponent", type, success_callback === "true");
+	if (callback && type == "match_pong")
+		return (await load_create_game_pong());
+	else if (callback && type == "match_tictactoe")
+		return (await load_create_game_tictactoe());
+	else if (callback && type == "tournament")
+		return (await select_tournament());
 	load_navbar();
 	if (await Api.is_login())
 		template.edit.id.add.attribute("sign-in-button", "class", "d-none");
@@ -74,6 +88,7 @@ async function load_create_game_pong() {
 		if (opponentData)
 			set_connected_opponent_form(opponentData);
 	}
+	set_theme_signin42();
 }
 
 async function load_pong_match() {
@@ -111,6 +126,7 @@ async function load_create_game_tictactoe() {
 		if (opponentData)
 			set_connected_opponent_form(opponentData);
 	}
+	set_theme_signin42();
 }
 
 async function load_tictactoe_match() {
@@ -169,32 +185,7 @@ async function load_signin() {
 	
 	load_navbar();
 	content.innerHTML = template.value;
-
-	// Adapt the 42 logo based on the current theme
-	const theme = document.body.getAttribute("data-bs-theme");
-	const logo = document.getElementById("logo_42");
-	const signin_42_btn = document.getElementById("signin_42");
-
-	if (theme === "dark")
-	{
-		if (logo)
-			logo.src = "/frontend/assets/42logo_dark.svg";
-		if (signin_42_btn)
-		{
-			signin_42_btn.classList.remove("btn-outline-dark");
-			signin_42_btn.classList.add("btn-outline-light");
-		}
-	}
-	else
-	{
-		if (logo)
-			logo.src = "/frontend/assets/42logo_light.svg";
-		if (signin_42_btn)
-		{
-			signin_42_btn.classList.remove("btn-outline-light");
-			signin_42_btn.classList.add("btn-outline-dark");
-		}
-	}
+	set_theme_signin42();
 
 	if (window.location.pathname !== "/signin")
 		history.pushState({ page: "signin" }, "Signin", "/signin");
@@ -282,6 +273,7 @@ async function load_tournament(pk)
 		history.pushState({ page: "tournament", id: pk }, "Tournament", "/tournament?id=" + pk);
 		const urlParams = new URLSearchParams(window.location.search);
 		pk = urlParams.get('id');
+		localStorage.setItem("tournament_id", pk);
 	}
 	else
 	{
@@ -296,6 +288,8 @@ async function load_tournament(pk)
 	let template = null;
 	if (tournament.is_done)
 	{
+		if (localStorage.getItem("tournament_id") != null)
+			localStorage.removeItem("tournament_id");
 		return (await load_tournament_details(pk));
 	}
 	else
@@ -312,10 +306,24 @@ async function load_tournament(pk)
 		const opponent_data = await fetch_user(opponent_id);
 		if (user_data == null || opponent_data == null)
 			return (new Toast(Toast.ERROR, "Failed to load the next match of this tournament"));
+		let user_signed_in = false;
+		let opponent_signed_in = false;
 		if (await Api.is_login())
-			await tournament_user_signout(false, true);
+		{
+			const signed_in_user = await fetch_me();
+			if (signed_in_user.username !== user_data.username)
+				await tournament_user_signout(false, true);
+			else
+				user_signed_in = true;
+		}
 		if (await Api.is_opponent_login())
-			await tournament_opponent_signout(false, true);
+		{
+			const signed_in_opponent = await fetch_opponent();
+			if (signed_in_opponent.username !== opponent_data.username)
+				await tournament_opponent_signout(false, true);
+			else
+				opponent_signed_in = true;
+		}
 		template = await new Template("frontend/html/pages/tournament_login.html").load();
 		if (template == null)
 			return (console.error(ERROR_TEMPLATE));
@@ -328,7 +336,8 @@ async function load_tournament(pk)
 		else
 			tournament_name_title = "TicTacToe Tournament : " + tournament.name;
 		document.getElementById("tournament_name").innerHTML = tournament_name_title;
-		set_tournament_forms(user_data, opponent_data);
+		set_theme_signin42();
+		set_tournament_forms(user_data, opponent_data, user_signed_in, opponent_signed_in);
 	}
 	init_tooltips();
 }

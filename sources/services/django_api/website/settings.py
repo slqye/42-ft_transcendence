@@ -64,11 +64,9 @@ MIDDLEWARE = [
 PROMETHEUS_METRICS_EXPORT_NAMESPACE = "django"
 
 REST_FRAMEWORK = {
+	'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
 	'DEFAULT_AUTHENTICATION_CLASSES': [
 		'api.authentication.DualCookieJWTAuthentication',
-		#"rest_framework_simplejwt.authentication.JWTAuthentication",
-		# 'rest_framework.authentication.TokenAuthentication',
-		# 'rest_framework.authentication.SessionAuthentication',
 	]
 }
 
@@ -167,3 +165,9 @@ CSRF_TRUSTED_ORIGINS = [
 	"https://localhost:8000",
 	MAIN_URL,
 ]
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Media files settings
+MEDIA_URL = '/user_media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'user_media')

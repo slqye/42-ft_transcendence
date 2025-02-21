@@ -36,8 +36,14 @@
 							<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
 							<input type="password" class="form-control" placeholder="Password" aria-label="password" id="opponent_signin_password">
 						</div>
-						<div class="my-3">
-							<button type="button" id="sign_in_as_opponent_button" class="btn btn-outline-primary" onclick="opponent_signin();">Sign in</button>
+						<div class="my-3" id="sign_in_opponent_options">
+							<button type="button" id="sign_in_as_opponent_button" class="btn btn-outline-primary" onclick="event.preventDefault(); opponent_signin();">Sign in</button>
+							<div class="justify-content-center">
+								<button class="btn mt-2 d-flex align-items-center px-2 signin_42_opponent_btn" id="signin_42_opponent_btn" style="padding: 0.5em;" onclick="event.preventDefault(); signin_42(true, 'match_pong');">
+									<span>Sign in with </span>
+									<img src="/frontend/assets/42logo_dark.svg" alt="42 icon" id="logo_42_opponent" class="px-1" style="height: 1em; width: auto;">
+								</button>
+							</div>
 						</div>
 						<div id="opponent_info" class="my-3 d-flex align-items-center justify-content-between d-none">
 							<button type="button" class="btn btn-danger m-0" onclick="opponent_signout();">Sign out</button>

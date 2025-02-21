@@ -49,7 +49,7 @@ async function	set_friend_data(data, template, container)
 	template.edit.id.set.attribute("btn_view_profile", "data-request-id", data["id"]);
 	template.edit.id.set.content("friend_display_name", data["display_name"]);
 	template.edit.id.set.content("friend_user_name", "@" + data["username"]);
-	if (data["connected"] == "true")
+	if (data["is_connected"] == true)
 	{
 		template.edit.id.add.attribute("friend_online_status", "class", "bg-success");
 		template.edit.id.set.attribute("friend_online_status", "data-bs-title", "online");

@@ -301,11 +301,11 @@ class TicTacToe
 		this.player2.quickest_win_moves = 0;
 	}
 
-	resetMatch()
+	static resetMatch(ttt_instance)
 	{
-		this.resetPlayerVariables();
-		this.refreshScoreboard();
-		this.startRound();
+		ttt_instance.resetPlayerVariables();
+		ttt_instance.refreshScoreboard();
+		ttt_instance.startRound();
 	}
 
 	refreshScoreboard()
@@ -319,7 +319,7 @@ class TicTacToe
 		var gameButton = document.getElementById('game-button');
 		gameButton.setAttribute('class', 'btn btn-outline-primary');
 		gameButton.textContent = 'Play a new match';
-		gameButton.addEventListener('click', this.resetMatch);
+		gameButton.addEventListener('click', () => { TicTacToe.resetMatch(this); });
 	}
 
 	async terminateMatch()
@@ -342,7 +342,7 @@ class TicTacToe
 		let result = this.player1.score > this.player2.score ? 0 : 1;
 		if (this.player1.score === this.player2.score)
 			result = 2;
-		let request_body = JSON.stringify({
+		let request_body = await JSON.stringify({
 			"is_pong": false,
 			"result": result,
 			"tournament": this.tournament_id !== -1 ? this.tournament_id : null,
@@ -361,16 +361,16 @@ class TicTacToe
 		});
 		if (this.is_ia)
 		{
-			let request_object = JSON.parse(request_body);
+			let request_object = await JSON.parse(request_body);
 			request_object.opponent_user_id = null;
 			request_object.versus_ai = true;
-			request_body = JSON.stringify(request_object);
+			request_body = await JSON.stringify(request_object);
 		}
 		else
 		{
-			let request_object = JSON.parse(request_body);
+			let request_object = await JSON.parse(request_body);
 			request_object.opponent_user_id = opponent.id;
-			request_body = JSON.stringify(request_object);
+			request_body = await JSON.stringify(request_object);
 		}
 		const request = await new Api("/api/invitations/", Api.USER).set_method("POST").set_body(request_body).request();
 		if (request.status === Api.ERROR || request.code !== 201)
@@ -378,7 +378,11 @@ class TicTacToe
 		else
 		{
 			let invitation_id = request.response.id;
-			const accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.OPPONENT).set_method("POST").request();
+			let accept_request;
+			if (this.is_ia)
+				accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.USER).set_method("POST").request();
+			else
+				accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status === Api.ERROR || accept_request.code !== 201)
 			{
 				return (new Toast(Toast.ERROR, "An error occurred while attempting to create a match."));

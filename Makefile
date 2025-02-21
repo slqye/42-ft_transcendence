@@ -35,20 +35,16 @@ down :
 	@docker compose -f ./sources/docker-compose.yml down
 
 clean : down
-	@ { docker volume ls --filter label=is-transcendence=yes -q; echo null; } | xargs -r docker volume rm --force
 
 fclean : clean
-	@docker compose -f ./sources/docker-compose.yml down --rmi all
+	@docker compose -f ./sources/docker-compose.yml down --rmi all --volumes
 	@docker image prune --filter label=is-transcendence=yes --force
 
-
-re :
-	@make fclean
-	@make build
-	@make up
+re : clean build up
 
 flush_database :
 	@docker exec -it transcendence_django_api python manage.py flush --no-input
+	@rm -rf sources/services/django_api/api/migrations
 
 drop_database :
 	@docker exec -it transcendence_django_api python manage.py reset_db --noinput
@@ -72,4 +68,4 @@ status :
 	@echo "${COLOR_GREEN}Images :${COLOR_RESET}"
 	@docker image ls --filter label=is-transcendence=yes
 
-.PHONY:	all re down clean fclean up build flush_database drop_database new_database_re status
+.PHONY:	all build up stop start down clean fclean re flush_database drop_database new_database_re status
