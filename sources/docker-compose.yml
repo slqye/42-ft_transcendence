@@ -75,7 +75,7 @@ services:
       test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
   
   postgres_exporter:
     container_name: transcendence_postgres_exporter
