@@ -25,7 +25,11 @@ class	Api
 		this.log = null;
 		this.depth = 0;
 
-		this.add_header("X-User-Type", this.type)
+		this.add_header("X-User-Type", this.type);
+		if (localStorage.getItem("preferred-language"))
+			this.add_header("Preferred-Language", localStorage.getItem("preferred-language"));
+		else
+			this.add_header("Preferred-Language", "en");
 	}
 
 	static str_network_error()
