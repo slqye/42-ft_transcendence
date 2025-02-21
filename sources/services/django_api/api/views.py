@@ -218,7 +218,7 @@ class UserFetchIdViaUsernames(APIView):
 		usernames = request.data.get("usernames")
 		if not usernames or not isinstance(usernames, list):
 			return Response(
-				{"error": get_error_message("A list of usernames must be provided in the request body.", request)},
+				{"detail": get_error_message("A list of usernames must be provided in the request body.", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
 		users = User.objects.filter(username__in=usernames)
@@ -244,14 +244,14 @@ class UpdateUserField(APIView):
 		allowed_fields = ["email", "display_name", "avatar_url", "language_code", "password"]
 		if field not in allowed_fields:
 			return Response(
-				{"error": get_error_message("Invalid field", request)},
+				{"detail": get_error_message("Invalid field", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
 		new_value = request.data.get(field)
 		if new_value is None:
 			# e.g. "password is required." if field == "password"
 			return Response(
-				{"error": get_error_message(f"{field} is required.", request)},
+				{"detail": get_error_message(f"{field} is required.", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
 		user = request.user
