@@ -133,7 +133,7 @@ class TicTacToe
 		});
 		if (player1_moves == 0 && player2_moves == 0) return (this.first_player);
 		else if (player1_moves > player2_moves) return (this.second_player);
-		else return (this.first_player)
+		else return (this.first_player);
 	}
 
 	play_ai()
@@ -220,7 +220,7 @@ class TicTacToe
 			return;
 		}
 		if (this.checkDraw()) {
-			this.endGame(null, "It's a draw!");
+			this.endGame(null, str_draw());
 			return;
 		}
 		this.switchPlayer();
@@ -249,7 +249,7 @@ class TicTacToe
 				return;
 			}
 			if (this.checkDraw()) {
-				this.endGame(null, "It's a draw!");
+				this.endGame(null, str_draw());
 				return;
 			}
 			this.switchPlayer();
@@ -273,7 +273,7 @@ class TicTacToe
 		winningConditions.forEach(condition => {
 			const [a, b, c] = condition;
 			if (this.board[a] === this.currentPlayer && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
-				this.endGame(this.currentPlayer, this.currentPlayer + " wins!");
+				this.endGame(this.currentPlayer, str_player_wins(this.currentPlayer));
 				win = true;
 			}
 		});
@@ -318,7 +318,7 @@ class TicTacToe
 	{
 		var gameButton = document.getElementById('game-button');
 		gameButton.setAttribute('class', 'btn btn-outline-primary');
-		gameButton.textContent = 'Play a new match';
+		gameButton.textContent = str_button_replay();
 		gameButton.addEventListener('click', () => { TicTacToe.resetMatch(this); });
 	}
 
@@ -336,7 +336,7 @@ class TicTacToe
 			catch (error)
 			{
 				this.setGameButtonToReplay();
-				return new Toast("An opponent must be logged in to play a game.");
+				return (new Toast(Toast.ERROR, str_opponent_required_error()));
 			}
 		}
 		let result = this.player1.score > this.player2.score ? 0 : 1;
@@ -385,11 +385,11 @@ class TicTacToe
 				accept_request = await new Api(`/api/invitations/${invitation_id}/accept/`, Api.OPPONENT).set_method("POST").request();
 			if (accept_request.status === Api.ERROR || accept_request.code !== 201)
 			{
-				return (new Toast(Toast.ERROR, "An error occurred while attempting to create a match."));
+				return (new Toast(Toast.ERROR, str_match_creation_error()));
 			}
 			else
 			{
-				new Toast(Toast.SUCCESS, "Match has been successfully created.");
+				new Toast(Toast.SUCCESS, str_match_creation_success());
 				this.match_id = accept_request.response.match.id;
 			}
 		}
@@ -405,11 +405,11 @@ class TicTacToe
 				.request();
 			if (put_tournament_request.status === Api.ERROR)
 			{
-				new Toast(Toast.ERROR, "An error occurred while attempting to update the tournament." + "<br/>" + put_tournament_request.log);
+				new Toast(Toast.ERROR, str_tournament_update_error());
 			}
 			else
 			{
-				new Toast(Toast.SUCCESS, "Tournament has been successfully updated.");
+				new Toast(Toast.SUCCESS, str_tournament_update_success());
 				await load_tournament(this.tournament_id);
 			}
 		}

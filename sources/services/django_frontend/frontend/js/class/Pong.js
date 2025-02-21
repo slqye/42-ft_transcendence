@@ -240,9 +240,9 @@ class Pong
 				this.stop();
 				var gameStatus = document.getElementById('game-status');
 				if (this.player1.score >= this.win_condition)
-					gameStatus.textContent = this.player1.name + ' wins!';
+					gameStatus.textContent = str_player_wins(this.player1.name);
 				else
-					gameStatus.textContent = this.player2.name + ' wins!';
+					gameStatus.textContent = str_player_wins(this.player2.name);
 				this.terminateMatch();
 			}
 			this.game_timer_start = Date.now();
@@ -341,7 +341,7 @@ class Pong
 	{
 		var gameButton = document.getElementById('game-button');
 		gameButton.setAttribute('class', 'btn btn-outline-primary');
-		gameButton.textContent = 'Play a new match';
+		gameButton.textContent = str_button_replay();
 		gameButton.addEventListener('click', this.start);
 	}
 
@@ -359,7 +359,7 @@ class Pong
 			catch (error)
 			{
 				this.setGameButtonToReplay();
-				return (new Toast("An opponent must be logged in to play a game."));
+				return (new Toast(Toast.ERROR, str_opponent_required()));
 			}
 		}
 		this.player1.average_time_to_score = 0;
@@ -420,7 +420,7 @@ class Pong
 			}
 			else
 			{
-				new Toast(Toast.SUCCESS, "Match has been successfully created.");
+				new Toast(Toast.SUCCESS, str_match_creation_success());
 				this.match_id = accept_request.response.match.id;
 			}
 		}
@@ -436,11 +436,11 @@ class Pong
 				.request();
 			if (put_tournament_request.status === Api.ERROR)
 			{
-				new Toast(Toast.ERROR, "An error occurred while attempting to update the tournament." + "<br/>" + put_tournament_request.log);
+				new Toast(Toast.ERROR, str_tournament_update_error());
 			}
 			else
 			{
-				new Toast(Toast.SUCCESS, "Tournament has been successfully updated.");
+				new Toast(Toast.SUCCESS, str_tournament_update_success());
 				await load_tournament(this.tournament_id);
 			}
 		}

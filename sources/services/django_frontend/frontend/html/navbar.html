@@ -9,7 +9,7 @@
 			<ul class="navbar-nav">
 				<!-- games -->
 				<li class="nav-item dropdown d-none" id="games">
-					<button class="nav-link dropdown-toggle" id="dropdown_title" role="button" data-bs-toggle="dropdown" aria-expanded="false">Games</button>
+					<button class="nav-link dropdown-toggle" id="dropdown_title" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-translate="games">Games</button>
 					<ul class="dropdown-menu">
 						<li><button class="dropdown-item" onclick="stop_all_games(); load_create_game_pong();">Pong</button></li>
 						<li><button class="dropdown-item" onclick="stop_all_games(); load_create_game_tictactoe();">Tictactoe</button></li>
@@ -17,11 +17,20 @@
 				</li>
 				<!-- tournament -->
 				<li class="nav-item">
-					<button class="nav-link btn btn-link" id="tournament" onclick="stop_all_games(); select_tournament();">Tournament</button>
+					<button class="nav-link btn btn-link" id="tournament" onclick="stop_all_games(); select_tournament();" data-translate="tournament">Tournament</button>
 				</li>
 				<!-- about -->
 				<li class="nav-item">
-					<button class="nav-link btn btn-link" id="about" onclick="stop_all_games(); load_about();">About</button>
+					<button class="nav-link btn btn-link" id="about" onclick="stop_all_games(); load_about();" data-translate="about_us">About us</button>
+				</li>
+				<!-- language -->
+				<li class="nav-item dropdown">
+					<button class="nav-link btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-translate="language">Language</button>
+					<ul class="dropdown-menu">
+						<li><button class="dropdown-item" onclick="translate_page('en');">English</button></li>
+						<li><button class="dropdown-item" onclick="translate_page('fr');">Français</button></li>
+						<li><button class="dropdown-item" onclick="translate_page('de');">Deutsch</button></li>
+					</ul>
 				</li>
 			</ul>
 			<!-- left -->
@@ -29,15 +38,15 @@
 				<!-- theme -->
 				<li class="nav-item">
 					<button class="nav-link btn btn-link d-flex align-items-center justify-content-center" onclick="switch_theme();">
-						<p class="mb-0 d-inline-block d-lg-none" id="theme">Theme</p>
+						<p class="mb-0 d-inline-block d-lg-none" id="theme" data-translate="theme">Theme</p>
 						<img src="/frontend/assets/sun-fill.svg" alt="icon_theme" id="theme_icon_sun" class="px-2 d-none d-lg-inline-block" style="filter: invert(100%);">
 						<img src="/frontend/assets/moon-fill.svg" alt="icon_theme" id="theme_icon_moon" class="px-2 d-none d-lg-none">
 					</button>
 				</li>
 				<!-- signin -->
 				<li class="nav-item" id="signin">
-					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in" onclick="stop_all_games(); load_signin();">Sign in</button>
-					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in" onclick="stop_all_games(); load_signin();">Sign in</button>
+					<button type="button" class="btn btn-outline-primary d-none d-lg-inline-block" id="sign_in" onclick="stop_all_games(); load_signin();" data-translate="sign_in">Sign in</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_in" onclick="stop_all_games(); load_signin();" data-translate="sign_in">Sign in</button>
 				</li>
 				<li class="nav-item d-none" id="profile">
 					<div class="dropdown dropstart">
@@ -45,20 +54,20 @@
 							<img class="img-fluid profile-img" id="img-profile-icon" src="" alt="icon">
 						</button>
 						<button class="nav-link btn btn-link d-inline-block d-lg-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: transparent; border-color: transparent;">
-							<p class="mb-0" id="theme">Profile</p>
+							<p class="mb-0" id="theme" data-translate="profile">Profile</p>
 						</button>
 						<ul class="dropdown-menu">
-							<button class="dropdown-item" onclick="stop_all_games(); load_profile('me')">Profile</button>
-							<button class="dropdown-item" onclick="stop_all_games(); load_friends();">Friends</button>
-							<button class="dropdown-item" onclick="stop_all_games(); load_settings();">Settings</button>
-							<button class="dropdown-item" onclick="(async () => { await stop_all_games(); signout(); load_home(); })();">Sign out</button>
+							<button class="dropdown-item" onclick="load_profile('me')" data-translate="profile">Profile</button>
+							<button class="dropdown-item" onclick="stop_all_games(); load_friends();" data-translate="friends">Friends</button>
+							<button class="dropdown-item" onclick="stop_all_games(); load_settings();" data-translate="settings">Settings</button>
+							<button class="dropdown-item" onclick="(async () => { stop_all_games(); await signout(); load_home(); })();" data-translate="signout">Sign out</button>
 						</ul>
 					</div>
 				</li>
 				<!-- signout opponent -->
 				<li class="nav-item m-1 d-none" id="signout_opponent_container">
-					<button type="button" class="btn btn-outline-danger d-none d-lg-inline-block mx-1" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); stop_all_games(); load_navbar(); })()">Opponent sign out</button>
-					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); stop_all_games(); load_navbar(); })()">Opponent sign out</button>
+					<button type="button" class="btn btn-outline-danger d-none d-lg-inline-block mx-1" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); load_navbar(); })()" data-translate="signout_opponent">Opponent sign out</button>
+					<button type="button" class="nav-link btn d-inline-block d-lg-none" id="sign_out_opponent" onclick="(async () => {await opponent_signout(); stop_all_games(); load_navbar(); })()" data-translate="signout_opponent">Opponent sign out</button>
 				</li>
 			</ul>
 		</div>

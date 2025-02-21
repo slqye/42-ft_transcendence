@@ -9,10 +9,10 @@ async function	set_profile(template, pk = "me")
 	{
 		const request = await new Api("/api/users/" + pk + "/", Api.USER).request();
 		if (request.status == Api.ERROR)
-			return (console.error(request.log));
+			return (new Toast(Toast.ERROR, request.log));
 		const request_stats = await new Api("/api/users/" + pk + "/stats/", Api.USER).request();
 		if (request_stats.status == Api.ERROR)
-			return (console.error(request_stats.log));
+			return (new Toast(Toast.ERROR, request_stats.log));
 		const data = request.response;
 		template.edit.id.set.content("profile_display_name", data.display_name);
 		template.edit.id.set.content("profile_user_name", "@" + data.username);
@@ -34,7 +34,7 @@ async function	set_profile(template, pk = "me")
 	}
 	catch (error)
 	{
-		return (console.error(error));
+		return (new Toast(Toast.ERROR, error));
 	}
 }
 
@@ -58,10 +58,10 @@ async function	set_profile_history(template, pk = "me")
 	{
 		const request = await new Api("/api/users/" + pk + "/matches/", Api.USER).request();
 		if (request.status == Api.ERROR)
-			return (console.error(request.log));
+			return (new Toast(Toast.ERROR, request.log));
 		const request_profile = await new Api("/api/users/" + pk + "/", Api.USER).request();
 		if (request_profile.status == Api.ERROR)
-			return (console.error(request_profile.log));
+			return (new Toast(Toast.ERROR, request_profile.log));
 		const data = await request.response;
 		const history = template.edit.id.get.element("history");
 		for (let index = 0; index < data.length; index++)
@@ -69,7 +69,7 @@ async function	set_profile_history(template, pk = "me")
 			const element = data[index];
 			let template_history_item = await new Template("frontend/html/pages/history_item.html").load();
 			if (template_history_item == null)
-				return console.error(ERROR_TEMPLATE);
+				return (new Toast(Toast.ERROR, str_template_error()));
 			const new_id = "collapse" + index;
 			template_history_item.edit.id.set.attribute("match_button", "data-bs-target", "#" + new_id);
 			template_history_item.edit.id.set.attribute("match_button", "aria-controls", new_id);
@@ -122,7 +122,7 @@ async function	set_profile_history(template, pk = "me")
 	}
 	catch (error)
 	{
-		return (console.error(error));
+		return (new Toast(Toast.ERROR, error));
 	}
 }
 
@@ -132,10 +132,10 @@ async function	set_profile_tournament_history(template, pk = "me")
 	{
 		const request = await new Api("/api/users/" + pk + "/tournaments/", Api.USER).request();
 		if (request.status == Api.ERROR)
-			return (console.error(request.log));
+			return (new Toast(Toast.ERROR, request.log));
 		const request_profile = await new Api("/api/users/" + pk + "/", Api.USER).request();
 		if (request_profile.status == Api.ERROR)
-			return (console.error(request_profile.log));
+			return (new Toast(Toast.ERROR, request_profile.log));
 		let user = await request_profile.response;
 		const data = await request.response;
 		const tournament_history = template.edit.id.get.element("history_tournaments");
@@ -144,7 +144,7 @@ async function	set_profile_tournament_history(template, pk = "me")
 			const element = data[index];
 			let template_history_item = await new Template("frontend/html/pages/history_tournament_item.html").load();
 			if (template_history_item == null)
-				return console.error(ERROR_TEMPLATE);
+				return (new Toast(Toast.ERROR, str_template_error()));
 			let ranking = element.participants_ranking;
 			let winner = ranking[ranking.length - 1];
 			if (user.username == winner.username)
@@ -170,6 +170,6 @@ async function	set_profile_tournament_history(template, pk = "me")
 	}
 	catch (error)
 	{
-		return (console.error(error));
+		return (new Toast(Toast.ERROR, error));
 	}
 }

@@ -25,7 +25,22 @@ class	Api
 		this.log = null;
 		this.depth = 0;
 
-		this.add_header("X-User-Type", this.type)
+		this.add_header("X-User-Type", this.type);
+		if (localStorage.getItem("preferred-language"))
+			this.add_header("Preferred-Language", localStorage.getItem("preferred-language"));
+		else
+			this.add_header("Preferred-Language", "en");
+	}
+
+	static str_network_error()
+	{
+		let language = localStorage.getItem('preferred-language');
+		if (language == 'fr')
+			return "Erreur de réseau.";
+		else if (language == 'de')
+			return "Netzwerkfehler.";
+		else
+			return "Network error.";
 	}
 
 	async request()
@@ -34,7 +49,7 @@ class	Api
 		if (this.depth > 2)
 		{
 			this.status = Api.ERROR;
-			this.log = "Network error.";
+			this.log = Api.str_network_error();
 			return (this);
 		}
 		try
