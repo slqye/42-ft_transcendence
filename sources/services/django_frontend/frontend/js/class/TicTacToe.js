@@ -301,11 +301,11 @@ class TicTacToe
 		this.player2.quickest_win_moves = 0;
 	}
 
-	resetMatch()
+	static resetMatch(ttt_instance)
 	{
-		this.resetPlayerVariables();
-		this.refreshScoreboard();
-		this.startRound();
+		ttt_instance.resetPlayerVariables();
+		ttt_instance.refreshScoreboard();
+		ttt_instance.startRound();
 	}
 
 	refreshScoreboard()
@@ -319,7 +319,7 @@ class TicTacToe
 		var gameButton = document.getElementById('game-button');
 		gameButton.setAttribute('class', 'btn btn-outline-primary');
 		gameButton.textContent = 'Play a new match';
-		gameButton.addEventListener('click', this.resetMatch);
+		gameButton.addEventListener('click', () => { TicTacToe.resetMatch(this); });
 	}
 
 	async terminateMatch()
