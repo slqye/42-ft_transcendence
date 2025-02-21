@@ -49,10 +49,10 @@
 		</div>
 		<div class="row mt-5">
 			<div class="col-12 my-2 d-flex justify-content-center">
-				<input type="radio" class="btn-check" name="options-base" id="select_games" autocomplete="off" checked>
-				<label class="btn btn-outline-primary mx-2" for="select_games" data-translate="games" onclick="change_history_type()">Games</label>
+				<input type="radio" class="btn-check" name="options-base" id="select_games" autocomplete="off" placeholder="GAMES" checked>
+				<label class="btn btn-outline-primary mx-2" for="select_games" data-translate="games" onclick="show_games_history()">Games</label>
 				<input type="radio" class="btn-check" name="options-base" id="select_tournament" autocomplete="off">
-				<label class="btn btn-outline-primary mx-2" for="select_tournament" data-translate="tournaments" onclick="change_history_type()">Tournaments</label>
+				<label class="btn btn-outline-primary mx-2" for="select_tournament" data-translate="tournaments" onclick="show_tournaments_history()">Tournaments</label>
 			</div>
 			<div class="col-12 accorsdion justify-content-center" id="history"></div>
 			<div class="col-12 accordion justify-content-center d-none" id="history_tournaments"></div>
