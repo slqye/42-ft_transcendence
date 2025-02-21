@@ -35,7 +35,6 @@ def get_error_message(key: str, request) -> str:
 	preferred_lang = request.headers.get("Preferred-Language", "en")
 	if preferred_lang not in ("en", "fr", "de"):
 		preferred_lang = "en"
-	# Fall back to the key itself if not found in the dictionary
 	return LANGUAGE_ERROR_MESSAGES.get(key, {}).get(preferred_lang, key)
 
 
