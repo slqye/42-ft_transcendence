@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from PIL import Image
 
+from .error_messages import LANGUAGE_ERROR_MESSAGES
 from .models import User, Match, Tournament, Pair, Invitation, Friendship
 from .serializers import (
 	UserSerializer,
@@ -28,12 +29,16 @@ from .serializers import (
 	PictureSerializer
 )
 
-
 User = get_user_model()
+
+def get_error_message(key: str, request) -> str:
+	preferred_lang = request.headers.get("Preferred-Language", "en")
+	if preferred_lang not in ("en", "fr", "de"):
+		preferred_lang = "en"
+	return LANGUAGE_ERROR_MESSAGES.get(key, {}).get(preferred_lang, key)
 
 
 # ------------------------------ USER AND TOKENS ------------------------------ #
-
 
 class UserTokenRefreshView(APIView):
 	permission_classes = [permissions.AllowAny]
@@ -42,12 +47,18 @@ class UserTokenRefreshView(APIView):
 	def post(self, request, *args, **kwargs):
 		refresh_token = request.COOKIES.get("user_refresh")
 		if refresh_token is None:
-			return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Refresh token not provided", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		try:
 			refresh = RefreshToken(refresh_token)
 			user_id = refresh.payload.get("user_id")
 			if not User.objects.filter(id=user_id).exists():
-				response = Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+				response = Response(
+					{"detail": get_error_message("User not found", request)},
+					status=status.HTTP_404_NOT_FOUND
+				)
 				response.delete_cookie("user_access")
 				response.delete_cookie("user_refresh")
 				return response
@@ -56,7 +67,10 @@ class UserTokenRefreshView(APIView):
 			response.set_cookie("user_access", new_access_token, httponly=True, secure=True, samesite="None")
 			return response
 		except TokenError:
-			response = Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+			response = Response(
+				{"detail": get_error_message("Invalid or expired refresh token", request)},
+				status=status.HTTP_401_UNAUTHORIZED
+			)
 			response.delete_cookie("user_access")
 			response.delete_cookie("user_refresh")
 			return response
@@ -69,12 +83,18 @@ class OpponentTokenRefreshView(APIView):
 	def post(self, request, *args, **kwargs):
 		refresh_token = request.COOKIES.get("opponent_refresh")
 		if refresh_token is None:
-			return Response({"detail": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Refresh token not provided", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		try:
 			refresh = RefreshToken(refresh_token)
 			opponent_id = refresh.payload.get("user_id")
 			if not User.objects.filter(id=opponent_id).exists():
-				response = Response({"detail": "Opponent not found"}, status=status.HTTP_404_NOT_FOUND)
+				response = Response(
+					{"detail": get_error_message("Opponent not found", request)},
+					status=status.HTTP_404_NOT_FOUND
+				)
 				response.delete_cookie("opponent_access")
 				response.delete_cookie("opponent_refresh")
 				return response
@@ -83,7 +103,10 @@ class OpponentTokenRefreshView(APIView):
 			response.set_cookie("opponent_access", new_access_token, httponly=True, secure=True, samesite="None")
 			return response
 		except TokenError:
-			response = Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+			response = Response(
+				{"detail": get_error_message("Invalid or expired refresh token", request)},
+				status=status.HTTP_401_UNAUTHORIZED
+			)
 			response.delete_cookie("opponent_access")
 			response.delete_cookie("opponent_refresh")
 			return response
@@ -122,7 +145,10 @@ class UserLoginView(APIView):
 		password = request.data.get("password")
 		user = authenticate(request, username=username, password=password)
 		if not user:
-			return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+			return Response(
+				{"detail": get_error_message("Invalid credentials", request)},
+				status=status.HTTP_401_UNAUTHORIZED
+			)
 		refresh = RefreshToken.for_user(user)
 		access_token = str(refresh.access_token)
 		refresh_token = str(refresh)
@@ -141,7 +167,10 @@ class OpponentLoginView(APIView):
 		password = request.data.get("password")
 		user = authenticate(request, username=username, password=password)
 		if not user:
-			return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+			return Response(
+				{"detail": get_error_message("Invalid credentials", request)},
+				status=status.HTTP_401_UNAUTHORIZED
+			)
 		refresh = RefreshToken.for_user(user)
 		access_token = str(refresh.access_token)
 		refresh_token = str(refresh)
@@ -187,14 +216,21 @@ class UserFetchIdViaUsernames(APIView):
 	def post(self, request, *args, **kwargs):
 		usernames = request.data.get("usernames")
 		if not usernames or not isinstance(usernames, list):
-			return Response({"error": "A list of usernames must be provided in the request body."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"error": get_error_message("A list of usernames must be provided in the request body.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		users = User.objects.filter(username__in=usernames)
 		found_usernames = {u.username for u in users}
 		not_found = [name for name in usernames if name not in found_usernames]
 		if not_found:
-			return Response({"detail": "One or more users not found", "usernames": not_found},
-							status=status.HTTP_404_NOT_FOUND)
+			return Response(
+				{
+					"detail": get_error_message("One or more users not found", request),
+					"usernames": not_found
+				},
+				status=status.HTTP_404_NOT_FOUND
+			)
 		user_ids = [u.id for u in users]
 		return Response({"user_ids": user_ids}, status=status.HTTP_200_OK)
 
@@ -206,10 +242,17 @@ class UpdateUserField(APIView):
 	def post(self, request, field, *args, **kwargs):
 		allowed_fields = ["email", "display_name", "avatar_url", "language_code", "password"]
 		if field not in allowed_fields:
-			return Response({"error": "Invalid field"}, status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"error": get_error_message("Invalid field", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		new_value = request.data.get(field)
 		if new_value is None:
-			return Response({"error": f"{field} is required."}, status=status.HTTP_400_BAD_REQUEST)
+			# e.g. "password is required." if field == "password"
+			return Response(
+				{"error": get_error_message(f"{field} is required.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		user = request.user
 		if field == "password":
 			user.set_password(new_value)
@@ -242,11 +285,13 @@ class UserStats(APIView):
 		pong_draws = target_user.pong_draws
 		pong_losses = target_user.pong_losses
 		pong_winrate = round((pong_wins / pong_matches) * 100, 2) if pong_matches > 0 else 0.0
+
 		ttt_matches = target_user.tictactoe_matches_played
 		ttt_wins = target_user.tictactoe_wins
 		ttt_draws = target_user.tictactoe_draws
 		ttt_losses = target_user.tictactoe_losses
 		ttt_winrate = round((ttt_wins / ttt_matches) * 100, 2) if ttt_matches > 0 else 0.0
+
 		return Response({
 			"pong_matches_played": pong_matches,
 			"pong_wins": pong_wins,
@@ -263,7 +308,6 @@ class UserStats(APIView):
 
 # ------------------------------ MATCHES ------------------------------ #
 
-
 class InvitationCreateView(generics.CreateAPIView):
 	queryset = Invitation.objects.all()
 	serializer_class = InvitationSerializer
@@ -279,22 +323,32 @@ class InvitationCreateView(generics.CreateAPIView):
 		try:
 			result = int(request.data.get("result"))
 		except (TypeError, ValueError):
-			return Response({"detail": "Result must be provided as an integer."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Result must be provided as an integer.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		if result not in [0, 1, 2]:
-			return Response({"detail": "Result must be either 0, 1, or 2."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Result must be either 0, 1, or 2.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		if user_type != "user":
-			return Response({"detail": "You must be a 'user' to create an invitation."},
-							status=status.HTTP_403_FORBIDDEN)
+			return Response(
+				{"detail": get_error_message("You must be a 'user' to create an invitation.", request)},
+				status=status.HTTP_403_FORBIDDEN
+			)
 		if versus_ai and opponent is not None:
-			return Response({"detail": "'opponent' must be None when creating a match versus AI."},
-							status=status.HTTP_403_FORBIDDEN)
+			return Response(
+				{"detail": get_error_message("'opponent' must be None when creating a match versus AI.", request)},
+				status=status.HTTP_403_FORBIDDEN
+			)
 		if versus_ai:
 			ai_user = User.objects.filter(username="AI").first()
 			if not ai_user:
-				return Response({"detail": "AI user does not exist."},
-								status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+				return Response(
+					{"detail": get_error_message("AI user does not exist.", request)},
+					status=status.HTTP_500_INTERNAL_SERVER_ERROR
+				)
 			mutable_data = request.data.copy()
 			mutable_data["opponent_user_id"] = ai_user.id
 			if hasattr(request.data, "_mutable"):
@@ -317,23 +371,35 @@ class InvitationAcceptView(APIView):
 		invitation = get_object_or_404(Invitation, pk=pk)
 		if not invitation.versus_ai:
 			if user_type != "opponent":
-				return Response({"detail": "You must be an 'opponent' to accept an invitation."},
-								status=status.HTTP_403_FORBIDDEN)
+				return Response(
+					{"detail": get_error_message("You must be an 'opponent' to accept an invitation.", request)},
+					status=status.HTTP_403_FORBIDDEN
+				)
 			if invitation.opponent_user != request.user:
-				return Response({"detail": "You are not the invited opponent user."},
-								status=status.HTTP_403_FORBIDDEN)
+				return Response(
+					{"detail": get_error_message("You are not the invited opponent user.", request)},
+					status=status.HTTP_403_FORBIDDEN
+				)
 			opponent_user = invitation.opponent_user
 		else:
 			if user_type != "user":
-				return Response({"detail": "You must be a 'user' to create a match versus AI."},
-								status=status.HTTP_403_FORBIDDEN)
+				return Response(
+					{"detail": get_error_message("You must be a 'user' to create a match versus AI.", request)},
+					status=status.HTTP_403_FORBIDDEN
+				)
 			opponent_user = invitation.opponent_user
+
 		if invitation.status:
-			return Response({"detail": "Invitation has already been accepted."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Invitation has already been accepted.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
+
 		host_user = invitation.host_user
 		invitation.status = True
 		invitation.save()
+
+		# Update user stats
 		try:
 			if invitation.is_pong:
 				host_user.pong_matches_played += 1
@@ -359,11 +425,16 @@ class InvitationAcceptView(APIView):
 				else:
 					host_user.tictactoe_draws += 1
 					opponent_user.tictactoe_draws += 1
+
 			host_user.save()
 			opponent_user.save()
 		except Exception as e:
-			return Response({"detail": "Error updating user stats: " + str(e)},
-							status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+			return Response(
+				{"detail": get_error_message("Error updating user stats: ", request) + str(e)},
+				status=status.HTTP_500_INTERNAL_SERVER_ERROR
+			)
+
+		# Create the match
 		try:
 			match = Match.objects.create(
 				host_user=host_user,
@@ -376,15 +447,21 @@ class InvitationAcceptView(APIView):
 				versus_ai=invitation.versus_ai,
 			)
 		except Exception as e:
-			return Response({"detail": "Error creating match: " + str(e)},
-							status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+			return Response(
+				{"detail": get_error_message("Error creating match: ", request) + str(e)},
+				status=status.HTTP_500_INTERNAL_SERVER_ERROR
+			)
+
 		match_data = MatchSerializer(match).data
 		try:
 			invitation.delete()
 		except Exception:
 			pass
-		return Response({"detail": "Invitation accepted. Match created.", "match": match_data},
-						status=status.HTTP_201_CREATED)
+
+		return Response(
+			{"detail": "Invitation accepted. Match created.", "match": match_data},
+			status=status.HTTP_201_CREATED
+		)
 
 
 class UserMatches(APIView):
@@ -437,7 +514,6 @@ class UserTicTacToeMatches(APIView):
 
 # ------------------------------ FRIENDSHIP ------------------------------ #
 
-
 class FriendshipView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 	http_method_names = ["post", "put", "delete"]
@@ -448,17 +524,23 @@ class FriendshipView(APIView):
 	def post(self, request, pk=None):
 		friend_user = get_object_or_404(User, username=pk)
 		if friend_user.id == request.user.id:
-			return Response({"detail": "Cannot create friendship with yourself."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Cannot create friendship with yourself.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		data = request.data.copy()
 		data["user_id_1"] = request.user.id
 		data["user_id_2"] = friend_user.id
+
 		if Friendship.objects.filter(
 			models.Q(user_id_1=request.user, user_id_2=friend_user)
 			| models.Q(user_id_1=friend_user, user_id_2=request.user)
 		).exists():
-			return Response({"detail": "A friendship between these users already exists."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("A friendship between these users already exists.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
+
 		serializer = FriendshipSerializer(data=data)
 		if serializer.is_valid():
 			serializer.save()
@@ -467,15 +549,21 @@ class FriendshipView(APIView):
 
 	def put(self, request, pk=None):
 		if pk is None:
-			return Response({"detail": "Friendship ID is required for update."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Friendship ID is required for update.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		friendship = self.get_object(pk)
 		if friendship.user_id_2 != request.user:
-			return Response({"detail": "You are not the correct user to accept this friendship."},
-							status=status.HTTP_403_FORBIDDEN)
+			return Response(
+				{"detail": get_error_message("You are not the correct user to accept this friendship.", request)},
+				status=status.HTTP_403_FORBIDDEN
+			)
 		if friendship.friendship_status:
-			return Response({"detail": "Friendship has already been accepted."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Friendship has already been accepted.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		serializer = FriendshipSerializer(friendship, data={"friendship_status": True}, partial=True)
 		if serializer.is_valid():
 			serializer.save()
@@ -484,12 +572,16 @@ class FriendshipView(APIView):
 
 	def delete(self, request, pk=None):
 		if pk is None:
-			return Response({"detail": "Friendship ID is required for deletion."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Friendship ID is required for deletion.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		friendship = self.get_object(pk)
 		if request.user not in [friendship.user_id_1, friendship.user_id_2]:
-			return Response({"detail": "Friendship deletion is forbidden."},
-							status=status.HTTP_403_FORBIDDEN)
+			return Response(
+				{"detail": get_error_message("Friendship deletion is forbidden.", request)},
+				status=status.HTTP_403_FORBIDDEN
+			)
 		friendship.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -503,6 +595,7 @@ class FriendListView(APIView):
 			target_user = request.user
 		else:
 			target_user = get_object_or_404(User, pk=pk)
+
 		friendships = Friendship.objects.filter(
 			models.Q(user_id_1=target_user) | models.Q(user_id_2=target_user)
 		)
@@ -517,11 +610,11 @@ class FriendListView(APIView):
 			data = UserSerializer(friend).data
 			data["friendship_status"] = fs.friendship_status
 			friend_users[fs.id] = data
+
 		return Response({"friends": friend_users}, status=status.HTTP_200_OK)
 
 
 # ------------------------------ TOURNAMENTS ------------------------------ #
-
 
 class TournamentView(generics.GenericAPIView):
 	queryset = Tournament.objects.all()
@@ -558,38 +651,54 @@ class TournamentDetailView(APIView):
 	def put(self, request, pk):
 		tournament = get_object_or_404(Tournament, pk=pk)
 		if tournament.is_done:
-			return Response({"detail": "This tournament is already done."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("This tournament is already done.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		pair = tournament.next_pair
 		if pair.match_played:
-			return Response({"detail": "This pair already has a completed match."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("This pair already has a completed match.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		match_id = request.data.get("match_id")
 		if not match_id:
-			return Response({"detail": "Missing match_id."}, status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Missing match_id.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		match_instance = get_object_or_404(Match, pk=match_id)
 		if (pair.user != match_instance.host_user
 				or pair.opponent != match_instance.opponent_user
 				or match_instance.tournament != pair.tournament):
-			return Response({"detail": "Match instance does not match the pair instance"},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Match instance does not match the pair instance", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
 		match_instance.tournament = pair.tournament
 		match_instance.save()
+
 		pair.match = match_instance
 		pair.match_played = True
 		pair.save()
+
 		match_result = match_instance.result
 		if match_result == 0:
 			winner, loser = pair.user, pair.opponent
 		elif match_result == 1:
 			winner, loser = pair.opponent, pair.user
 		else:
-			return Response({"detail": "Cannot advance if the match is a draw."},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response(
+				{"detail": get_error_message("Cannot advance if the match is a draw.", request)},
+				status=status.HTTP_400_BAD_REQUEST
+			)
+
 		total_rounds = int(math.log2(tournament.participants.count()))
 		next_round = pair.round_number + 1
 		tournament.participants_ranking.add(loser)
+
 		if next_round > total_rounds:
+			# The tournament ends
 			tournament.participants_ranking.add(winner)
 			tournament.is_done = True
 			tournament.save()
@@ -597,6 +706,7 @@ class TournamentDetailView(APIView):
 				"detail": f"The tournament has ended. {winner} is the champion!",
 				"tournament": TournamentSerializer(tournament).data
 			}, status=status.HTTP_200_OK)
+
 		incomplete_pair = Pair.objects.filter(
 			tournament=tournament,
 			round_number=next_round,
@@ -616,6 +726,7 @@ class TournamentDetailView(APIView):
 				opponent=None,
 				match_played=False
 			)
+
 		pairs_ = tournament.pairs.filter(match_played=False)
 		if pairs_.exists():
 			pair_ = pairs_.first()
@@ -626,6 +737,7 @@ class TournamentDetailView(APIView):
 		else:
 			tournament.next_pair = None
 		tournament.save()
+
 		return Response({
 			"detail": "Match has been successfully linked. Winner advanced.",
 			"tournament": TournamentSerializer(tournament).data
@@ -657,8 +769,10 @@ class TournamentFetchNextPair(generics.RetrieveAPIView):
 	def get(self, request, pk, format=None):
 		tournament = get_object_or_404(Tournament, pk=pk)
 		if not tournament.next_pair:
-			return Response({"detail": "Tournament completed.", "current_round": "completed", "next_pair": None},
-							status=status.HTTP_200_OK)
+			return Response(
+				{"detail": "Tournament completed.", "current_round": "completed", "next_pair": None},
+				status=status.HTTP_200_OK
+			)
 		serializer = PairSerializer(tournament.next_pair)
 		return Response({
 			"next_pair": serializer.data,
@@ -682,7 +796,6 @@ class UserTournaments(APIView):
 
 # ------------------------------ OAUTH & OTHER ------------------------------ #
 
-
 def index(request, path=None):
 	return HttpResponse("")
 
@@ -695,18 +808,22 @@ class OAuthCallbackView(APIView):
 		role = request.GET.get("role")
 		type_ = request.GET.get("type")
 		redirect_uri = settings.API_42_REDIRECT_URI
+
 		if role == "user":
 			redirect_uri += "?role=user"
 		elif role == "opponent":
 			redirect_uri += "?role=opponent"
 		else:
 			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=false")
+
 		if type_ not in ["match_pong", "match_tictactoe", "tournament", "skip"]:
 			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=false")
+
 		redirect_uri += f"&type={type_}"
 		code = request.GET.get("code")
 		if not code:
 			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=false")
+
 		try:
 			token_response = requests.post(
 				"https://api.intra.42.fr/oauth/token",
@@ -720,8 +837,10 @@ class OAuthCallbackView(APIView):
 			)
 		except Exception:
 			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=false")
+
 		if token_response.status_code != 200:
 			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=false")
+
 		access_token = token_response.json().get("access_token")
 		try:
 			user_response = requests.get(
@@ -729,8 +848,10 @@ class OAuthCallbackView(APIView):
 			)
 		except Exception:
 			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=false")
+
 		if user_response.status_code != 200:
 			return redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=false")
+
 		user_data = user_response.json()
 		username = user_data.get("login")
 		user, created = User.objects.get_or_create(username=username)
@@ -740,9 +861,11 @@ class OAuthCallbackView(APIView):
 			user.display_name = user_data.get("login")
 			user.set_unusable_password()
 			user.save()
+
 		refresh = RefreshToken.for_user(user)
 		acc_token = str(refresh.access_token)
 		ref_token = str(refresh)
+
 		response = redirect(f"{settings.MAIN_URL}/home?callback=true&role={role}&type={type_}&success_callback=true")
 		if role == "user":
 			response.set_cookie("user_access", acc_token, httponly=True, secure=True, samesite="None")
@@ -777,15 +900,21 @@ class PictureUploadView(APIView):
 			try:
 				image_obj = Image.open(image_file)
 			except Exception as e:
-				return Response({"detail": f"Error processing image: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+				return Response(
+					{"detail": get_error_message("Error processing image: ", request) + str(e)},
+					status=status.HTTP_400_BAD_REQUEST
+				)
 			if image_obj.size != (512, 512):
-				return Response({"detail": "Image must be exactly 512x512 pixels."},
-								status=status.HTTP_400_BAD_REQUEST)
+				return Response(
+					{"detail": get_error_message("Image must be exactly 512x512 pixels.", request)},
+					status=status.HTTP_400_BAD_REQUEST
+				)
 			ext = os.path.splitext(image_file.name)[1]
 			user = request.user
 			new_name = f"{user.username}{ext}"
 			image_file.name = new_name
 			upload_dir = os.path.join("user_media", "uploads")
+
 			if os.path.exists(upload_dir):
 				for existing_file in os.listdir(upload_dir):
 					if existing_file.startswith(user.username + "."):
@@ -793,11 +922,15 @@ class PictureUploadView(APIView):
 							os.remove(os.path.join(upload_dir, existing_file))
 						except Exception as remove_err:
 							return Response(
-								{"detail": f"Error removing old image {existing_file}: {remove_err}"},
+								{
+									"detail": f"{get_error_message('Error removing old image', request)} "
+											  f"{existing_file}: {remove_err}"
+								},
 								status=status.HTTP_500_INTERNAL_SERVER_ERROR
 							)
 			else:
 				os.makedirs(upload_dir)
+
 			serializer.save()
 			user.avatar_url = "frontend/assets/" + serializer.data.get("image")
 			user.save()
