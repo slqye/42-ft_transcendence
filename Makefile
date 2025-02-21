@@ -48,7 +48,7 @@ flush_database :
 
 drop_database :
 	@docker exec -it transcendence_django_api python manage.py reset_db --noinput
-	@docker exec -it transcendence_prometheus rm -rf /etc/prometheus
+	@docker exec -it transcendence_prometheus rm -rf /prometheus
 	@make fclean
 	@rm -rf sources/services/django_api/api/migrations
 
