@@ -173,3 +173,21 @@ async function	set_profile_tournament_history(template, pk = "me")
 		return (new Toast(Toast.ERROR, error));
 	}
 }
+
+function	show_games_history()
+{
+	const games_history = document.getElementById("history");
+	const tournamets_history = document.getElementById("history_tournaments");
+
+	games_history.classList.remove("d-none");
+	tournamets_history.classList.add("d-none");
+}
+
+function	show_tournaments_history()
+{
+	const games_history = document.getElementById("history");
+	const tournamets_history = document.getElementById("history_tournaments");
+
+	games_history.classList.add("d-none");
+	tournamets_history.classList.remove("d-none");
+}
