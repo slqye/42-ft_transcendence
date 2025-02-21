@@ -36,6 +36,14 @@ class	Template
 					element.setAttribute("placeholder", translations[language][key]);
 				}
 			});
+
+			const tooltipElements = this.html.querySelectorAll("[data-bs-title-translate]");
+			tooltipElements.forEach((element) => {
+				const key = element.getAttribute("data-bs-title-translate");
+				if (translations[language] && translations[language][key]) {
+					element.setAttribute("data-bs-title", translations[language][key]);
+				}
+			});
 	  
 			this.string = this.html.documentElement.outerHTML;
 			return (this);

@@ -52,12 +52,12 @@ async function	set_friend_data(data, template, container)
 	if (data["is_connected"] == true)
 	{
 		template.edit.id.add.attribute("friend_online_status", "class", "bg-success");
-		template.edit.id.set.attribute("friend_online_status", "data-bs-title", "online");
+		template.edit.id.set.attribute("friend_online_status", "data-bs-title", str_online());
 	}
 	else
 	{
 		template.edit.id.add.attribute("friend_online_status", "class", "bg-danger");
-		template.edit.id.set.attribute("friend_online_status", "data-bs-title", "offline");
+		template.edit.id.set.attribute("friend_online_status", "data-bs-title", str_offline());
 	}
 	container.appendChild(template.edit.id.get.element("friend"));
 }
