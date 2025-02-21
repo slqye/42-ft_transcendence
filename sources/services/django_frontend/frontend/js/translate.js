@@ -59,6 +59,13 @@ const translations = {
         signout_opponent: "Opponent sign out",
         language: "Language",
         games: "Games",
+        // toasts
+        success: "Success",
+        success_message: "The operation was successful.",
+        error: "Error",
+        error_message: "An error occurred while performing the operation.",
+        warning: "Warning",
+        warning_message: "A warning occurred while performing the operation.",
     },
     fr: {
         about_us: "À propos de nous",
@@ -120,6 +127,13 @@ const translations = {
         signout_opponent: "Déconnexion de l'adversaire",
         language: "Langue",
         games: "Jeux",
+        // toasts
+        success: "Succès",
+        success_message: "L'opération a été réussie.",
+        error: "Erreur",
+        error_message: "Une erreur est survenue lors de l'exécution de l'opération.",
+        warning: "Attention",
+        warning_message: "Une attention est survenue lors de l'exécution de l'opération.",
     },
     de: {
         about_us: "Über uns",
@@ -181,6 +195,13 @@ const translations = {
         signout_opponent: "Gegner abmelden",
         language: "Sprache",
         games: "Spiele",
+        // toasts
+        success: "Erfolg",
+        success_message: "Die Operation war erfolgreich.",
+        error: "Fehler",
+        error_message: "Ein Fehler ist aufgetreten.",
+        warning: "Warnung",
+        warning_message: "Eine Warnung ist aufgetreten.",
     },
 };
 
