@@ -144,7 +144,6 @@ async function	set_profile_tournament_history(template, pk = "me")
 		for (let index = 0; index < data.length; index++)
 		{
 			const element = data[index];
-			console.log(element);
 			let template_history_item = await new Template("frontend/html/pages/history_tournament_item.html").load();
 			if (template_history_item == null)
 				return console.error(ERROR_TEMPLATE);
