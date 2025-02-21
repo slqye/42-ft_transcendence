@@ -1,0 +1,20 @@
+groups:
+  - name: main_alerts
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          description: "Target {{ $labels.instance }} is down."
+          summary: "The target is down."
+
+      - alert: HighRequestRate
+        expr: sum(rate(http_requests_total[5m])) by (instance) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          description: "Instance {{ $labels.instance }} is experiencing high request rate."
+          summary: "Request rate exceeded 1000 in the last 5 minutes."
