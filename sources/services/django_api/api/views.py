@@ -547,9 +547,6 @@ class FriendshipView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 	http_method_names = ["post", "put", "delete"]
 
-	def get_object(self, request, pk):
-		return get_object_or_404_custom(Friendship, request, pk=pk)
-
 	def post(self, request, pk=None):
 		friend_user = get_object_or_404_custom(User, request, username=pk)
 		if friend_user.id == request.user.id:
@@ -605,14 +602,14 @@ class FriendshipView(APIView):
 				{"detail": get_error_message("Friendship ID is required for deletion.", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
-		friendship = self.get_object(pk)
+		friendship = get_object_or_404_custom(Friendship, request, pk=pk)
 		if request.user not in [friendship.user_id_1, friendship.user_id_2]:
 			return Response(
 				{"detail": get_error_message("Friendship deletion is forbidden.", request)},
 				status=status.HTTP_403_FORBIDDEN
 			)
 		friendship.delete()
-		return Response(status=status.HTTP_204_NO_CONTENT)
+		return Response({"detail": get_error_message("Friendship has been succesfully deleted", request)}, status=status.HTTP_200_OK)
 
 
 class FriendListView(APIView):

@@ -18,7 +18,6 @@ def translate_message(error_messages, request):
 	preferred_lang = request.headers.get("Preferred-Language", "en")
 	if preferred_lang not in ("en", "fr", "de"):
 		preferred_lang = "en"
-	print(preferred_lang)
 	translations = {
 		"user with this username already exists.": {
 			"en": "user with this username already exists.",

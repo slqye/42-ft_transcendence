@@ -185,5 +185,10 @@ LANGUAGE_ERROR_MESSAGES = {
 		"en": "Please enter a valid image",
 		"fr": "Veuillez entrer une image valide",
 		"de": "Bitte geben Sie ein gültiges Bild ein"
-	}
+	},
+	"Friendship has been succesfully deleted": {
+		"en": "Friendship has been successfully deleted",
+		"fr": "L'amitié a été supprimée avec succès",
+		"de": "Freundschaft wurde erfolgreich gelöscht"
+	},
 }

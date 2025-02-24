@@ -133,7 +133,7 @@ services:
     command:
       - "--storage.tsdb.path=/prometheus/data_storage/"
     ports:
-      - 9090:9090
+      - 9091:9090
     labels:
       is-transcendence: "yes"
 
