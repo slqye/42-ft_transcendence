@@ -82,8 +82,6 @@ services:
     image: wrouesnel/postgres_exporter:v0.8.0
     env_file: .env
     restart: always
-    ports:
-      - "9187:9187"
     depends_on:
       - postgres
     networks:
@@ -115,8 +113,6 @@ services:
     networks:
       - transcendence_network_backend
     restart: always
-    ports:
-      - "9113:9113"
     command:
       - -nginx.scrape-uri=http://localhost:8000/metrics
     depends_on:
@@ -150,7 +146,7 @@ services:
         is-transcendence: "yes"
     restart: always
     ports:
-      - '3000:3000'
+      - '3001:3000'
     env_file: .env
     networks:
       - transcendence_network_backend

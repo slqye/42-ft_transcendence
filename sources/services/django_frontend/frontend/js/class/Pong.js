@@ -14,7 +14,6 @@ class Pong
 	constructor(canvas, score, player1, player2, win_condition, tournament_id = -1) {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext("2d");
-		this.sliders = document.getElementsByClassName("form-range");
 		this.score = score;
 		this.win_condition = win_condition;
 		this.roundActive = false;
@@ -52,6 +51,8 @@ class Pong
 			radius: 0,
 		}
 		
+		this.p1_mobile_btn_held = [false, false];
+		this.p2_mobile_btn_held = [false, false];
 		this.p1_paddle = this.paddles[this.player1.name];
 		this.p2_paddle = this.paddles[this.player2.name];
 		this.keys = new Set();
@@ -101,6 +102,28 @@ class Pong
 		document.getElementById('player1').textContent = this.player1.name;
 		document.getElementById('player2').textContent = this.player2.name;
 		this.is_ia = !await Api.is_opponent_login();
+		if (isMobile())
+		{
+			const p1_top_btn = document.getElementById("player1-top-mobile-button");
+			const p1_bottom_btn = document.getElementById("player1-bottom-mobile-button");
+			p1_top_btn.addEventListener('touchstart', (event) => { event.preventDefault(); this.p1_mobile_btn_held[0] = true });
+			p1_top_btn.addEventListener('touchend', (event) => { event.preventDefault(); this.p1_mobile_btn_held[0] = false });
+			p1_bottom_btn.addEventListener('touchstart', (event) => { event.preventDefault(); this.p1_mobile_btn_held[1] = true });
+			p1_bottom_btn.addEventListener('touchend', (event) => { event.preventDefault(); this.p1_mobile_btn_held[1] = false });
+			p1_top_btn.classList.remove("d-none");
+			p1_bottom_btn.classList.remove("d-none");
+			if (!this.is_ia)
+			{
+				const p2_top_btn = document.getElementById("player2-top-mobile-button");
+				const p2_bottom_btn = document.getElementById("player2-bottom-mobile-button");
+				p2_top_btn.addEventListener('touchstart', (event) => { event.preventDefault(); this.p2_mobile_btn_held[0] = true });
+				p2_top_btn.addEventListener('touchend', (event) => { event.preventDefault(); this.p2_mobile_btn_held[0] = false });
+				p2_bottom_btn.addEventListener('touchstart', (event) => { event.preventDefault(); this.p2_mobile_btn_held[1] = true });
+				p2_bottom_btn.addEventListener('touchend', (event) => { event.preventDefault(); this.p2_mobile_btn_held[1] = false });
+				p2_top_btn.classList.remove("d-none");
+				p2_bottom_btn.classList.remove("d-none");
+			}
+		}
 	}
 
 	handleGame()
@@ -112,9 +135,12 @@ class Pong
 	}
 
 	refreshScoreboard()
-	{ 
-		document.getElementById('player1-score').textContent = this.player1.score;
-		document.getElementById('player2-score').textContent = this.player2.score;
+	{
+		if (document.getElementById('player1-score') && document.getElementById('player2-score'))
+		{
+			document.getElementById('player1-score').textContent = this.player1.score;
+			document.getElementById('player2-score').textContent = this.player2.score;
+		}
 	}
 
 	resize_paddle()
@@ -140,34 +166,24 @@ class Pong
 
 	paddle_movements()
 	{
-		if (isMobile())
+		if ((this.keys.has(Pong.P1_KEYS[Pong.UP]) || this.p1_mobile_btn_held[0]) && this.p1_paddle.y > 0)
+			this.p1_paddle.y -= this.paddle_speed;
+		if ((this.keys.has(Pong.P1_KEYS[Pong.DOWN]) || this.p1_mobile_btn_held[1]) && this.p1_paddle.y < this.canvas.height -this.p1_paddle.height)
+			this.p1_paddle.y += this.paddle_speed;
+		if (!this.is_ia)
 		{
-			const top_range = document.getElementById("top-range");
-			const bottom_range = document.getElementById("bottom-range");
-			this.p1_paddle.y = top_range.value * this.canvas.height;
-			this.p2_paddle.y = -bottom_range.value * this.canvas.height;
+			if ((this.keys.has(Pong.P2_KEYS[Pong.UP]) || this.p2_mobile_btn_held[0]) && this.p2_paddle.y > 0)
+				this.p2_paddle.y -= this.paddle_speed;
+			if ((this.keys.has(Pong.P2_KEYS[Pong.DOWN]) || this.p2_mobile_btn_held[1]) && this.p2_paddle.y < this.canvas.height - this.p2_paddle.height)
+				this.p2_paddle.y += this.paddle_speed;
 		}
-		else
+		else if (this.is_recieving)
 		{
-			if (this.keys.has(Pong.P1_KEYS[Pong.UP]) && this.p1_paddle.y > 0)
-				this.p1_paddle.y -= this.paddle_speed;
-			if (this.keys.has(Pong.P1_KEYS[Pong.DOWN]) && this.p1_paddle.y < this.canvas.height -this.p1_paddle.height)
-				this.p1_paddle.y += this.paddle_speed;
-			if (!this.is_ia)
-			{
-				if (this.keys.has(Pong.P2_KEYS[Pong.UP]) && this.p2_paddle.y > 0)
-					this.p2_paddle.y -= this.paddle_speed;
-				if (this.keys.has(Pong.P2_KEYS[Pong.DOWN]) && this.p2_paddle.y < this.canvas.height - this.p2_paddle.height)
-					this.p2_paddle.y += this.paddle_speed;
-			}
-			else if (this.is_recieving)
-			{
-				if (this.p2_paddle.y + this.p2_paddle.height / 2 < this.ball.y)
-					this.p2_paddle.y += this.paddle_speed;
-				else
-					this.p2_paddle.y -= this.paddle_speed;
-				this.p2_paddle.y = Math.max(0, Math.min(this.p2_paddle.y, this.canvas.height - this.p2_paddle.height));
-			}
+			if (this.p2_paddle.y + this.p2_paddle.height / 2 < this.ball.y)
+				this.p2_paddle.y += this.paddle_speed;
+			else
+				this.p2_paddle.y -= this.paddle_speed;
+			this.p2_paddle.y = Math.max(0, Math.min(this.p2_paddle.y, this.canvas.height - this.p2_paddle.height));
 		}
 	}
 
@@ -239,6 +255,8 @@ class Pong
 			{
 				this.stop();
 				var gameStatus = document.getElementById('game-status');
+				if (!gameStatus)
+					return ;
 				if (this.player1.score >= this.win_condition)
 					gameStatus.textContent = str_player_wins(this.player1.name);
 				else
@@ -300,8 +318,6 @@ class Pong
 		document.addEventListener("keydown", this.key_listener);
 		document.addEventListener("keyup", this.keyup_listener);
 		this.resize_handler();
-		this.sliders[0].setAttribute("value", this.sliders[0].getAttribute("max") / 2);
-		this.sliders[1].setAttribute("value", this.sliders[1].getAttribute("min") / 2);
 		this.game_timer_start = Date.now();
 		this.update();
 	}
@@ -333,8 +349,6 @@ class Pong
 		this.canvas.height = this.canvas.width * Pong.ASPECT_RATIO;
 		this.resize_paddle();
 		this.resize_ball();
-		this.sliders[0].setAttribute("max", 1 - this.p1_paddle.height / this.canvas.height);
-		this.sliders[1].setAttribute("min", -1 + this.p2_paddle.height / this.canvas.height);
 	}
 
 	setGameButtonToReplay()
