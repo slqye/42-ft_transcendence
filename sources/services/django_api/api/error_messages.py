@@ -191,4 +191,9 @@ LANGUAGE_ERROR_MESSAGES = {
 		"fr": "L'amitié a été supprimée avec succès",
 		"de": "Freundschaft wurde erfolgreich gelöscht"
 	},
+	"input contains too many characters.": {
+		"en": "input contains too many characters.",
+		"fr": "L'entrée contient trop de caractères.",
+		"de": "Die Eingabe enthält zu viele Zeichen."
+	}
 }
