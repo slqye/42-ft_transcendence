@@ -577,7 +577,7 @@ class FriendshipView(APIView):
 				{"detail": get_error_message("Friendship ID is required for update.", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
-		friendship = self.get_object(pk)
+		friendship = get_object_or_404_custom(Friendship, request, pk=pk)
 		if friendship.user_id_2 != request.user:
 			return Response(
 				{"detail": get_error_message("You are not the correct user to accept this friendship.", request)},
@@ -587,7 +587,7 @@ class FriendshipView(APIView):
 			return Response(
 				{"detail": get_error_message("Friendship has already been accepted.", request)},
 				status=status.HTTP_400_BAD_REQUEST
-			)
+				)
 		serializer = FriendshipSerializer(friendship, data={"friendship_status": True}, partial=True)
 		if serializer.is_valid():
 			serializer.save()
