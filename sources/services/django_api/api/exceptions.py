@@ -47,5 +47,7 @@ def translate_message(error_messages, request):
 		elif message.startswith("Ensure this field has no more than"):
 			localized_message = translations["input contains too many characters."].get(preferred_lang, message)
 			translated_messages.append(localized_message)
+		else:
+			translated_messages.append(message)
 	
 	return translated_messages
