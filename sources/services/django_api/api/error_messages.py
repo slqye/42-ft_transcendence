@@ -176,4 +176,9 @@ LANGUAGE_ERROR_MESSAGES = {
 		"fr": "Erreur lors de la suppression de l'ancienne image",
 		"de": "Fehler beim Entfernen des alten Bildes"
 	},
+	"Please enter a valid image": {
+		"en": "Please enter a valid image",
+		"fr": "Veuillez entrer une image valide",
+		"de": "Bitte geben Sie ein gültiges Bild ein"
+	}
 }

@@ -547,7 +547,6 @@ class FriendshipView(APIView):
 
 	def post(self, request, pk=None):
 		friend_user = get_object_or_404_custom(User, request, username=pk)
-		print("Why")
 		if friend_user.id == request.user.id:
 			return Response(
 				{"detail": get_error_message("Cannot create friendship with yourself.", request)},
@@ -947,10 +946,8 @@ class PictureUploadView(APIView):
 							os.remove(os.path.join(upload_dir, existing_file))
 						except Exception as remove_err:
 							return Response(
-								{
-									"detail": f"{get_error_message('Error removing old image', request)} "
-											  f"{existing_file}: {remove_err}"
-								},
+								{"detail": f"{get_error_message('Error removing old image', request)} "
+										f"{existing_file}: {remove_err}"},
 								status=status.HTTP_500_INTERNAL_SERVER_ERROR
 							)
 			else:
@@ -960,4 +957,8 @@ class PictureUploadView(APIView):
 			user.avatar_url = "frontend/assets" + serializer.data.get("image")
 			user.save()
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+		errors = serializer.errors.copy()			
+		if "image" in errors:
+			errors["detail"] = errors.pop("image")
+			errors["detail"] = get_error_message("Please enter a valid image", request)
+		return Response(errors, status=status.HTTP_400_BAD_REQUEST)
