@@ -229,7 +229,17 @@ class TicTacToe
 	switchPlayer()
 	{
 		this.currentPlayer = this.currentPlayer === this.player1.name ? this.player2.name : this.player1.name;
-		document.getElementById('game-status').textContent = this.currentPlayer + "'s turn";
+		let game_status = document.getElementById('game-status');
+		let language = localStorage.getItem('preferred-language');
+		if (!language)
+			language = 'en';
+		let turnMessage = this.currentPlayer + "'s turn";
+		if (language === 'fr') {
+			turnMessage = "C'est au tour de " + this.currentPlayer;
+		} else if (language === 'de') {
+			turnMessage = "Es ist " + this.currentPlayer + "'s Zug";
+		}
+		game_status.textContent = turnMessage;
 		if (this.is_ia && this.currentPlayer == this.player2.name && !this.is_player_order_set)
 		{
 			this.first_player = this.player2;
