@@ -26,10 +26,7 @@ class	Api
 		this.depth = 0;
 
 		this.add_header("X-User-Type", this.type);
-		if (localStorage.getItem("preferred-language"))
-			this.add_header("Preferred-Language", localStorage.getItem("preferred-language"));
-		else
-			this.add_header("Preferred-Language", "en");
+		this.set_language();
 	}
 
 	static str_network_error()
@@ -121,6 +118,15 @@ class	Api
 		}
 		localStorage.removeItem("opponent_authenticated");
 		return (false);
+	}
+
+	set_language()
+	{
+		if (localStorage.getItem("preferred-language"))
+			this.add_header("Preferred-Language", localStorage.getItem("preferred-language"));
+		else
+			this.add_header("Preferred-Language", "en");
+		return this;
 	}
 
 	// Setters

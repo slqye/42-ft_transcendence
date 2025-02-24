@@ -19,7 +19,7 @@ async function edit_profile_picture(imageInput)
 		return;
 	}
 	formData.append('image', imageInput.files[0]);
-	const request = await new Api(`/api/users/update/picture-upload/`, Api.USER).set_method("POST").set_body(formData).set_headers({}).request();
+	const request = await new Api(`/api/users/update/picture-upload/`, Api.USER).set_method("POST").set_body(formData).set_headers({}).set_language().request();
 	if (request.status == Api.ERROR)
 		new Toast(Toast.ERROR, request.log);
 	else
