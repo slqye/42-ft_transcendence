@@ -270,6 +270,12 @@ class UpdateUserField(APIView):
 				{"detail": get_error_message("Invalid field", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
+		user = request.user
+		if user.is_42_user and field == "password":
+			return Response(
+				{"detail": get_error_message("42 user can't update their password", request)},
+				status=status.HTTP_403_FORBIDDEN
+			)
 		new_value = request.data.get(field)
 		if new_value is None:
 			# e.g. "password is required." if field == "password"
@@ -277,7 +283,6 @@ class UpdateUserField(APIView):
 				{"detail": get_error_message(f"{field} is required.", request)},
 				status=status.HTTP_400_BAD_REQUEST
 			)
-		user = request.user
 		if field == "password":
 			user.set_password(new_value)
 		else:
@@ -883,6 +888,7 @@ class OAuthCallbackView(APIView):
 			user.email = user_data.get("email")
 			user.avatar_url = user_data.get("image", {}).get("link")
 			user.display_name = user_data.get("login")
+			user.is_42_user = True
 			user.set_unusable_password()
 			user.save()
 

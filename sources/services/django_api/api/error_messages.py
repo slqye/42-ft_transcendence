@@ -154,6 +154,11 @@ LANGUAGE_ERROR_MESSAGES = {
 		"fr": "Le champ mot de passe est requis.",
 		"de": "Passwort ist erforderlich."
 	},
+	"42 user can't update their password": {
+		"en": "42 user can't update their password",
+		"fr": "L'utilisateur 42 ne peut pas mettre à jour son mot de passe.",
+		"de": "42-Benutzer können ihr Passwort nicht aktualisieren."
+	},
 	# For partial/dynamic strings, we store just the static part;
 	# the code then appends the dynamic detail.
 	"Error updating user stats: ": {

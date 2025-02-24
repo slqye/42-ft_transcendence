@@ -13,6 +13,7 @@ class User(AbstractUser):
 	created_at = models.DateTimeField(auto_now_add=True)
 	is_ai = models.BooleanField(default=False)
 	last_active = models.DateTimeField(null=True, blank=True)
+	is_42_user = models.BooleanField(default=False)
 
 	pong_matches_played = models.PositiveIntegerField(default=0)
 	pong_wins = models.PositiveIntegerField(default=0)
