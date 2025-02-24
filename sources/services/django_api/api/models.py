@@ -40,7 +40,7 @@ def is_power_of_two(n: int) -> bool:
 	return (n & (n - 1) == 0) and n != 0
 
 class Tournament(models.Model):
-	name = models.CharField(max_length=50)
+	name = models.CharField(max_length=10)
 	participants = models.ManyToManyField(User, related_name='tournaments_joined', blank=False)
 	participants_ranking = models.ManyToManyField(User, related_name='tournaments_joined_ranking', blank=True)
 	is_done = models.BooleanField(default=False)
