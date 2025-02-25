@@ -6,7 +6,7 @@
 					<h5 class="card-title" data-translate="edit_profile_informations">Edit profile informations</h5>
 					<form class="input-group mb-3" onsubmit="event.preventDefault(); edit_personal_info('display_name', document.getElementById('input_edit_profile_display_name').value);">
 						<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg></span>
-						<input type="text" class="form-control" id="input_edit_profile_display_name" placeholder="Display name" data-translate-placeholder="display_name" required>
+						<input type="text" pattern="[A-Za-z0-9]+" class="form-control" id="input_edit_profile_display_name" placeholder="Display name" data-translate-placeholder="display_name" required>
 						<button class="btn btn-primary" type="submit">
 							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
 								<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
