@@ -18,7 +18,7 @@ all : $(NAME)
 $(NAME) : build up
 
 build :
-	@docker compose -f ./sources/docker-compose.yml build
+	@docker compose -f ./sources/docker-compose.yml build --no-cache
 		
 up :
 	@docker compose -f ./sources/docker-compose.yml up -d
