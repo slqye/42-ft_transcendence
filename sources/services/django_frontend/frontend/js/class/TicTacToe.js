@@ -140,7 +140,7 @@ class TicTacToe
 	{
 		let moves_values = this.make_minimax_move(this.board, this.board);
 		this.board[moves_values[0]] = this.player2.name;
-		this.cell_board[moves_values[0]].textContent = this.currentPlayer === this.player1.name ? 'X' : 'O';
+		this.cell_board[moves_values[0]].textContent = this.currentPlayer === this.player1.name ? this.player1.symbol : this.player2.symbol;
 		this.cell_board[moves_values[0]].style.color = this.currentPlayer === this.player1.name ? 'red' : 'blue';
 	}
 
@@ -213,7 +213,7 @@ class TicTacToe
 	makeMove(clickedCell, index)
 	{
 		this.board[index] = this.currentPlayer;
-		clickedCell.textContent = this.currentPlayer === this.player1.name ? 'X' : 'O';
+		clickedCell.textContent = this.currentPlayer === this.player1.name ? this.player1.symbol : this.player2.symbol;
 		clickedCell.style.color = this.currentPlayer === this.player1.name ? 'red' : 'blue';
 		this.moves_count += 1;
 		if (this.checkWin()) {
