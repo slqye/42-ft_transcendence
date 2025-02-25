@@ -11,7 +11,7 @@
 				<form class="col-10 mx-auto py-2 align-items-center" onsubmit="event.preventDefault(); create_tournament();">
 					<div class="my-3">
 						<h5 data-translate="tournament_name">Tournament name</h5>
-						<input type="text" class="form-control" id="tournament_name" placeholder="Tournament name" data-translate-placeholder="tournament_name">
+						<input type="text" pattern="[A-Za-z0-9]+" class="form-control" id="tournament_name" placeholder="Tournament name" data-translate-placeholder="tournament_name" maxlength="10">
 					</div>
 					<div class="my-3">
 						<h5 data-translate="select_game">Select game</h5>
