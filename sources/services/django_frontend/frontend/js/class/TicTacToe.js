@@ -59,16 +59,6 @@ class TicTacToe
 		gameButton.removeEventListener('click', this.handleGame);
 		this.board = Array(9).fill(null);
 		this.setupCells();
-		if (this.player1.symbol === TicTacToe.CROSS)
-		{
-			this.player1.symbol = TicTacToe.NOUGHT;
-			this.player2.symbol = TicTacToe.CROSS;
-		}
-		else
-		{
-			this.player1.symbol = TicTacToe.CROSS;
-			this.player2.symbol = TicTacToe.NOUGHT;
-		}
 		this.is_player_order_set = false;
 		this.switchPlayer();
 	}
