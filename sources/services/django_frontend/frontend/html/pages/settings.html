@@ -28,7 +28,7 @@
 					</form>
 					<form class="input-group mb-3" onsubmit="event.preventDefault(); edit_personal_info('password', document.getElementById('input_edit_profile_password').value);">
 						<span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span>
-						<input type="password" class="form-control" id="input_edit_profile_password" placeholder="Password" data-translate-placeholder="password" required>
+						<input type="password" class="form-control" id="input_edit_profile_password" placeholder="Password" data-translate-placeholder="password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" required>
 						<button class="btn btn-primary" type="submit">
 							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
 								<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
