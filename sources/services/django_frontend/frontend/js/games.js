@@ -89,7 +89,7 @@ async function	launch_tictactoe_match()
 	tictactoe.init();
 }
 
-function	user_switch()
+async function	user_switch()
 {
 	const opponent_user = document.getElementById("opponent_user");
 	const opponent_ia = document.getElementById("opponent_ia");
@@ -97,7 +97,10 @@ function	user_switch()
 
 	opponent_user.classList.remove("d-none");
 	opponent_ia.classList.add("d-none");
-	launch_btn.classList.add("d-none");
+	if (await Api.is_opponent_login())
+		launch_btn.classList.remove("d-none");
+	else
+		launch_btn.classList.add("d-none");
 }
 
 async function	ia_switch()
@@ -108,18 +111,10 @@ async function	ia_switch()
 
 	opponent_user.classList.add("d-none");
 	opponent_ia.classList.remove("d-none");
-	launch_btn.classList.remove("d-none");
 	if (!await Api.is_opponent_login())
-		return ;
-	const request = await new Api("/api/opponent/logout/", Api.USER).set_method("POST").set_omit_refresh(true).request();
-	if (request.status == Api.ERROR)
-		new Toast(Toast.ERROR, request.log);
+		launch_btn.classList.remove("d-none");
 	else
-	{
-		localStorage.removeItem("opponent_authenticated");
-		if (window.location.pathname === "/create_game_pong" || window.location.pathname === "/create_game_tictactoe")
-			reset_opponent_form();
-	}
+		launch_btn.classList.add("d-none");
 }
 
 function stop_all_games()
