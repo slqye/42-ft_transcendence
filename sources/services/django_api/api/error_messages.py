@@ -195,5 +195,10 @@ LANGUAGE_ERROR_MESSAGES = {
 		"en": "input contains too many characters.",
 		"fr": "L'entrée contient trop de caractères.",
 		"de": "Die Eingabe enthält zu viele Zeichen."
+	},
+	"Unable to update the field. The provided value is invalid or already in use.": {
+		"en": "Unable to update the field. The provided value is invalid or already in use.",
+		"fr": "Impossible de mettre à jour le champ. La valeur fournie est invalide ou déjà utilisée.",
+		"de": "Das Feld konnte nicht aktualisiert werden. Der angegebene Wert ist ungültig oder wird bereits verwendet."
 	}
 }

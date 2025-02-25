@@ -287,7 +287,11 @@ class UpdateUserField(APIView):
 			user.set_password(new_value)
 		else:
 			setattr(user, field, new_value)
-		user.save()
+		try:
+			user.save()
+		except Exception:
+			return (Response({"detail": get_error_message("Unable to update the field. The provided value is invalid or already in use.", request)},
+		   status=status.HTTP_403_FORBIDDEN))
 		return Response({field: getattr(user, field)}, status=status.HTTP_200_OK)
 
 
